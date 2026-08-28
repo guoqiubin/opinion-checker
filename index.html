@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>观点理论支持检测</title>
+<style>
+  :root {
+    --bg-top: #F2EDE4;
+    --bg-bottom: #DDD5C5;
+    --panel-top: #F6F1E8;
+    --panel-bottom: #E6DECC;
+    --paper: #FBF7EE;
+    --paper-deep: #F1EAD9;
+    --gold: #B07820;
+    --gold-light: #D9A641;
+    --gold-deep: #8A5E14;
+    --brown: #5C4F3A;
+    --brown-dark: #453A28;
+    --brown-mid: #7A6C55;
+    --border: #A09880;
+    --comment: #8A7F6E;
+    --red: #B03A2E;
+    --green-deep: #3F6B3F;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, "Times New Roman", "Songti SC", "STSong", "SimSun", serif;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.55), transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(176,120,32,.08), transparent 55%),
+      repeating-linear-gradient(45deg, rgba(0,0,0,.014) 0 1px, transparent 1px 4px),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    color: var(--brown);
+    line-height: 1.6;
+    min-height: 100vh;
+    font-size: 15px;
+  }
+  ::selection { background: rgba(176,120,32,.35); }
+  ::-webkit-scrollbar { width: 12px; }
+  ::-webkit-scrollbar-track { background: #E2DAC8; border-radius: 8px; }
+  ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #C4B48E, #A08B60); border-radius: 8px; border: 2px solid #E2DAC8; }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 36px 20px 64px; }
+
+  /* 顶部标题 = 木质铭牌 */
+  header { text-align: center; margin-bottom: 28px; }
+  header h1 {
+    display: inline-block;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #F7EFDC;
+    text-shadow: 0 1px 0 rgba(255,255,255,.18), 0 -1px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.4);
+    padding: 14px 34px;
+    border-radius: 12px;
+    border: 1px solid #7A5C22;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.16), rgba(0,0,0,.12)),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 5px),
+      linear-gradient(180deg, #A87E2E, #8A5E14 55%, #6F4A0E);
+    box-shadow: 0 6px 14px rgba(69,58,40,.45), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 4px rgba(0,0,0,.35);
+  }
+  header p { color: var(--brown-mid); font-size: 14px; margin-top: 14px; font-style: italic; }
+  header .slogan {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    font-style: italic;
+    color: #7A5C22;
+    letter-spacing: 1px;
+    padding: 8px 22px;
+    border-radius: 20px;
+    border: 1px solid #C2A65E;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.6), rgba(255,255,255,.1)),
+      linear-gradient(180deg, #EDE3C8, #DFD2AE);
+    box-shadow: 0 3px 8px rgba(69,58,40,.25), inset 0 1px 0 rgba(255,255,255,.8), inset 0 -1px 2px rgba(0,0,0,.08);
+    text-shadow: 0 1px 0 rgba(255,255,255,.6);
+  }
+
+  /* 公告栏 = 皮面便签 */
+  .notice-current {
+    padding: 13px 15px;
+    border-radius: 9px;
+    border: 1px solid #B5A98E;
+    background: linear-gradient(180deg, #FBF7EE, #F0E9D8);
+    box-shadow: inset 0 1px 2px rgba(69,58,40,.15), inset 0 1px 0 rgba(255,255,255,.7), 0 2px 6px rgba(69,58,40,.12);
+  }
+  .notice-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .notice-ver {
+    font-size: 15px; font-weight: 700; color: #FFF6E0; text-shadow: 0 -1px 0 rgba(0,0,0,.35);
+    padding: 2px 11px; border-radius: 7px;
+    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0) 50%), linear-gradient(180deg, #C99A3E, #A87A22 55%, #8A5E14);
+    border: 1px solid #7A5C22;
+    box-shadow: 0 2px 4px rgba(69,58,40,.3), inset 0 1px 0 rgba(255,255,255,.5);
+  }
+  .notice-date { font-size: 12px; color: var(--comment); font-style: italic; }
+  .notice-changes { margin-top: 9px; }
+  .notice-item { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--brown); margin-bottom: 5px; line-height: 1.6; }
+  .notice-tag {
+    flex-shrink: 0; font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 5px;
+    color: #FFF6E0; text-shadow: 0 -1px 0 rgba(0,0,0,.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 1px rgba(0,0,0,.2), 0 1px 2px rgba(69,58,40,.25);
+    margin-top: 2px;
+  }
+  .notice-tag.add { background: linear-gradient(180deg, #7FA860, #557A3A); }
+  .notice-tag.fix { background: linear-gradient(180deg, #C96A5A, #9A3A2C); }
+  .notice-tag.opt { background: linear-gradient(180deg, #D9A641, #A87A22); }
+  .notice-toggle {
+    margin-top: 12px;
+    background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
+    color: var(--brown-mid);
+    border: 1px solid #9A8F77;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(69,58,40,.2), inset 0 1px 0 rgba(255,255,255,.8);
+    transition: all .12s;
+  }
+  .notice-toggle:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
+  .notice-toggle:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
+  .notice-history { display: none; margin-top: 14px; border-top: 1px solid rgba(160,152,128,.5); padding-top: 12px; }
+  .notice-history.show { display: block; }
+  .notice-h-item { margin-bottom: 14px; }
+  .notice-h-item:last-child { margin-bottom: 0; }
+  .notice-h-item .notice-changes { margin-top: 6px; }
+  .notice-h-item .notice-ver { font-size: 13px; padding: 1px 9px; }
+  .notice-h-item .notice-date { font-size: 11px; }
+
+  /* 卡片窗口 = 皮革/纸质面板 */
+  .win {
+    background: linear-gradient(180deg, var(--panel-top), var(--panel-bottom));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 22px;
+    box-shadow: 0 6px 16px rgba(69,58,40,.28), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -1px 0 rgba(0,0,0,.06);
+    overflow: hidden;
+  }
+  .win-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 45%),
+      repeating-linear-gradient(90deg, rgba(90,70,30,.08) 0 3px, transparent 3px 8px),
+      linear-gradient(180deg, #CBBE9C, #B4A67F);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(0,0,0,.15);
+  }
+  .win-dots { display: flex; gap: 6px; }
+  .win-dots i {
+    width: 12px; height: 12px; border-radius: 50%;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.4), inset 0 -1px 1px rgba(255,255,255,.6), 0 1px 1px rgba(0,0,0,.2);
+  }
+  .win-dots i:nth-child(1) { background: radial-gradient(circle at 35% 30%, #ff8d84, #C0463A 70%); }
+  .win-dots i:nth-child(2) { background: radial-gradient(circle at 35% 30%, #ffd98a, #C99A2E 70%); }
+  .win-dots i:nth-child(3) { background: radial-gradient(circle at 35% 30%, #8fe0a2, #3E8A52 70%); }
+  .win-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brown-dark);
+    letter-spacing: 1px;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);
+  }
+  .win-body { padding: 18px; }
+
+  /* 区块标题 = 压花标签 */
+  .cmd-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brown-dark);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(160,152,128,.55);
+    text-shadow: 0 1px 0 rgba(255,255,255,.55);
+  }
+  .cmd-label .dollar { color: var(--gold-deep); }
+  .cmd-label .fname { color: var(--brown); font-style: italic; }
+
+  /* 工具栏 = 黄铜钮 */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    background: linear-gradient(180deg, #EFE9DB, #E0D7C3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), inset 0 -2px 4px rgba(0,0,0,.06);
+  }
+  .toolbar button {
+    min-width: 36px;
+    height: 30px;
+    padding: 0 10px;
+    border: 1px solid #9A8F77;
+    border-radius: 7px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brown-dark);
+    background: linear-gradient(180deg, #F3EDDF, #DCD2BB);
+    box-shadow: 0 2px 3px rgba(69,58,40,.3), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 2px rgba(0,0,0,.1);
+    transition: all .12s;
+  }
+  .toolbar button:hover { background: linear-gradient(180deg, #FBF6EA, #E6DCC6); }
+  .toolbar button:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.25); transform: translateY(1px); }
+  .toolbar button.active {
+    color: #FFF6E0;
+    text-shadow: 0 -1px 0 rgba(0,0,0,.4);
+    background: linear-gradient(180deg, #C99A3E, #A87A22 55%, #8A5E14);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.35), inset 0 -1px 0 rgba(255,255,255,.25);
+  }
+  .toolbar .sep { width: 1px; background: var(--border); margin: 4px 4px; box-shadow: 1px 0 0 rgba(255,255,255,.6); }
+
+  /* 编辑器 = 纸张内凹 */
+  #editor {
+    min-height: 170px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 16px;
+    border: 1px solid #B5A98E;
+    border-radius: 0 0 8px 8px;
+    font-size: 15px;
+    outline: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(176,120,32,.025) 0 1px, transparent 1px 24px),
+      var(--paper);
+    caret-color: var(--gold-deep);
+    color: var(--brown-dark);
+    font-family: inherit;
+    box-shadow: inset 0 3px 8px rgba(69,58,40,.22), inset 0 1px 2px rgba(69,58,40,.15);
+    line-height: 1.8;
+  }
+  #editor:focus { border-color: var(--gold); box-shadow: inset 0 3px 8px rgba(69,58,40,.22), 0 0 0 3px rgba(176,120,32,.22); }
+  #editor:empty::before { content: attr(data-placeholder); color: #B3A88F; font-style: italic; }
+  #editor ul, #editor ol { padding-left: 26px; margin: 6px 0; }
+  #editor blockquote { border-left: 3px solid var(--gold); padding-left: 12px; color: var(--brown-mid); margin: 8px 0; font-style: italic; }
+  #editor b, #editor strong { color: var(--brown-dark); }
+
+  .actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
+
+  /* 主按钮 = 金色凸起 */
+  #checkBtn {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 50%),
+      linear-gradient(180deg, var(--gold-light), var(--gold) 55%, var(--gold-deep));
+    color: #FFF6E0;
+    border: 1px solid #7A5C22;
+    border-radius: 10px;
+    padding: 11px 26px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 -1px 1px rgba(0,0,0,.45);
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(69,58,40,.4), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3);
+    transition: all .12s;
+  }
+  #checkBtn:hover { filter: brightness(1.06); box-shadow: 0 5px 10px rgba(69,58,40,.45), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3); }
+  #checkBtn:active {
+    box-shadow: inset 0 3px 6px rgba(0,0,0,.4), inset 0 -1px 0 rgba(255,255,255,.2);
+    transform: translateY(2px);
+  }
+  #checkBtn:disabled { opacity: .55; cursor: not-allowed; }
+  #clearBtn {
+    background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
+    color: var(--brown-mid);
+    border: 1px solid #9A8F77;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(69,58,40,.25), inset 0 1px 0 rgba(255,255,255,.8);
+    transition: all .12s;
+  }
+  #clearBtn:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
+  #clearBtn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
+  .hint { font-size: 12px; color: var(--comment); margin-top: 12px; font-style: italic; }
+
+  /* 状态条 = 皮质信息条 */
+  .status { display: none; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: 9px; margin-bottom: 18px; font-size: 14px; border: 1px solid var(--border); }
+  .status.show { display: flex; }
+  .status .tag {
+    flex-shrink: 0; font-weight: 700; font-size: 12px; padding: 2px 9px; border-radius: 6px;
+    color: #FFF6E0; text-shadow: 0 -1px 0 rgba(0,0,0,.35);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 2px rgba(0,0,0,.25), 0 1px 2px rgba(69,58,40,.3);
+  }
+  .status.loading { background: linear-gradient(180deg, #EFEAD8, #E2D9C0); color: var(--brown-dark); }
+  .status.loading .tag { background: linear-gradient(180deg, #B99A4E, #8F6A1E); }
+  .status.warning { background: linear-gradient(180deg, #F5EBD4, #EADCB9); color: #6B4E14; }
+  .status.warning .tag { background: linear-gradient(180deg, #D9A641, #A87A22); }
+  .status.error { background: linear-gradient(180deg, #F3DFDA, #E8C9C1); color: #7A2E24; }
+  .status.error .tag { background: linear-gradient(180deg, #C96A5A, #9A3A2C); }
+  .status.success { background: linear-gradient(180deg, #E3EDDB, #CFDFC3); color: #3F5C2E; }
+  .status.success .tag { background: linear-gradient(180deg, #7FA860, #557A3A); }
+
+  /* AI 判断结论 = 皮质卡片 */
+  #verdict { display: none; }
+  #verdict.show { display: block; }
+  .verdict-banner { padding: 16px; border-radius: 10px; margin-bottom: 16px; border: 1px solid var(--border); }
+  .verdict-banner.support {
+    background: linear-gradient(180deg, #E6EFD8, #D5E2BF);
+    border-color: #9FB480;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 3px 8px rgba(69,58,40,.2);
+  }
+  .verdict-banner.no-support {
+    background: linear-gradient(180deg, #F6EBCF, #EBDCAE);
+    border-color: #C2A65E;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 3px 8px rgba(69,58,40,.2);
+  }
+  .verdict-banner.medium {
+    background: linear-gradient(180deg, #F5EDD8, #EADCB9);
+    border-color: #C2A65E;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 3px 8px rgba(69,58,40,.2);
+  }
+  .verdict-banner.unknown {
+    background: linear-gradient(180deg, #EDE8DD, #DFD8C8);
+    border-color: #B5A98E;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 3px 8px rgba(69,58,40,.2);
+  }
+  .verdict-banner.error {
+    background: linear-gradient(180deg, #F3DFDA, #E8C9C1);
+    border-color: #C08A7E;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 3px 8px rgba(69,58,40,.2);
+  }
+  .verdict-banner .v-icon { color: var(--gold-deep); font-size: 14px; font-weight: 700; letter-spacing: 1px; }
+  .verdict-banner.support .v-icon { color: #557A3A; }
+  .verdict-banner.medium .v-icon { color: #A87A22; }
+  .verdict-banner.no-support .v-icon { color: #A87A22; }
+  .verdict-banner.unknown .v-icon { color: #7A6C55; }
+  .verdict-banner.error .v-icon { color: #9A3A2C; }
+  .verdict-banner .v-title { font-size: 18px; font-weight: 700; margin-top: 4px; color: var(--brown-dark); text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+  .verdict-banner .v-desc { font-size: 14px; color: var(--brown); margin-top: 8px; }
+  .verdict-banner .v-sub { font-size: 13px; color: var(--brown-mid); margin-top: 6px; font-style: italic; }
+  .verdict-banner .v-sub b { color: var(--gold-deep); font-style: normal; }
+  .verdict-banner .v-reason {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.5);
+    border: 1px solid rgba(160,152,128,.5);
+    box-shadow: inset 0 1px 2px rgba(69,58,40,.08);
+    font-size: 14px;
+    color: var(--brown);
+    line-height: 1.75;
+  }
+  .verdict-banner .v-reason-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold-deep);
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+  .verdict-banner .v-reason-body { white-space: pre-wrap; }
+
+  /* 结果 */
+  #results { display: none; }
+  #results.show { display: block; }
+  .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .result-header h2 { font-size: 17px; font-weight: 700; color: var(--brown-dark); text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+  .result-header .meta { font-size: 12px; color: var(--comment); font-style: italic; }
+
+  /* 信源卡片 = 纸质档案卡 */
+  .source-card {
+    background: linear-gradient(180deg, #FBF7EE, #F0E9D8);
+    border: 1px solid #B5A98E;
+    border-left: 4px solid var(--gold);
+    border-radius: 9px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 3px 8px rgba(69,58,40,.18), inset 0 1px 0 rgba(255,255,255,.75);
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .source-card:hover { box-shadow: 0 6px 14px rgba(69,58,40,.25), inset 0 1px 0 rgba(255,255,255,.75); border-color: var(--gold); }
+  .source-card .title { font-size: 15px; font-weight: 700; line-height: 1.5; }
+  .source-card .title .idx { color: var(--gold-deep); margin-right: 7px; }
+  .source-card .title a { color: var(--brown-dark); text-decoration: none; }
+  .level-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-left: 7px;
+    vertical-align: 2px;
+    letter-spacing: .5px;
+    color: #FFF6E0;
+    text-shadow: 0 -1px 0 rgba(0,0,0,.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 2px rgba(0,0,0,.25), 0 1px 2px rgba(69,58,40,.3);
+    white-space: nowrap;
+  }
+  .level-1 { background: linear-gradient(180deg, #D9A641, #A87A22); }
+  .level-2 { background: linear-gradient(180deg, #8FA0B5, #5C6F85); }
+  .level-3 { background: linear-gradient(180deg, #A8A294, #7A7466); }
+  .source-card .meta-row .cites { font-weight: 700; color: var(--gold-deep); }
+  .source-card .title a:hover { color: var(--gold-deep); text-decoration: underline; }
+  .source-card .authors { font-size: 13px; color: var(--brown-mid); margin-top: 5px; font-style: italic; }
+  .source-card .meta-row { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 7px; font-size: 13px; color: var(--brown-mid); }
+  .source-card .meta-row .year { font-weight: 700; color: var(--green-deep); }
+  .source-card .meta-row .venue { font-style: italic; }
+  .source-card .doi { font-size: 11px; word-break: break-all; color: var(--comment); font-family: "Menlo", "Courier New", monospace; }
+  .source-card .links { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .source-card .links a {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFF6E0;
+    text-decoration: none;
+    text-shadow: 0 -1px 0 rgba(0,0,0,.3);
+    border: 1px solid #7A5C22;
+    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,0) 50%), linear-gradient(180deg, #C99A3E, #A87A22 55%, #8A5E14);
+    padding: 5px 12px;
+    border-radius: 7px;
+    box-shadow: 0 2px 4px rgba(69,58,40,.3), inset 0 1px 0 rgba(255,255,255,.5);
+    transition: filter .12s;
+  }
+  .source-card .links a:hover { filter: brightness(1.08); }
+  .source-card .links a:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.3); transform: translateY(1px); }
+  .tag-api {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-left: 7px;
+    vertical-align: 2px;
+    letter-spacing: .5px;
+    color: #FFF6E0;
+    text-shadow: 0 -1px 0 rgba(0,0,0,.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 2px rgba(0,0,0,.25), 0 1px 2px rgba(69,58,40,.3);
+  }
+  .tag-api.s2 { background: linear-gradient(180deg, #7FA860, #557A3A); }
+  .tag-api.oa { background: linear-gradient(180deg, #8FA0B5, #5C6F85); }
+  .tag-api.crossref { background: linear-gradient(180deg, #D9A641, #A87A22); }
+
+  /* 空结果 */
+  .empty { text-align: center; padding: 36px 20px; }
+  .empty .icon { font-size: 30px; color: var(--gold-deep); margin-bottom: 10px; font-weight: 700; }
+  .empty h3 { font-size: 17px; margin-bottom: 8px; color: var(--brown-dark); }
+  .empty p { color: var(--brown-mid); font-size: 14px; max-width: 560px; margin: 0 auto; font-style: italic; }
+
+  footer { text-align: center; font-size: 12px; color: var(--comment); margin-top: 30px; font-style: italic; }
+
+  @media (max-width: 600px) {
+    .container { padding: 18px 12px 44px; }
+    header h1 { font-size: 21px; padding: 12px 22px; }
+    .actions { flex-direction: column; align-items: stretch; }
+    #checkBtn, #clearBtn { width: 100%; text-align: center; }
+    .win-body { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>观点理论支持检测</h1>
+    <p>输入你的观点，AI 先理解语义并判断是否存在学术支持，再检索学术文献给出信源（1~10 条）</p>
+    <div class="slogan">妈妈再也不用担心我胡说八道了！</div>
+  </header>
+
+  <!-- 更新公告 -->
+  <div class="win" id="noticeWin">
+    <div class="win-titlebar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="win-title">更新公告</span>
+    </div>
+    <div class="win-body">
+      <div class="notice-current" id="noticeCurrent"></div>
+      <button type="button" id="noticeToggle" class="notice-toggle">查看历史版本 ▾</button>
+      <div id="noticeHistory" class="notice-history"></div>
+    </div>
+  </div>
+
+  <!-- 输入区 -->
+  <div class="win">
+    <div class="win-titlebar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="win-title">观点文稿</span>
+    </div>
+    <div class="win-body">
+      <div class="cmd-label"><span class="dollar">§</span> <span class="fname">在此记录你的观点</span></div>
+      <div class="toolbar" id="toolbar">
+        <button type="button" data-cmd="bold" title="加粗"><b>B</b></button>
+        <button type="button" data-cmd="italic" title="斜体"><i>I</i></button>
+        <button type="button" data-cmd="underline" title="下划线"><u>U</u></button>
+        <span class="sep"></span>
+        <button type="button" data-cmd="insertUnorderedList" title="无序列表">• 列表</button>
+        <button type="button" data-cmd="insertOrderedList" title="有序列表">1. 列表</button>
+        <span class="sep"></span>
+        <button type="button" data-cmd="removeFormat" title="清除格式">清除格式</button>
+      </div>
+      <div id="editor" contenteditable="true" data-placeholder="在此输入你的观点，例如：人口密度增加到一定程度后，人类可能会开始自相残杀……"></div>
+      <div class="actions">
+        <button id="checkBtn">判断理论支持</button>
+        <button id="clearBtn">清空</button>
+      </div>
+      <div class="hint">流程：AI 模型理解观点语义 → 判断是否具有理论/学术支持 → 用模型提炼的学术概念检索 Semantic Scholar / Crossref，返回 1~10 条信源。支持 Ctrl/Cmd+Enter 快捷判断。</div>
+    </div>
+  </div>
+
+  <!-- 状态条 -->
+  <div id="status" class="status"><span class="tag">INFO</span><span class="status-msg"></span></div>
+
+  <!-- AI 判断结论 -->
+  <div id="verdict" class="win"><div class="win-body" id="verdictBody"></div></div>
+
+  <!-- 结果区 -->
+  <div id="results" class="win">
+    <div class="win-titlebar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="win-title">信源档案</span>
+    </div>
+    <div class="win-body">
+      <div class="result-header">
+        <h2>信源列表</h2>
+        <span class="meta" id="resultMeta"></span>
+      </div>
+      <div id="sourceList"></div>
+    </div>
+  </div>
+
+  <footer>数据来源：AI 模型语义判断 + Semantic Scholar API / Crossref API · 仅供学术参考，不构成权威背书</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ==================== 富文本工具栏 ====================
+  var toolbar = document.getElementById('toolbar');
+  var editor = document.getElementById('editor');
+
+  toolbar.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-cmd]');
+    if (!btn) return;
+    e.preventDefault();
+    var cmd = btn.getAttribute('data-cmd');
+    editor.focus();
+    document.execCommand(cmd, false, null);
+    updateActiveStates();
+  });
+
+  function updateActiveStates() {
+    var buttons = toolbar.querySelectorAll('button[data-cmd]');
+    buttons.forEach(function (btn) {
+      var cmd = btn.getAttribute('data-cmd');
+      var active = false;
+      try {
+        if (cmd === 'bold') active = document.queryCommandState('bold');
+        else if (cmd === 'italic') active = document.queryCommandState('italic');
+        else if (cmd === 'underline') active = document.queryCommandState('underline');
+        else if (cmd === 'insertUnorderedList') active = document.queryCommandState('insertUnorderedList');
+        else if (cmd === 'insertOrderedList') active = document.queryCommandState('insertOrderedList');
+      } catch (err) { active = false; }
+      btn.classList.toggle('active', active);
+    });
+  }
+  editor.addEventListener('keyup', updateActiveStates);
+  editor.addEventListener('mouseup', updateActiveStates);
+
+  document.getElementById('clearBtn').addEventListener('click', function () {
+    editor.innerHTML = '';
+    editor.focus();
+    hideVerdict();
+    hideResults();
+    hideStatus();
+  });
+
+  // ==================== 状态 ====================
+  var statusEl = document.getElementById('status');
+  var statusMsgEl = statusEl.querySelector('.status-msg');
+  var STATUS_TAGS = { loading: 'INFO', warning: 'WARN', error: 'ERROR', success: 'OK' };
+
+  function showStatus(type, msg) {
+    statusEl.className = 'status show ' + type;
+    statusEl.querySelector('.tag').textContent = STATUS_TAGS[type] || 'INFO';
+    statusMsgEl.innerHTML = msg;
+  }
+  function hideStatus() {
+    statusEl.className = 'status';
+    statusMsgEl.innerHTML = '';
+  }
+
+  // ==================== 结论展示 ====================
+  var verdictEl = document.getElementById('verdict');
+  var verdictBodyEl = document.getElementById('verdictBody');
+  function hideVerdict() {
+    verdictEl.classList.remove('show');
+    verdictBodyEl.innerHTML = '';
+  }
+  function showVerdict(verdict) {
+    verdictEl.classList.add('show');
+    var html = '';
+    if (verdict) {
+      var level = verdict.level;
+      var cls = '';
+      var icon = '';
+      var title = '';
+      if (level === 'high') {
+        cls = 'support';
+        icon = '✓ 支持度：高';
+        title = '高：存在明确理论支持';
+      } else if (level === 'medium') {
+        cls = 'medium';
+        icon = '~ 支持度：中';
+        title = '中：存在部分理论支持';
+      } else if (level === 'low') {
+        cls = 'no-support';
+        icon = '✕ 支持度：低';
+        title = '低：缺乏直接理论支持';
+      } else {
+        cls = 'unknown';
+        icon = '! 支持度：无法判断';
+        title = '暂无法给出支持度判断';
+      }
+      html += '<div class="verdict-banner ' + cls + '">';
+      html += '<div class="v-icon">' + icon + '</div>';
+      html += '<div>';
+      html += '<div class="v-title">' + title + '</div>';
+      if (verdict.summary) html += '<div class="v-desc">' + escapeHtml(verdict.summary) + '</div>';
+      if (verdict.reasoning) {
+        html += '<div class="v-reason"><div class="v-reason-label">理由说明</div><div class="v-reason-body">' + escapeHtml(verdict.reasoning) + '</div></div>';
+      }
+      if (verdict.concepts && verdict.concepts.length) {
+        html += '<div class="v-sub">检索概念：<b>' + escapeHtml(verdict.concepts.join(' / ')) + '</b></div>';
+      }
+      html += '</div></div>';
+    }
+    verdictBodyEl.innerHTML = html;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ==================== 更新公告 ====================
+  var VERSIONS = [
+    {
+      version: 'v1.3',
+      date: '2026-08-28',
+      changes: [
+        { type: 'add', text: '信源等级体系：顶刊 / 学术期刊 / 其他三级展示，顶刊优先' },
+        { type: 'add', text: '新增 OpenAlex 学术索引，扩宽信源来源' },
+        { type: 'add', text: '信源卡片支持一键跳转 Google Scholar 检索' },
+        { type: 'add', text: '新增更新公告栏，记录版本变更' }
+      ]
+    },
+    {
+      version: 'v1.2',
+      date: '2026-08-28',
+      changes: [
+        { type: 'add', text: 'AI 语义判断上线（服务端代理，密钥不落地前端）' },
+        { type: 'add', text: '支持度高 / 中 / 低三档分级与理由说明' },
+        { type: 'fix', text: '修复关键词检索模式信源相关性低的问题' },
+        { type: 'opt', text: '移除前端模型设置区，访客零配置' }
+      ]
+    },
+    {
+      version: 'v1.1',
+      date: '2026-08-28',
+      changes: [
+        { type: 'opt', text: '界面重设计为拟物风格（皮革 / 金属质感）' },
+        { type: 'add', text: '顶部新增 slogan 铭牌' }
+      ]
+    },
+    {
+      version: 'v1.0',
+      date: '2026-08-28',
+      changes: [
+        { type: 'add', text: '初始版本：富文本观点输入与工具栏' },
+        { type: 'add', text: '理论支持判断与学术信源检索（Semantic Scholar / Crossref）' }
+      ]
+    }
+  ];
+
+  function buildNoticeChanges(changes) {
+    var html = '';
+    changes.forEach(function (c) {
+      var label = c.type === 'add' ? '增加' : c.type === 'fix' ? '修复' : '优化';
+      html += '<div class="notice-item"><span class="notice-tag ' + c.type + '">' + label + '</span><span>' + escapeHtml(c.text) + '</span></div>';
+    });
+    return html;
+  }
+
+  function renderNotice() {
+    var current = VERSIONS[0];
+    document.getElementById('noticeCurrent').innerHTML =
+      '<div class="notice-head"><span class="notice-ver">' + current.version + '</span>' +
+      '<span class="notice-date">' + current.date + '</span></div>' +
+      '<div class="notice-changes">' + buildNoticeChanges(current.changes) + '</div>';
+
+    var histHtml = '';
+    VERSIONS.slice(1).forEach(function (v) {
+      histHtml += '<div class="notice-h-item">' +
+        '<div class="notice-head"><span class="notice-ver">' + v.version + '</span>' +
+        '<span class="notice-date">' + v.date + '</span></div>' +
+        '<div class="notice-changes">' + buildNoticeChanges(v.changes) + '</div></div>';
+    });
+    document.getElementById('noticeHistory').innerHTML = histHtml;
+  }
+  renderNotice();
+
+  var noticeToggle = document.getElementById('noticeToggle');
+  noticeToggle.addEventListener('click', function () {
+    var h = document.getElementById('noticeHistory');
+    var show = !h.classList.contains('show');
+    h.classList.toggle('show', show);
+    noticeToggle.textContent = show ? '收起历史版本 ▴' : '查看历史版本 ▾';
+  });
+
+  // ==================== 结果展示 ====================
+  var resultsEl = document.getElementById('results');
+  var sourceListEl = document.getElementById('sourceList');
+  var resultMetaEl = document.getElementById('resultMeta');
+
+  function hideResults() {
+    resultsEl.classList.remove('show');
+    sourceListEl.innerHTML = '';
+    resultMetaEl.textContent = '';
+  }
+
+  var itemIndex = 0;
+
+  function buildSourceCard(item, apiName) {
+    itemIndex += 1;
+    var idx = itemIndex;
+    var card = document.createElement('div');
+    card.className = 'source-card';
+
+    var title = document.createElement('div');
+    title.className = 'title';
+    var idxSpan = document.createElement('span');
+    idxSpan.className = 'idx';
+    idxSpan.textContent = '[' + idx + ']';
+    title.appendChild(idxSpan);
+    var titleA = document.createElement('a');
+    titleA.textContent = item.title || '（无标题）';
+    titleA.href = item.url || '#';
+    titleA.target = '_blank';
+    titleA.rel = 'noopener noreferrer';
+    title.appendChild(titleA);
+    if (apiName) {
+      var tag = document.createElement('span');
+      tag.className = 'tag-api ' + (apiName === 'semanticscholar' ? 's2' : 'crossref');
+      tag.textContent = apiName === 'semanticscholar' ? 'Semantic Scholar' : 'Crossref';
+      title.appendChild(tag);
+    }
+    card.appendChild(title);
+
+    if (item.authors && item.authors.length) {
+      var authors = document.createElement('div');
+      authors.className = 'authors';
+      authors.textContent = item.authors.slice(0, 6).join(', ') + (item.authors.length > 6 ? ' et al.' : '');
+      card.appendChild(authors);
+    }
+
+    var metaRow = document.createElement('div');
+    metaRow.className = 'meta-row';
+    if (item.year) {
+      var year = document.createElement('span');
+      year.className = 'year';
+      year.textContent = item.year;
+      metaRow.appendChild(year);
+    }
+    if (item.venue) {
+      var venue = document.createElement('span');
+      venue.className = 'venue';
+      venue.textContent = item.venue;
+      metaRow.appendChild(venue);
+    }
+    if (item.doi) {
+      var doi = document.createElement('span');
+      doi.className = 'doi';
+      doi.textContent = 'DOI: ' + item.doi;
+      metaRow.appendChild(doi);
+    }
+    if (metaRow.children.length) card.appendChild(metaRow);
+
+    var links = document.createElement('div');
+    links.className = 'links';
+    if (item.url) {
+      var a1 = document.createElement('a');
+      a1.textContent = '查看原文';
+      a1.href = item.url;
+      a1.target = '_blank';
+      a1.rel = 'noopener noreferrer';
+      links.appendChild(a1);
+    }
+    if (item.doi) {
+      var a2 = document.createElement('a');
+      a2.textContent = 'DOI 链接';
+      a2.href = 'https://doi.org/' + item.doi;
+      a2.target = '_blank';
+      a2.rel = 'noopener noreferrer';
+      links.appendChild(a2);
+    }
+    if (links.children.length) card.appendChild(links);
+
+    return card;
+  }
+
+  // ==================== 主流程 ====================
+  var checkBtn = document.getElementById('checkBtn');
+
+  function getPlainText() {
+    var text = editor.innerText || editor.textContent || '';
+    return text.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  async function run() {
+    var text = getPlainText();
+    if (!text) {
+      showStatus('warning', '请先输入你的观点');
+      return;
+    }
+
+    hideVerdict();
+    hideResults();
+    checkBtn.disabled = true;
+    itemIndex = 0;
+
+    showStatus('loading', 'AI 正在理解语义并检索学术文献……');
+    try {
+      var resp = await fetch('/api/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
+      var data = null;
+      try { data = await resp.json(); } catch (e) { data = null; }
+      if (!resp.ok) throw new Error((data && data.error) || ('HTTP ' + resp.status));
+      hideStatus();
+      if (data.mode === 'keyword') {
+        showStatus('warning', '当前为关键词检索模式（服务端未配置 AI 模型），准确率较低。');
+      }
+      showVerdict(data.verdict);
+      renderResults(data);
+    } catch (err) {
+      hideStatus();
+      var msg = String(err && err.message || err);
+      if (/Failed to fetch|NetworkError|load failed/i.test(msg)) {
+        msg = '无法连接后端服务。请通过线上地址访问本页面（本地直接打开文件时无法调用 AI 服务）。';
+      }
+      showStatus('error', '请求失败：' + msg);
+    } finally {
+      checkBtn.disabled = false;
+    }
+  }
+
+  function renderResults(data) {
+    var items = data.results || [];
+    var MAX = 10;
+    var shown = items.slice(0, MAX);
+
+    resultMetaEl.textContent = '查询：' + (data.query || '') + ' · 来源：' +
+      (data.source === 'openalex' ? 'OpenAlex' : data.source === 'semanticscholar' ? 'Semantic Scholar' : data.source === 'crossref' ? 'Crossref' : '无');
+
+    if (!shown.length) {
+      resultsEl.classList.add('show');
+      sourceListEl.innerHTML =
+        '<div class="empty"><div class="icon">未检索到直接相关的学术文献</div>' +
+        '<h3>该观点可能缺乏直接的理论支持</h3>' +
+        '<p>这通常意味着该观点缺乏直接的理论支持或实证研究，可尝试更换检索概念，或结合 AI 判断结论参考相近方向。</p></div>';
+      return;
+    }
+
+    resultsEl.classList.add('show');
+    sourceListEl.innerHTML = '';
+    shown.forEach(function (item) {
+      sourceListEl.appendChild(buildSourceCard(item, item.api));
+    });
+  }
+
+  checkBtn.addEventListener('click', run);
+  editor.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      run();
+    }
+  });
+})();
+</script>
+</body>
+</html>
