@@ -22,7 +22,11 @@ function buildJudgePrompt(lang) {
     return JUDGE_SYSTEM_PROMPT + '\n' +
       '7. 本次为「中文文献」检索模式：concepts 必须使用中文专业学术术语（每个概念可附英文对照，但中文优先），' +
       'search_query 必须为中文检索串。\n' +
-      '8. 严禁输出英文 concepts / search_query（专有名词如心理学经典实验名可保留英文原称）。';
+      '8. 严禁输出英文 concepts / search_query（专有名词如心理学经典实验名可保留英文原称）。\n' +
+      '9. concepts 只保留 2-4 个最能代表观点主题的核心学术概念（例如观点涉及"欲望"，concepts 应含 "欲望" 而非 "欲望心理现象基础" 这类整句），' +
+      '检索时会用这些词精确匹配文献的标题/摘要，多词或长句会严重降低相关性。\n' +
+      '10. 严禁输出 "心理现象"、"影响因素"、"理论基础"、"研究"、"分析" 这类宽泛无学科辨识度的词，' +
+      '每个 concepts 必须是能在学术文献标题/摘要中定位到具体主题的术语（如 "欲望"、"精神分析"、"自我决定理论"、"本能驱力"）。';
   }
   return JUDGE_SYSTEM_PROMPT + '\n' +
     '7. 本次为「英文文献」检索模式：concepts 与 search_query 使用英文。';
@@ -173,36 +177,104 @@ function rateSource(item) {
   return item;
 }
 
-function searchOpenAlex(query, lang) {
+function reconstructAbstract(inv) {
+  // OpenAlex abstract_inverted_index 倒排索引还原为摘要文本
+  if (!inv) return '';
+  var words = [];
+  Object.keys(inv).forEach(function (w) {
+    inv[w].forEach(function (p) { words[p] = w; });
+  });
+  var out = [];
+  for (var i = 0; i < words.length; i++) {
+    if (words[i] !== undefined) out.push(words[i]);
+  }
+  return out.join(' ');
+}
+
+function oaWorkToItem(w) {
+  var venue = null;
+  var publisher = null;
+  if (w.primary_location && w.primary_location.source) {
+    venue = w.primary_location.source.display_name || null;
+    publisher = w.primary_location.source.host_organization_name || null;
+  }
+  return {
+    title: w.display_name,
+    authors: (w.authorships || []).map(function (a) { return a.author && a.author.display_name; }).filter(Boolean),
+    year: w.publication_year,
+    venue: venue,
+    publisher: publisher,
+    doi: w.doi ? w.doi.replace('https://doi.org/', '') : null,
+    url: w.doi || null,
+    cited_by_count: w.cited_by_count || 0,
+    language: normalizeLanguage(w.language),
+    abstract: reconstructAbstract(w.abstract_inverted_index),
+    api: 'openalex'
+  };
+}
+
+function searchOpenAlexZh(concepts, query) {
+  // 中文链路：收敛到「标题+摘要」元数据范围，绝不匹配正文全文。
+  // 每个核心概念词独立检索（避免多词 OR 拆分稀释，如"精神分析"被拆成"精神+分析"），
+  // 概念词加引号做精确短语匹配（实测 plain 21151 条 vs quoted 2043 条，噪音大幅下降），
+  // 合并去重后再按完整概念词做本地二次过滤。
+  var terms = (concepts && concepts.filter(Boolean)) || [];
+  if (!terms.length) terms = [String(query || '').slice(0, 60)];
+  // 过滤泛概念词（覆盖度太高、无学科辨识度，会引入无关文献），再取前 2 个最核心词
+  var ZH_FILTER_WORDS = ['心理现象','影响因素','理论基础','理论支持','学术支持','作用机制','作用','机制','研究','分析','综述','现状','对策','问题','意义','价值','影响','原因','基础','方面','领域','方法','模式','路径','对策研究'];
+  terms = terms.filter(function (t) {
+    var s = String(t || '').trim();
+    return s && ZH_FILTER_WORDS.indexOf(s) < 0;
+  });
+  if (!terms.length) terms = [String(query || '').slice(0, 60)];
+  terms = terms.slice(0, 2);
+  var reqs = terms.map(function (t) {
+    var term = String(t).trim();
+    // 中文词或短英文短语加引号精确匹配；含空格的长英文句不加引号避免过度收紧
+    var quoted = /[\u4e00-\u9fa5]/.test(term) || !/\s/.test(term) ? '"' + term + '"' : term;
+    var url = 'https://api.openalex.org/works?filter=language:zh,title_and_abstract.search:' +
+      encodeURIComponent(quoted) +
+      '&per-page=8&select=id,display_name,publication_year,authorships,primary_location,cited_by_count,doi,type,language,abstract_inverted_index';
+    return fetch(url, {
+      headers: { 'Accept': 'application/json' }
+    }).then(function (res) {
+      if (!res.ok) throw new Error('OA_HTTP_' + res.status);
+      return res.json();
+    });
+  });
+  return Promise.all(reqs).then(function (datas) {
+    var seen = {};
+    var out = [];
+    datas.forEach(function (data) {
+      (data.results || []).forEach(function (w) {
+        var item = oaWorkToItem(w);
+        if (!item || !item.title) return;
+        var key = String(item.title).toLowerCase();
+        if (seen[key]) return;
+        seen[key] = true;
+        var hay = ((item.title || '') + ' ' + (item.abstract || '')).toLowerCase();
+        var hit = terms.some(function (c) {
+          return c && hay.indexOf(String(c).toLowerCase()) >= 0;
+        });
+        if (!hit) return;
+        out.push(item);
+      });
+    });
+    return out.slice(0, 10);
+  });
+}
+
+function searchOpenAlex(query, lang, concepts) {
+  if (lang === 'zh') return searchOpenAlexZh(concepts, query);
   var url = 'https://api.openalex.org/works?search=' + encodeURIComponent(query) +
-    '&per-page=10&select=id,display_name,publication_year,authorships,primary_location,cited_by_count,doi,type,language';
-  if (lang === 'zh') url += '&filter=language:zh';
+    '&per-page=10&select=id,display_name,publication_year,authorships,primary_location,cited_by_count,doi,type,language,abstract_inverted_index';
   return fetch(url, {
     headers: { 'Accept': 'application/json' }
   }).then(function (res) {
     if (!res.ok) throw new Error('OA_HTTP_' + res.status);
     return res.json();
   }).then(function (data) {
-    return (data.results || []).map(function (w) {
-      var venue = null;
-      var publisher = null;
-      if (w.primary_location && w.primary_location.source) {
-        venue = w.primary_location.source.display_name || null;
-        publisher = w.primary_location.source.host_organization_name || null;
-      }
-      return {
-        title: w.display_name,
-        authors: (w.authorships || []).map(function (a) { return a.author && a.author.display_name; }).filter(Boolean),
-        year: w.publication_year,
-        venue: venue,
-        publisher: publisher,
-        doi: w.doi ? w.doi.replace('https://doi.org/', '') : null,
-        url: w.doi || null,
-        cited_by_count: w.cited_by_count || 0,
-        language: normalizeLanguage(w.language),
-        api: 'openalex'
-      };
-    });
+    return (data.results || []).map(oaWorkToItem);
   });
 }
 
@@ -263,15 +335,15 @@ function sleep(ms) {
   return new Promise(function (resolve) { setTimeout(resolve, ms); });
 }
 
-async function searchAcademic(query, lang) {
+async function searchAcademic(query, lang, concepts) {
   // 检索链路：
   //   en：OpenAlex（覆盖广、带期刊/出版社信息）→ Semantic Scholar → Crossref
-  //   zh：OpenAlex(仅中文) → Crossref(中文优先) → Semantic Scholar
+  //   zh：OpenAlex(仅中文，标题+摘要收敛匹配) → Crossref(中文优先) → Semantic Scholar
   var items = [];
   var source = 'none';
   if (lang === 'zh') {
     try {
-      var oaZh = await searchOpenAlex(query, 'zh');
+      var oaZh = await searchOpenAlex(query, 'zh', concepts);
       if (oaZh && oaZh.length) { items = oaZh; source = 'openalex'; }
     } catch (e) { /* fallthrough */ }
     if (items.length < 3) {
@@ -393,7 +465,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    var result = await searchAcademic(query, lang);
+    var result = await searchAcademic(query, lang, (verdict && verdict.concepts) || []);
     res.status(200).json({
       mode: mode,
       lang: lang,
