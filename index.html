@@ -814,45 +814,47 @@
     verdictEl.classList.remove('show');
     verdictBodyEl.innerHTML = '';
   }
+  function buildVerdictHTML(verdict) {
+    if (!verdict) return '';
+    var level = verdict.level;
+    var cls = '';
+    var icon = '';
+    var title = '';
+    if (level === 'high') {
+      cls = 'support';
+      icon = '✓ 支持度：高';
+      title = '高：存在明确理论支持';
+    } else if (level === 'medium') {
+      cls = 'medium';
+      icon = '~ 支持度：中';
+      title = '中：存在部分理论支持';
+    } else if (level === 'low') {
+      cls = 'no-support';
+      icon = '✕ 支持度：低';
+      title = '低：缺乏直接理论支持';
+    } else {
+      cls = 'unknown';
+      icon = '! 支持度：无法判断';
+      title = '暂无法给出支持度判断';
+    }
+    var html = '<div class="verdict-banner ' + cls + '">';
+    html += '<div class="v-icon">' + icon + '</div>';
+    html += '<div>';
+    html += '<div class="v-title">' + title + '</div>';
+    if (verdict.summary) html += '<div class="v-desc">' + escapeHtml(verdict.summary) + '</div>';
+    if (verdict.reasoning) {
+      html += '<div class="v-reason"><div class="v-reason-label">理由说明</div><div class="v-reason-body">' + escapeHtml(verdict.reasoning) + '</div></div>';
+    }
+    if (verdict.concepts && verdict.concepts.length) {
+      html += '<div class="v-sub">检索概念：<b>' + escapeHtml(verdict.concepts.join(' / ')) + '</b></div>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
   function showVerdict(verdict) {
     verdictEl.classList.add('show');
-    var html = '';
-    if (verdict) {
-      var level = verdict.level;
-      var cls = '';
-      var icon = '';
-      var title = '';
-      if (level === 'high') {
-        cls = 'support';
-        icon = '✓ 支持度：高';
-        title = '高：存在明确理论支持';
-      } else if (level === 'medium') {
-        cls = 'medium';
-        icon = '~ 支持度：中';
-        title = '中：存在部分理论支持';
-      } else if (level === 'low') {
-        cls = 'no-support';
-        icon = '✕ 支持度：低';
-        title = '低：缺乏直接理论支持';
-      } else {
-        cls = 'unknown';
-        icon = '! 支持度：无法判断';
-        title = '暂无法给出支持度判断';
-      }
-      html += '<div class="verdict-banner ' + cls + '">';
-      html += '<div class="v-icon">' + icon + '</div>';
-      html += '<div>';
-      html += '<div class="v-title">' + title + '</div>';
-      if (verdict.summary) html += '<div class="v-desc">' + escapeHtml(verdict.summary) + '</div>';
-      if (verdict.reasoning) {
-        html += '<div class="v-reason"><div class="v-reason-label">理由说明</div><div class="v-reason-body">' + escapeHtml(verdict.reasoning) + '</div></div>';
-      }
-      if (verdict.concepts && verdict.concepts.length) {
-        html += '<div class="v-sub">检索概念：<b>' + escapeHtml(verdict.concepts.join(' / ')) + '</b></div>';
-      }
-      html += '</div></div>';
-    }
-    verdictBodyEl.innerHTML = html;
+    verdictBodyEl.innerHTML = buildVerdictHTML(verdict);
   }
 
   function escapeHtml(str) {
@@ -1348,8 +1350,8 @@
     var results = parseResults(item.results);
     var html = '<div class="featured-card">';
     html += '<div class="f-statement">' + escapeHtml(item.statement || '') + '</div>';
-    var answer = v.summary || v.reasoning || '';
-    if (answer) html += '<div class="f-answer">' + escapeHtml(answer) + '</div>';
+    var vhtml = buildVerdictHTML(v);
+    if (vhtml) html += vhtml;
     if (results.length) {
       html += '<button type="button" class="f-sources-toggle" data-toggle="sources">查看信源（' + results.length + '） ▾</button>';
       html += '<div class="f-sources" style="display:none">' + results.slice(0, 10).map(buildFeaturedSource).join('') + '</div>';
