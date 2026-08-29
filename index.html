@@ -537,17 +537,22 @@
   .featured-btn.danger { background: linear-gradient(#e8b0a8, #c9705f); border-color: #b15a48; color: #5a1f14; }
   #featuredList { margin-top: 12px; }
   .featured-card { background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(120,90,30,.08); }
-  .featured-card .f-statement { font-size: 15px; line-height: 1.6; color: var(--brown-dark); margin-bottom: 8px; }
-  .featured-card .f-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--comment); }
-  .featured-card .f-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-  .f-badge.level-high { background: #d8efd8; color: #2e6b2e; }
-  .f-badge.level-medium { background: #f7e7c3; color: #8a6410; }
-  .f-badge.level-low { background: #f3d9d4; color: #9a3f2e; }
-  .f-badge.f-lang { background: #e8e2f5; color: #5b4a94; }
-  .featured-card .f-summary { font-size: 13px; color: var(--brown-mid); margin-top: 6px; line-height: 1.5; }
+  .featured-card .f-statement { font-size: 15px; line-height: 1.6; color: var(--brown-dark); margin-bottom: 8px; font-weight: 600; }
+  .featured-card .f-answer { font-size: 13px; line-height: 1.6; color: var(--brown-mid); background: #FBF1D8; border-left: 3px solid var(--gold-deep); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-bottom: 10px; }
+  .featured-card .f-sources-toggle { border: 1px solid #cbb27a; background: #F5E9CC; color: var(--brown-dark); border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer; }
+  .featured-card .f-sources-toggle:hover { background: #EFDFB8; }
+  .featured-card .f-sources { margin-top: 10px; border-top: 1px dashed #e3cf9f; padding-top: 10px; }
+  .featured-card .f-no-sources { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 6px; }
+  .f-source-item { padding: 8px 0; border-bottom: 1px solid #f1e6cd; font-size: 12px; }
+  .f-source-item:last-child { border-bottom: none; }
+  .f-source-item .fs-title { font-size: 13px; color: var(--brown-dark); line-height: 1.45; }
+  .f-source-item .fs-title a { color: inherit; text-decoration: none; }
+  .f-source-item .fs-title a:hover { text-decoration: underline; }
+  .f-source-item .fs-meta { margin-top: 3px; font-size: 11px; color: var(--comment); }
+  .featured-card .f-badge { display: inline-block; padding: 1px 7px; border-radius: 8px; font-size: 10px; font-weight: 700; color: #fff; }
+  .f-source-item .f-badge { margin-right: 6px; }
   .featured-card .f-actions { margin-top: 10px; text-align: right; }
   .featured-card .f-del { border: none; background: none; color: #c9705f; font-size: 12px; cursor: pointer; padding: 2px 6px; text-decoration: underline; }
-  .featured-card.f-pinned { border-left: 4px solid var(--gold-deep); }
   .featured-loading, .featured-empty { text-align: center; padding: 24px; color: var(--comment); font-size: 13px; font-style: italic; }
 
   /* 管理密钥弹窗 */
@@ -1312,14 +1317,45 @@
     return '<span class="f-badge ' + m[0] + '">' + m[1] + '</span>';
   }
 
+  function srcLevelBadge(level) {
+    var map = { 1: ['level-1', '一级'], 2: ['level-2', '二级'], 3: ['level-3', '三级'] };
+    var m = map[level] || ['level-3', '三级'];
+    return '<span class="f-badge ' + m[0] + '">' + m[1] + '</span>';
+  }
+
+  function parseResults(raw) {
+    if (Array.isArray(raw)) return raw;
+    if (typeof raw === 'string') {
+      try { var p = JSON.parse(raw); return Array.isArray(p) ? p : []; } catch (e) { return []; }
+    }
+    return [];
+  }
+
+  function buildFeaturedSource(src) {
+    var html = '<div class="f-source-item">';
+    html += '<div class="fs-title">' + (src.level ? srcLevelBadge(src.level) : '') + '<a href="' + escapeHtml(src.url || '#') + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(src.title || '（无标题）') + '</a></div>';
+    var meta = [];
+    if (src.year) meta.push(escapeHtml(String(src.year)));
+    if (src.venue) meta.push(escapeHtml(src.venue));
+    if (src.language) meta.push(src.language === 'zh' ? '中文' : '英文');
+    if (meta.length) html += '<div class="fs-meta">' + meta.join(' · ') + '</div>';
+    html += '</div>';
+    return html;
+  }
+
   function buildFeaturedCard(item) {
     var v = item.verdict || {};
-    var langTxt = item.lang === 'zh' ? '中文' : '英文';
-    var dateTxt = item.created_at ? String(item.created_at).replace('T', ' ').slice(0, 16) : '';
-    var html = '<div class="featured-card' + (item.pinned ? ' f-pinned' : '') + '">';
+    var results = parseResults(item.results);
+    var html = '<div class="featured-card">';
     html += '<div class="f-statement">' + escapeHtml(item.statement || '') + '</div>';
-    html += '<div class="f-meta">' + levelBadge(v.level) + '<span class="f-badge f-lang">' + langTxt + '</span>' + (dateTxt ? '<span>' + escapeHtml(dateTxt) + '</span>' : '') + '</div>';
-    if (v.summary) html += '<div class="f-summary">' + escapeHtml(v.summary) + '</div>';
+    var answer = v.summary || v.reasoning || '';
+    if (answer) html += '<div class="f-answer">' + escapeHtml(answer) + '</div>';
+    if (results.length) {
+      html += '<button type="button" class="f-sources-toggle" data-toggle="sources">查看信源（' + results.length + '） ▾</button>';
+      html += '<div class="f-sources" style="display:none">' + results.slice(0, 10).map(buildFeaturedSource).join('') + '</div>';
+    } else {
+      html += '<div class="f-no-sources">未找到直接相关的信源</div>';
+    }
     if (manageMode) {
       html += '<div class="f-actions"><button type="button" class="f-del" data-del="' + item.id + '">删除</button></div>';
     }
@@ -1338,14 +1374,27 @@
           return;
         }
         featuredListEl.innerHTML = items.map(buildFeaturedCard).join('');
-        featuredListEl.querySelectorAll('[data-del]').forEach(function (btn) {
-          btn.addEventListener('click', function () { deleteFeatured(btn.getAttribute('data-del')); });
-        });
       })
       .catch(function () {
         featuredListEl.innerHTML = '<div class="featured-empty">精选观点加载失败，请刷新重试。</div>';
       });
   }
+
+  // 精选区事件委托：折叠信源 / 删除
+  featuredListEl.addEventListener('click', function (e) {
+    var toggle = e.target.closest('.f-sources-toggle');
+    if (toggle) {
+      var box = toggle.parentNode.querySelector('.f-sources');
+      var show = box.style.display !== 'none';
+      box.style.display = show ? 'none' : 'block';
+      toggle.textContent = show ? '查看信源（' + (box.querySelectorAll('.f-source-item').length) + '） ▾' : '收起信源 ▴';
+      return;
+    }
+    var del = e.target.closest('[data-del]');
+    if (del) {
+      deleteFeatured(del.getAttribute('data-del'));
+    }
+  });
 
   function submitFeatured(key) {
     if (!lastData || !lastCheckedText) {
