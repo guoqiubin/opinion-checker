@@ -486,6 +486,41 @@
   .tag-api.s2 { background: linear-gradient(180deg, #7FA860, #557A3A); }
   .tag-api.oa { background: linear-gradient(180deg, #8FA0B5, #5C6F85); }
   .tag-api.crossref { background: linear-gradient(180deg, #D9A641, #A87A22); }
+  .lang-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    margin-left: 6px;
+    vertical-align: 2px;
+    letter-spacing: .5px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 1px 2px rgba(69,58,40,.25);
+  }
+  .lang-tag.zh { background: linear-gradient(180deg, #C98A4B, #A8622E); color: #FFF6E0; text-shadow: 0 -1px 0 rgba(0,0,0,.3); }
+  .lang-tag.en { background: linear-gradient(180deg, #6FA3B8, #487A8F); color: #F0FAFF; text-shadow: 0 -1px 0 rgba(0,0,0,.3); }
+  .result-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 14px;
+    padding: 8px 12px;
+    background: rgba(255,246,224,.55);
+    border: 1px solid rgba(168,138,90,.25);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--brown-mid);
+  }
+  .result-toolbar select {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 8px;
+    border: 1px solid rgba(168,138,90,.45);
+    border-radius: 8px;
+    background: #FFF8E8;
+    color: var(--brown-dark);
+    cursor: pointer;
+  }
 
   /* 空结果 */
   .empty { text-align: center; padding: 36px 20px; }
@@ -588,14 +623,22 @@
     </div>
     <div class="win-body">
       <div class="result-header">
-        <h2>信源列表</h2>
+        <h2>信源档案</h2>
         <span class="meta" id="resultMeta"></span>
+      </div>
+      <div class="result-toolbar">
+        <label>语言筛选</label>
+        <select id="langFilter">
+          <option value="all">全部</option>
+          <option value="en">英文文献</option>
+          <option value="zh">中文文献</option>
+        </select>
       </div>
       <div id="sourceList"></div>
     </div>
   </div>
 
-  <footer>数据来源：AI 模型语义判断 + Semantic Scholar API / Crossref API · 仅供学术参考，不构成权威背书</footer>
+  <footer>数据来源：AI 模型语义判断 + OpenAlex / Semantic Scholar / Crossref API · 中文文献经 OpenAlex 中文索引检索 · 仅供学术参考，不构成权威背书</footer>
 </div>
 
 <script>
@@ -752,6 +795,16 @@
   // ==================== 更新公告 ====================
   var VERSIONS = [
     {
+      version: 'v1.5',
+      date: '2026-08-29',
+      changes: [
+        { type: 'add', text: '信源支持中文文献：中文检索链路 + 中文权威期刊一级名单（《中国社会科学》《心理学报》等）' },
+        { type: 'add', text: '信源档案支持「全部 / 英文 / 中文」三态语言筛选，切换中文自动走中文文献检索' },
+        { type: 'add', text: '文献卡片新增语言徽标（中文 / 英文）' },
+        { type: 'add', text: '中文文献卡片新增「知网检索」一键跳转（按标题搜索，能否看全文取决于知网权限）' }
+      ]
+    },
+    {
       version: 'v1.4',
       date: '2026-08-29',
       changes: [
@@ -867,9 +920,15 @@
     title.appendChild(titleA);
     if (apiName) {
       var tag = document.createElement('span');
-      tag.className = 'tag-api ' + (apiName === 'semanticscholar' ? 's2' : 'crossref');
-      tag.textContent = apiName === 'semanticscholar' ? 'Semantic Scholar' : 'Crossref';
+      tag.className = 'tag-api ' + (apiName === 'semanticscholar' ? 's2' : apiName === 'openalex' ? 'oa' : 'crossref');
+      tag.textContent = apiName === 'semanticscholar' ? 'Semantic Scholar' : apiName === 'openalex' ? 'OpenAlex' : 'Crossref';
       title.appendChild(tag);
+    }
+    if (item.language) {
+      var lt = document.createElement('span');
+      lt.className = 'lang-tag ' + (item.language === 'zh' ? 'zh' : 'en');
+      lt.textContent = item.language === 'zh' ? '中文' : '英文';
+      title.appendChild(lt);
     }
     card.appendChild(title);
 
@@ -919,6 +978,22 @@
       a2.target = '_blank';
       a2.rel = 'noopener noreferrer';
       links.appendChild(a2);
+    }
+    if (item.title) {
+      var a3 = document.createElement('a');
+      a3.textContent = 'Google Scholar';
+      a3.href = 'https://scholar.google.com/scholar?q=' + encodeURIComponent(item.title);
+      a3.target = '_blank';
+      a3.rel = 'noopener noreferrer';
+      links.appendChild(a3);
+    }
+    if (item.title && item.language === 'zh') {
+      var a4 = document.createElement('a');
+      a4.textContent = '知网检索';
+      a4.href = 'https://kns.cnki.net/kns8s/defaultresult/index?crossids=YSTT4HG0&korder=SU&kw=' + encodeURIComponent(item.title);
+      a4.target = '_blank';
+      a4.rel = 'noopener noreferrer';
+      links.appendChild(a4);
     }
     if (links.children.length) card.appendChild(links);
 
@@ -1013,7 +1088,7 @@
     }
   }
 
-  async function checkRun(text) {
+  async function checkRun(text, lang) {
     if (!text) {
       showStatus('warning', '请先输入你的观点');
       return;
@@ -1021,13 +1096,14 @@
     hideVerdict();
     hideResults();
     itemIndex = 0;
+    var reqLang = lang || currentLang();
 
-    showStatus('loading', 'AI 正在理解语义并检索学术文献……');
+    showStatus('loading', 'AI 正在理解语义并检索学术文献' + (reqLang === 'zh' ? '（中文文献）' : '') + '……');
     try {
       var resp = await fetch('/api/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text })
+        body: JSON.stringify({ text: text, lang: reqLang })
       });
       var data = null;
       try { data = await resp.json(); } catch (e) { data = null; }
@@ -1036,6 +1112,7 @@
       if (data.mode === 'keyword') {
         showStatus('warning', '当前为关键词检索模式（服务端未配置 AI 模型），准确率较低。');
       }
+      lastCheckedText = text;
       showVerdict(data.verdict);
       renderResults(data);
     } catch (err) {
@@ -1049,19 +1126,29 @@
   }
 
   function renderResults(data) {
+    lastData = data;
     var items = data.results || [];
     var MAX = 10;
+    var filter = langFilterEl.value;
+
+    if (filter === 'zh') {
+      items = items.filter(function (it) { return it.language === 'zh'; });
+    } else if (filter === 'en') {
+      items = items.filter(function (it) { return it.language !== 'zh'; });
+    }
     var shown = items.slice(0, MAX);
 
+    var langLabel = filter === 'zh' ? '中文' : filter === 'en' ? '英文' : '全部';
     resultMetaEl.textContent = '查询：' + (data.query || '') + ' · 来源：' +
-      (data.source === 'openalex' ? 'OpenAlex' : data.source === 'semanticscholar' ? 'Semantic Scholar' : data.source === 'crossref' ? 'Crossref' : '无');
+      (data.source === 'openalex' ? 'OpenAlex' : data.source === 'semanticscholar' ? 'Semantic Scholar' : data.source === 'crossref' ? 'Crossref' : '无') +
+      ' · 语言：' + langLabel;
 
     if (!shown.length) {
       resultsEl.classList.add('show');
       sourceListEl.innerHTML =
-        '<div class="empty"><div class="icon">未检索到直接相关的学术文献</div>' +
+        '<div class="empty"><div class="icon">未检索到' + langLabel + '相关的学术文献</div>' +
         '<h3>该观点可能缺乏直接的理论支持</h3>' +
-        '<p>这通常意味着该观点缺乏直接的理论支持或实证研究，可尝试更换检索概念，或结合 AI 判断结论参考相近方向。</p></div>';
+        '<p>这通常意味着该观点缺乏直接的理论支持或实证研究。若当前为「' + langLabel + '」筛选，可切换到其他语言重新检索；也可尝试更换检索概念，或结合 AI 判断结论参考相近方向。</p></div>';
       return;
     }
 
@@ -1071,6 +1158,19 @@
       sourceListEl.appendChild(buildSourceCard(item, item.api));
     });
   }
+
+  langFilterEl.addEventListener('change', function () {
+    var val = langFilterEl.value;
+    if (val === 'zh' || val === 'en') {
+      // 切换到具体语言：自动用对应链路重新检索，保证结果真正覆盖该语言文献
+      if (lastCheckedText) {
+        checkRun(lastCheckedText, val);
+      }
+    } else {
+      // 全部：直接展示当前已加载结果（不重复请求）
+      if (lastData) renderResults(lastData);
+    }
+  });
 
   distillBtn.addEventListener('click', runDistill);
   directBtn.addEventListener('click', function () { checkRun(getPlainText()); });

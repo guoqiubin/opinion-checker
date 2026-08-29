@@ -17,6 +17,17 @@ const JUDGE_SYSTEM_PROMPT =
   '5. concepts 必须精确对应观点背后的学术概念，例如观点是"人口密度过高会导致社会冲突"，concepts 应包含 "population density", "social conflict", "overcrowding" 等，绝不能是原文的词频词。\n' +
   '6. 若观点本身模糊或混合多个论断，按最核心的论断判断。';
 
+function buildJudgePrompt(lang) {
+  if (lang === 'zh') {
+    return JUDGE_SYSTEM_PROMPT + '\n' +
+      '7. 本次为「中文文献」检索模式：concepts 必须使用中文专业学术术语（每个概念可附英文对照，但中文优先），' +
+      'search_query 必须为中文检索串。\n' +
+      '8. 严禁输出英文 concepts / search_query（专有名词如心理学经典实验名可保留英文原称）。';
+  }
+  return JUDGE_SYSTEM_PROMPT + '\n' +
+    '7. 本次为「英文文献」检索模式：concepts 与 search_query 使用英文。';
+}
+
 const STOP_WORDS = new Set([
   '的','了','和','与','或','是','在','我','你','他','她','它','们','这','那','就','都','而','及','把','被','让','向','从','对','于','给','用','以','为','等','中','上','下','不','也','很','更','最','有','没有','会','要','能','可','将','正','但','却','并','其','之','一个','一种','这个','那个','这些','那些','因为','所以','如果','虽然','但是','以及','可以','认为','观点','提出','我们','大家','应该','需要','随着','由于','通过','进行','成为','可能','就是','只是','还是','或者','其中','目前','现在','未来','已经','开始','相关','问题','方面','领域','发展','影响','作用','意义','理论','支持','研究','文献'
 ]);
@@ -123,10 +134,31 @@ const MAJOR_PUBLISHERS = [
   'cell press', 'bmc', 'plos', 'acs', 'royal society', 'iop publishing', 'mdpi',
   'frontiers media', 'nature portfolio', 'guilford', 'psychology press', 'routledge'
 ];
+// 中文权威期刊（一级）：综合性社科/人文顶刊 + 各学科权威期刊
+const CHINESE_TOP_JOURNALS = [
+  '中国社会科学', '心理学报', '社会学研究', '经济研究', '管理世界', '哲学研究',
+  '教育研究', '法学研究', '历史研究', '文学评论', '新闻与传播研究',
+  '中国科学', '科学通报', '中华医学杂志', '计算机学报', '软件学报', '物理学报',
+  '心理科学', '管理科学学报', '世界经济', '金融研究', '中国工业经济',
+  '会计研究', '人口研究', '中国人口科学', '中国软科学', '自然资源学报',
+  '中国语文', '外语教学与研究', '统计研究', '马克思主义研究', '政治学研究'
+];
+
+function normalizeLanguage(lang) {
+  var l = String(lang || '').toLowerCase();
+  if (/^zh/.test(l)) return 'zh';
+  if (/^en/.test(l)) return 'en';
+  return 'unknown';
+}
 
 function rateSource(item) {
-  var venue = String(item.venue || '').toLowerCase().replace(/[^a-z0-9&\s]/g, ' ').replace(/\s+/g, ' ').trim();
+  var rawVenue = String(item.venue || '');
+  var venue = rawVenue.toLowerCase().replace(/[^a-z0-9&\s]/g, ' ').replace(/\s+/g, ' ').trim();
   var publisher = String(item.publisher || '').toLowerCase();
+  // 中文权威期刊（需在转小写/去符号前用原文匹配，避免中文被过滤）
+  for (var c = 0; c < CHINESE_TOP_JOURNALS.length; c++) {
+    if (rawVenue.indexOf(CHINESE_TOP_JOURNALS[c]) >= 0) { item.level = 1; return item; }
+  }
   for (var i = 0; i < TOP_JOURNALS.length; i++) {
     if (venue.indexOf(TOP_JOURNALS[i]) >= 0) { item.level = 1; return item; }
   }
@@ -141,9 +173,10 @@ function rateSource(item) {
   return item;
 }
 
-function searchOpenAlex(query) {
+function searchOpenAlex(query, lang) {
   var url = 'https://api.openalex.org/works?search=' + encodeURIComponent(query) +
-    '&per-page=10&select=id,display_name,publication_year,authorships,primary_location,cited_by_count,doi,type';
+    '&per-page=10&select=id,display_name,publication_year,authorships,primary_location,cited_by_count,doi,type,language';
+  if (lang === 'zh') url += '&filter=language:zh';
   return fetch(url, {
     headers: { 'Accept': 'application/json' }
   }).then(function (res) {
@@ -166,6 +199,7 @@ function searchOpenAlex(query) {
         doi: w.doi ? w.doi.replace('https://doi.org/', '') : null,
         url: w.doi || null,
         cited_by_count: w.cited_by_count || 0,
+        language: normalizeLanguage(w.language),
         api: 'openalex'
       };
     });
@@ -229,25 +263,52 @@ function sleep(ms) {
   return new Promise(function (resolve) { setTimeout(resolve, ms); });
 }
 
-async function searchAcademic(query) {
-  // 检索链路：OpenAlex（覆盖广、带期刊/出版社信息）→ Semantic Scholar → Crossref
+async function searchAcademic(query, lang) {
+  // 检索链路：
+  //   en：OpenAlex（覆盖广、带期刊/出版社信息）→ Semantic Scholar → Crossref
+  //   zh：OpenAlex(仅中文) → Crossref(中文优先) → Semantic Scholar
   var items = [];
   var source = 'none';
-  try {
-    var oa = await searchOpenAlex(query);
-    if (oa && oa.length) { items = oa; source = 'openalex'; }
-  } catch (e) { /* fallthrough */ }
-  if (items.length === 0) {
+  if (lang === 'zh') {
     try {
-      var s2 = await searchSemanticScholar(query);
-      if (s2 && s2.length) { items = s2; source = 'semanticscholar'; }
+      var oaZh = await searchOpenAlex(query, 'zh');
+      if (oaZh && oaZh.length) { items = oaZh; source = 'openalex'; }
     } catch (e) { /* fallthrough */ }
-  }
-  if (items.length === 0) {
+    if (items.length < 3) {
+      try {
+        var crZh = await searchCrossref(query);
+        if (crZh && crZh.length) {
+          var zhOnly = crZh.filter(function (x) { return x.language === 'zh'; });
+          if (zhOnly.length) {
+            items = items.concat(zhOnly).slice(0, 10);
+            if (source === 'none') source = 'crossref';
+          }
+        }
+      } catch (e) { /* fallthrough */ }
+    }
+    if (items.length === 0) {
+      try {
+        var s2Zh = await searchSemanticScholar(query);
+        if (s2Zh && s2Zh.length) { items = s2Zh; source = 'semanticscholar'; }
+      } catch (e) { /* fallthrough */ }
+    }
+  } else {
     try {
-      var cr = await searchCrossref(query);
-      if (cr && cr.length) { items = cr; source = 'crossref'; }
+      var oa = await searchOpenAlex(query, 'en');
+      if (oa && oa.length) { items = oa; source = 'openalex'; }
     } catch (e) { /* fallthrough */ }
+    if (items.length === 0) {
+      try {
+        var s2 = await searchSemanticScholar(query);
+        if (s2 && s2.length) { items = s2; source = 'semanticscholar'; }
+      } catch (e) { /* fallthrough */ }
+    }
+    if (items.length === 0) {
+      try {
+        var cr = await searchCrossref(query);
+        if (cr && cr.length) { items = cr; source = 'crossref'; }
+      } catch (e) { /* fallthrough */ }
+    }
   }
   items = items.map(rateSource);
   items.sort(function (a, b) {
@@ -282,6 +343,12 @@ export default async function handler(req, res) {
     res.status(400).json({ error: '观点过长，请控制在 600 字以内' });
     return;
   }
+  // lang：en（默认，英文链路）/ zh（中文链路）
+  var lang = '';
+  try {
+    lang = String((req.body && req.body.lang) || 'en').trim();
+  } catch (e) {}
+  if (lang !== 'zh') lang = 'en';
 
   var apiKey = process.env.DEEPSEEK_API_KEY;
   var verdict = null;
@@ -290,7 +357,7 @@ export default async function handler(req, res) {
 
   if (apiKey) {
     try {
-      var content = await callLLM(JUDGE_SYSTEM_PROMPT, '观点：' + text, true);
+      var content = await callLLM(buildJudgePrompt(lang), '观点：' + text, true);
       var parsed = extractJSON(content);
       if (!parsed) throw new Error('模型输出无法解析为 JSON');
       verdict = parsed;
@@ -326,9 +393,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    var result = await searchAcademic(query);
+    var result = await searchAcademic(query, lang);
     res.status(200).json({
       mode: mode,
+      lang: lang,
       verdict: verdict,
       results: result.items,
       source: result.source,
@@ -337,6 +405,7 @@ export default async function handler(req, res) {
   } catch (err) {
     res.status(200).json({
       mode: mode,
+      lang: lang,
       verdict: verdict,
       results: [],
       source: 'none',
