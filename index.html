@@ -891,11 +891,19 @@
   var resultsEl = document.getElementById('results');
   var sourceListEl = document.getElementById('sourceList');
   var resultMetaEl = document.getElementById('resultMeta');
+  var langFilterEl = document.getElementById('langFilter');
+  var lastCheckedText = '';
+  var lastData = null;
 
   function hideResults() {
     resultsEl.classList.remove('show');
     sourceListEl.innerHTML = '';
     resultMetaEl.textContent = '';
+    lastData = null;
+  }
+
+  function currentLang() {
+    return langFilterEl.value === 'zh' ? 'zh' : 'en';
   }
 
   var itemIndex = 0;
