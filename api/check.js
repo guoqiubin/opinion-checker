@@ -278,8 +278,8 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'text 参数不能为空' });
     return;
   }
-  if (text.length > 5000) {
-    res.status(400).json({ error: '观点过长，请控制在 5000 字以内' });
+  if (text.length > 600) {
+    res.status(400).json({ error: '观点过长，请控制在 600 字以内' });
     return;
   }
 

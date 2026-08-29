@@ -5,6 +5,8 @@
 ## 功能特性
 
 - 富文本观点输入：支持加粗、斜体、列表等基础排版
+- 观点提炼：口语化小作文先由 AI 提炼为清晰可验证的核心观点，支持编辑修正后继续检测（≤600 字，实时字数统计）
+- 直接检测：已会表达时可跳过提炼，一键直达信源检测
 - AI 语义判断：调用大模型提炼学术概念与检索词，而非简单词频匹配
 - 支持度三档分级：高 / 中 / 低，附理由说明
 - 学术信源检索：OpenAlex → Semantic Scholar → Crossref 三级降级链路
@@ -29,7 +31,8 @@
 opinion-checker/
 ├── index.html          # 前端单文件（含样式、交互、公告栏）
 ├── api/
-│   └── check.js        # Vercel Serverless 函数：LLM 判断 + 学术检索
+│   ├── check.js        # Vercel Serverless 函数：LLM 判断 + 学术检索
+│   └── distill.js      # Vercel Serverless 函数：AI 观点提炼
 ├── package.json        # 项目配置与脚本
 └── README.md
 ```
@@ -63,6 +66,26 @@ vercel dev    # 本地启动，访问 http://localhost:3000
 ```
 
 ## API 说明
+
+`POST /api/distill`（观点提炼，≤600 字）
+
+请求：
+
+```json
+{ "text": "我觉得吧，人口密度到一定程度人就会开始互相伤害，因为东西不够分……" }
+```
+
+响应：
+
+```json
+{
+  "mode": "llm",
+  "statement": "当人口密度增加到一定程度时，由于资源有限，人类可能开始自相残杀。",
+  "points": ["人口密度增加导致资源有限", "资源有限可能引发人类自相残杀"]
+}
+```
+
+- 未配置 `DEEPSEEK_API_KEY` 或模型输出异常时自动降级：`mode=keyword`，`statement` 返回原文
 
 `POST /api/check`
 

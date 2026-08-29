@@ -248,7 +248,7 @@
   .actions { display: flex; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; }
 
   /* 主按钮 = 金色凸起 */
-  #checkBtn {
+  #checkBtn, #distillBtn {
     background:
       linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 50%),
       linear-gradient(180deg, var(--gold-light), var(--gold) 55%, var(--gold-deep));
@@ -265,13 +265,13 @@
     box-shadow: 0 4px 8px rgba(69,58,40,.4), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3);
     transition: all .12s;
   }
-  #checkBtn:hover { filter: brightness(1.06); box-shadow: 0 5px 10px rgba(69,58,40,.45), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3); }
-  #checkBtn:active {
+  #checkBtn:hover, #distillBtn:hover { filter: brightness(1.06); box-shadow: 0 5px 10px rgba(69,58,40,.45), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3); }
+  #checkBtn:active, #distillBtn:active {
     box-shadow: inset 0 3px 6px rgba(0,0,0,.4), inset 0 -1px 0 rgba(255,255,255,.2);
     transform: translateY(2px);
   }
-  #checkBtn:disabled { opacity: .55; cursor: not-allowed; }
-  #clearBtn {
+  #checkBtn:disabled, #distillBtn:disabled { opacity: .55; cursor: not-allowed; }
+  #clearBtn, #directBtn, #distillRetry, #distillGo {
     background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
     color: var(--brown-mid);
     border: 1px solid #9A8F77;
@@ -284,9 +284,53 @@
     box-shadow: 0 3px 6px rgba(69,58,40,.25), inset 0 1px 0 rgba(255,255,255,.8);
     transition: all .12s;
   }
-  #clearBtn:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
-  #clearBtn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
+  #clearBtn:hover, #directBtn:hover, #distillRetry:hover, #distillGo:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
+  #clearBtn:active, #directBtn:active, #distillRetry:active, #distillGo:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
   .hint { font-size: 12px; color: var(--comment); margin-top: 12px; font-style: italic; }
+  .char-count { text-align: right; font-size: 12px; color: var(--comment); margin-top: 8px; font-style: italic; }
+  .char-count.over { color: #9A3A2C; font-weight: 700; }
+
+  /* 观点提炼窗口 */
+  #distill { display: none; margin-bottom: 18px; }
+  #distill.show { display: block; }
+  .distill-statement { margin-bottom: 12px; }
+  .distill-statement textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: 12px 14px;
+    border: 1px solid #B5A98E;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--brown-dark);
+    background: repeating-linear-gradient(0deg, rgba(176,120,32,.025) 0 1px, transparent 1px 24px), var(--paper);
+    box-shadow: inset 0 3px 8px rgba(69,58,40,.22), inset 0 1px 2px rgba(69,58,40,.15);
+    outline: none;
+    resize: vertical;
+  }
+  .distill-statement textarea:focus { border-color: var(--gold); box-shadow: inset 0 3px 8px rgba(69,58,40,.22), 0 0 0 3px rgba(176,120,32,.22); }
+  .distill-points-label { font-size: 13px; font-weight: 700; color: var(--brown-mid); margin-bottom: 6px; letter-spacing: .5px; }
+  .distill-points { list-style: none; margin: 0 0 14px; padding: 0; }
+  .distill-points li {
+    position: relative;
+    padding: 7px 10px 7px 30px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: var(--brown-dark);
+    background: linear-gradient(180deg, rgba(255,255,255,.35), rgba(176,120,32,.06));
+    border: 1px solid #C9BC9D;
+    border-radius: 7px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .distill-points li::before {
+    content: '▸';
+    position: absolute;
+    left: 12px;
+    color: var(--gold-deep);
+    font-weight: 700;
+  }
+  .distill-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
   /* 状态条 = 皮质信息条 */
   .status { display: none; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: 9px; margin-bottom: 18px; font-size: 14px; border: 1px solid var(--border); }
@@ -455,7 +499,7 @@
     .container { padding: 18px 12px 44px; }
     header h1 { font-size: 21px; padding: 12px 22px; }
     .actions { flex-direction: column; align-items: stretch; }
-    #checkBtn, #clearBtn { width: 100%; text-align: center; }
+    #checkBtn, #distillBtn, #clearBtn, #directBtn, #distillRetry, #distillGo { width: 100%; text-align: center; }
     .win-body { padding: 14px; }
   }
 </style>
@@ -499,12 +543,34 @@
         <span class="sep"></span>
         <button type="button" data-cmd="removeFormat" title="清除格式">清除格式</button>
       </div>
-      <div id="editor" contenteditable="true" data-placeholder="在此输入你的观点，例如：人口密度增加到一定程度后，人类可能会开始自相残杀……"></div>
+      <div id="editor" contenteditable="true" data-placeholder="在此输入你的观点或想法，可以是口语化的小作文（≤600 字），例如：我想问捞女这个社会现象……"></div>
+      <div class="char-count" id="charCount">0 / 600</div>
       <div class="actions">
-        <button id="checkBtn">判断理论支持</button>
+        <button id="distillBtn">提炼观点</button>
+        <button id="directBtn">直接检测</button>
         <button id="clearBtn">清空</button>
       </div>
-      <div class="hint">流程：AI 模型理解观点语义 → 判断是否具有理论/学术支持 → 用模型提炼的学术概念检索 Semantic Scholar / Crossref，返回 1~10 条信源。支持 Ctrl/Cmd+Enter 快捷判断。</div>
+      <div class="hint">流程：输入观点（≤600 字）→ 「提炼观点」让 AI 先整理出清晰观点 → 确认后「检测信源支撑」；已会表达时可直接「直接检测」。支持 Ctrl/Cmd+Enter 快捷检测。</div>
+    </div>
+  </div>
+
+  <!-- 观点提炼 -->
+  <div id="distill" class="win">
+    <div class="win-titlebar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="win-title">观点提炼</span>
+    </div>
+    <div class="win-body">
+      <div class="cmd-label"><span class="dollar">§</span> <span class="fname">AI 已提炼出核心观点，可编辑修正后再检测信源</span></div>
+      <div class="distill-statement">
+        <textarea id="distillStatement" placeholder="AI 提炼出的观点陈述……"></textarea>
+      </div>
+      <div class="distill-points-label">核心要点</div>
+      <ul id="distillPoints" class="distill-points"></ul>
+      <div class="distill-actions">
+        <button id="distillRetry">重新提炼</button>
+        <button id="distillGo">检测信源支撑</button>
+      </div>
     </div>
   </div>
 
@@ -573,7 +639,45 @@
     editor.focus();
     hideVerdict();
     hideResults();
+    hideDistill();
     hideStatus();
+    updateCharCount();
+  });
+
+  // ==================== 字数统计与限制（≤600 字） ====================
+  var MAX_LEN = 600;
+  var charCountEl = document.getElementById('charCount');
+
+  function updateCharCount() {
+    var text = editor.innerText || editor.textContent || '';
+    var len = text.length;
+    charCountEl.textContent = len + ' / ' + MAX_LEN;
+    charCountEl.classList.toggle('over', len > MAX_LEN);
+    return text;
+  }
+
+  function placeCaretAtEnd(el) {
+    el.focus();
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  editor.addEventListener('input', function () {
+    var text = editor.innerText || editor.textContent || '';
+    if (text.length > MAX_LEN) {
+      var truncated = text.slice(0, MAX_LEN);
+      editor.innerHTML = '';
+      var p = document.createElement('div');
+      p.textContent = truncated;
+      editor.appendChild(p);
+      placeCaretAtEnd(editor);
+      showStatus('warning', '字数已超过 ' + MAX_LEN + ' 上限，超出部分已截断。');
+    }
+    updateCharCount();
   });
 
   // ==================== 状态 ====================
@@ -647,6 +751,16 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v1.4',
+      date: '2026-08-29',
+      changes: [
+        { type: 'add', text: '新增「观点提炼」：口语化小作文先由 AI 提炼为清晰观点，再检测信源支撑' },
+        { type: 'add', text: '输入区字数限制与实时统计（≤600 字）' },
+        { type: 'add', text: '新增「直接检测」快捷入口，跳过提炼直接检测信源' },
+        { type: 'opt', text: '提炼结果支持编辑修正后继续检测' }
+      ]
+    },
     {
       version: 'v1.3',
       date: '2026-08-28',
@@ -812,23 +926,100 @@
   }
 
   // ==================== 主流程 ====================
-  var checkBtn = document.getElementById('checkBtn');
+  var distillBtn = document.getElementById('distillBtn');
+  var directBtn = document.getElementById('directBtn');
+  var distillEl = document.getElementById('distill');
+  var distillStatementEl = document.getElementById('distillStatement');
+  var distillPointsEl = document.getElementById('distillPoints');
 
   function getPlainText() {
     var text = editor.innerText || editor.textContent || '';
     return text.replace(/\u00a0/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
-  async function run() {
+  function hideDistill() {
+    distillEl.classList.remove('show');
+    distillStatementEl.value = '';
+    distillPointsEl.innerHTML = '';
+  }
+
+  function showDistill(data) {
+    distillStatementEl.value = data.statement || '';
+    distillPointsEl.innerHTML = '';
+    var pts = data.points || [];
+    pts.forEach(function (p) {
+      var li = document.createElement('li');
+      li.textContent = p;
+      distillPointsEl.appendChild(li);
+    });
+    distillEl.classList.add('show');
+    distillEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function getDistillText() {
+    var statement = distillStatementEl.value.trim();
+    var pts = Array.prototype.map.call(distillPointsEl.children, function (li) {
+      return li.textContent.trim();
+    }).filter(Boolean);
+    if (pts.length) {
+      statement += '\n' + pts.map(function (p) { return '· ' + p; }).join('\n');
+    }
+    return statement;
+  }
+
+  async function runDistill() {
     var text = getPlainText();
     if (!text) {
-      showStatus('warning', '请先输入你的观点');
+      showStatus('warning', '请先输入你的观点或想法');
+      return;
+    }
+    if (text.length > MAX_LEN) {
+      showStatus('warning', '内容超过 ' + MAX_LEN + ' 字上限，请精简后再提炼');
       return;
     }
 
     hideVerdict();
     hideResults();
-    checkBtn.disabled = true;
+    hideDistill();
+    distillBtn.disabled = true;
+    showStatus('loading', 'AI 正在提炼核心观点……');
+    try {
+      var resp = await fetch('/api/distill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      });
+      var data = null;
+      try { data = await resp.json(); } catch (e) { data = null; }
+      if (!resp.ok) throw new Error((data && data.error) || ('HTTP ' + resp.status));
+      hideStatus();
+      if (data.mode === 'keyword') {
+        showStatus('warning', (data.message || '观点提炼暂不可用。') + ' 已用原文直接检测信源。');
+        checkRun(text);
+        return;
+      }
+      showDistill(data);
+      showStatus('success', '观点提炼完成，可编辑修正后点击「检测信源支撑」。');
+    } catch (err) {
+      hideStatus();
+      var msg = String(err && err.message || err);
+      if (/Failed to fetch|NetworkError|load failed/i.test(msg)) {
+        msg = '无法连接后端服务。请通过线上地址访问本页面。';
+      }
+      showStatus('error', '观点提炼失败：' + msg + ' 已用原文直接检测信源。');
+      checkRun(text);
+    } finally {
+      distillBtn.disabled = false;
+    }
+  }
+
+  async function checkRun(text) {
+    if (!text) {
+      showStatus('warning', '请先输入你的观点');
+      return;
+    }
+    hideVerdict();
+    hideResults();
     itemIndex = 0;
 
     showStatus('loading', 'AI 正在理解语义并检索学术文献……');
@@ -854,8 +1045,6 @@
         msg = '无法连接后端服务。请通过线上地址访问本页面（本地直接打开文件时无法调用 AI 服务）。';
       }
       showStatus('error', '请求失败：' + msg);
-    } finally {
-      checkBtn.disabled = false;
     }
   }
 
@@ -883,11 +1072,21 @@
     });
   }
 
-  checkBtn.addEventListener('click', run);
+  distillBtn.addEventListener('click', runDistill);
+  directBtn.addEventListener('click', function () { checkRun(getPlainText()); });
+  document.getElementById('distillRetry').addEventListener('click', runDistill);
+  document.getElementById('distillGo').addEventListener('click', function () {
+    var t = getDistillText();
+    if (!t) {
+      showStatus('warning', '提炼结果为空，请先提炼观点');
+      return;
+    }
+    checkRun(t);
+  });
   editor.addEventListener('keydown', function (e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
-      run();
+      checkRun(getPlainText());
     }
   });
 })();
