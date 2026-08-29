@@ -528,6 +528,39 @@
   .empty h3 { font-size: 17px; margin-bottom: 8px; color: var(--brown-dark); }
   .empty p { color: var(--brown-mid); font-size: 14px; max-width: 560px; margin: 0 auto; font-style: italic; }
 
+  /* 精选观点区 */
+  .featured-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .featured-head h2 { font-size: 17px; font-weight: 700; color: var(--brown-dark); text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+  .featured-tools { display: flex; gap: 8px; }
+  .featured-btn { background: var(--gold-grad, linear-gradient(#d9b25f, #b98d3a)); color: #4a3200; border: 1px solid #a87e31; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 4px rgba(0,0,0,.12); }
+  .featured-btn:hover { filter: brightness(1.06); }
+  .featured-btn.danger { background: linear-gradient(#e8b0a8, #c9705f); border-color: #b15a48; color: #5a1f14; }
+  #featuredList { margin-top: 12px; }
+  .featured-card { background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(120,90,30,.08); }
+  .featured-card .f-statement { font-size: 15px; line-height: 1.6; color: var(--brown-dark); margin-bottom: 8px; }
+  .featured-card .f-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--comment); }
+  .featured-card .f-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .f-badge.level-high { background: #d8efd8; color: #2e6b2e; }
+  .f-badge.level-medium { background: #f7e7c3; color: #8a6410; }
+  .f-badge.level-low { background: #f3d9d4; color: #9a3f2e; }
+  .f-badge.f-lang { background: #e8e2f5; color: #5b4a94; }
+  .featured-card .f-summary { font-size: 13px; color: var(--brown-mid); margin-top: 6px; line-height: 1.5; }
+  .featured-card .f-actions { margin-top: 10px; text-align: right; }
+  .featured-card .f-del { border: none; background: none; color: #c9705f; font-size: 12px; cursor: pointer; padding: 2px 6px; text-decoration: underline; }
+  .featured-card.f-pinned { border-left: 4px solid var(--gold-deep); }
+  .featured-loading, .featured-empty { text-align: center; padding: 24px; color: var(--comment); font-size: 13px; font-style: italic; }
+
+  /* 管理密钥弹窗 */
+  .modal-mask { position: fixed; inset: 0; background: rgba(40,28,10,.45); display: none; align-items: center; justify-content: center; z-index: 999; }
+  .modal-mask.show { display: flex; }
+  .modal-box { background: #FFF8E8; border: 2px solid #d9b25f; border-radius: 14px; padding: 22px; width: min(420px, 88vw); box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+  .modal-box h3 { margin: 0 0 6px; font-size: 16px; color: var(--brown-dark); }
+  .modal-box p { margin: 0 0 14px; font-size: 12px; color: var(--comment); }
+  .modal-box input { width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1px solid #cbb27a; border-radius: 8px; background: #FFFDF4; font-size: 14px; color: var(--brown-dark); }
+  .modal-actions { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; }
+  .modal-actions button { padding: 7px 16px; border-radius: 8px; border: 1px solid #cbb27a; background: #F5E9CC; color: var(--brown-dark); cursor: pointer; font-size: 13px; }
+  .modal-actions button.primary { background: var(--gold-grad, linear-gradient(#d9b25f, #b98d3a)); border-color: #a87e31; color: #4a3200; font-weight: 600; }
+
   footer { text-align: center; font-size: 12px; color: var(--comment); margin-top: 30px; font-style: italic; }
 
   @media (max-width: 600px) {
@@ -625,6 +658,7 @@
       <div class="result-header">
         <h2>信源档案</h2>
         <span class="meta" id="resultMeta"></span>
+        <button type="button" id="shareFeaturedBtn" class="featured-btn" style="display:none">分享到精选</button>
       </div>
       <div class="result-toolbar">
         <label>语言筛选</label>
@@ -639,6 +673,36 @@
   </div>
 
   <footer>数据来源：AI 模型语义判断 + OpenAlex / Semantic Scholar / Crossref API · 中文文献经 OpenAlex 中文索引检索 · 仅供学术参考，不构成权威背书</footer>
+
+  <!-- 精选观点展示墙 -->
+  <div id="featured" class="win">
+    <div class="win-titlebar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="win-title">精选观点</span>
+    </div>
+    <div class="win-body">
+      <div class="featured-head">
+        <h2>精选观点</h2>
+        <div class="featured-tools">
+          <button type="button" id="featuredManageBtn" class="featured-btn">管理模式</button>
+        </div>
+      </div>
+      <div id="featuredList"><div class="featured-loading">加载中…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 管理密钥弹窗 -->
+<div class="modal-mask" id="keyModal">
+  <div class="modal-box">
+    <h3>管理密钥</h3>
+    <p>请输入精选观点管理密钥（仅站长使用）</p>
+    <input type="password" id="keyInput" placeholder="管理密钥" autocomplete="off">
+    <div class="modal-actions">
+      <button type="button" id="keyCancel">取消</button>
+      <button type="button" id="keyOk" class="primary">确认</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -794,6 +858,14 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v1.7',
+      date: '2026-08-29',
+      changes: [
+        { type: 'add', text: '新增「精选观点」展示墙：站长精选观点、访客只读（AI 生成内容，仅供参考）' },
+        { type: 'add', text: '检测结果支持一键「分享到精选」，需站长管理密钥' }
+      ]
+    },
     {
       version: 'v1.6',
       date: '2026-08-29',
@@ -1144,6 +1216,8 @@
 
   function renderResults(data) {
     lastData = data;
+    var shareBtn = document.getElementById('shareFeaturedBtn');
+    shareBtn.style.display = (data && data.verdict) ? 'block' : 'none';
     var items = data.results || [];
     var MAX = 10;
     var filter = langFilterEl.value;
@@ -1206,6 +1280,155 @@
       checkRun(getPlainText());
     }
   });
+
+  // ==================== 精选观点 ====================
+  var FEATURED_API = 'api/featured';
+  var featuredListEl = document.getElementById('featuredList');
+  var keyModalEl = document.getElementById('keyModal');
+  var keyInputEl = document.getElementById('keyInput');
+  var keyModalMode = 'share'; // share | manage
+  var manageMode = false;
+
+  function getStoredKey() {
+    try { return localStorage.getItem('featured_manage_key') || ''; } catch (e) { return ''; }
+  }
+  function setStoredKey(k) {
+    try { localStorage.setItem('featured_manage_key', k); } catch (e) {}
+  }
+
+  function openKeyModal(mode) {
+    keyModalMode = mode;
+    keyInputEl.value = getStoredKey();
+    keyModalEl.classList.add('show');
+    keyInputEl.focus();
+  }
+  function closeKeyModal() {
+    keyModalEl.classList.remove('show');
+  }
+
+  function levelBadge(level) {
+    var map = { high: ['level-high', '支持度高'], medium: ['level-medium', '支持度中'], low: ['level-low', '支持度低'] };
+    var m = map[level] || ['', '未分级'];
+    return '<span class="f-badge ' + m[0] + '">' + m[1] + '</span>';
+  }
+
+  function buildFeaturedCard(item) {
+    var v = item.verdict || {};
+    var langTxt = item.lang === 'zh' ? '中文' : '英文';
+    var dateTxt = item.created_at ? String(item.created_at).replace('T', ' ').slice(0, 16) : '';
+    var html = '<div class="featured-card' + (item.pinned ? ' f-pinned' : '') + '">';
+    html += '<div class="f-statement">' + escapeHtml(item.statement || '') + '</div>';
+    html += '<div class="f-meta">' + levelBadge(v.level) + '<span class="f-badge f-lang">' + langTxt + '</span>' + (dateTxt ? '<span>' + escapeHtml(dateTxt) + '</span>' : '') + '</div>';
+    if (v.summary) html += '<div class="f-summary">' + escapeHtml(v.summary) + '</div>';
+    if (manageMode) {
+      html += '<div class="f-actions"><button type="button" class="f-del" data-del="' + item.id + '">删除</button></div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function loadFeatured() {
+    featuredListEl.innerHTML = '<div class="featured-loading">加载中…</div>';
+    fetch(FEATURED_API + '?limit=20')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var items = (data && data.items) || [];
+        if (!items.length) {
+          featuredListEl.innerHTML = '<div class="featured-empty">暂无精选观点，站长可点击「分享到精选」收录。</div>';
+          return;
+        }
+        featuredListEl.innerHTML = items.map(buildFeaturedCard).join('');
+        featuredListEl.querySelectorAll('[data-del]').forEach(function (btn) {
+          btn.addEventListener('click', function () { deleteFeatured(btn.getAttribute('data-del')); });
+        });
+      })
+      .catch(function () {
+        featuredListEl.innerHTML = '<div class="featured-empty">精选观点加载失败，请刷新重试。</div>';
+      });
+  }
+
+  function submitFeatured(key) {
+    if (!lastData || !lastCheckedText) {
+      showStatus('warning', '没有可分享的检测结果');
+      return;
+    }
+    var body = {
+      statement: lastCheckedText.slice(0, 600),
+      source_text: (lastData.verdict && lastData.verdict.summary) || null,
+      verdict: lastData.verdict,
+      results: lastData.results || [],
+      mode: lastData.mode || 'llm',
+      lang: lastData.lang || 'en'
+    };
+    fetch(FEATURED_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Manage-Key': key },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, d: d }; });
+    }).then(function (res) {
+      if (!res.ok) throw new Error((res.d && res.d.error) || '提交失败');
+      showStatus('ok', '已分享到精选观点');
+      setStoredKey(key);
+      loadFeatured();
+    }).catch(function (err) {
+      showStatus('error', '分享失败：' + String(err.message || err));
+    });
+  }
+
+  function deleteFeatured(id) {
+    var key = getStoredKey();
+    if (!key) { openKeyModal('manage'); return; }
+    fetch(FEATURED_API + '?id=' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'X-Manage-Key': key }
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, d: d }; });
+    }).then(function (res) {
+      if (!res.ok) throw new Error((res.d && res.d.error) || '删除失败');
+      showStatus('ok', '已删除');
+      loadFeatured();
+    }).catch(function (err) {
+      if (String(err.message || '').indexOf('401') >= 0) {
+        setStoredKey('');
+        openKeyModal('manage');
+      } else {
+        showStatus('error', '删除失败：' + String(err.message || err));
+      }
+    });
+  }
+
+  document.getElementById('shareFeaturedBtn').addEventListener('click', function () {
+    openKeyModal('share');
+  });
+  document.getElementById('featuredManageBtn').addEventListener('click', function () {
+    manageMode = !manageMode;
+    var btn = document.getElementById('featuredManageBtn');
+    btn.textContent = manageMode ? '退出管理' : '管理模式';
+    btn.classList.toggle('danger', manageMode);
+    if (manageMode && !getStoredKey()) {
+      openKeyModal('manage');
+      return;
+    }
+    loadFeatured();
+  });
+  document.getElementById('keyCancel').addEventListener('click', closeKeyModal);
+  document.getElementById('keyOk').addEventListener('click', function () {
+    var key = keyInputEl.value.trim();
+    if (!key) return;
+    closeKeyModal();
+    setStoredKey(key);
+    if (keyModalMode === 'share') {
+      submitFeatured(key);
+    } else {
+      loadFeatured();
+    }
+  });
+  keyInputEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('keyOk').click(); }
+  });
+
+  loadFeatured();
 })();
 </script>
 </body>
