@@ -1345,8 +1345,16 @@
     return html;
   }
 
+  function parseVerdict(raw) {
+    if (raw && typeof raw === 'object') return raw;
+    if (typeof raw === 'string') {
+      try { var p = JSON.parse(raw); return p && typeof p === 'object' ? p : {}; } catch (e) { return {}; }
+    }
+    return {};
+  }
+
   function buildFeaturedCard(item) {
-    var v = item.verdict || {};
+    var v = parseVerdict(item.verdict);
     var results = parseResults(item.results);
     var html = '<div class="featured-card">';
     html += '<div class="f-statement">' + escapeHtml(item.statement || '') + '</div>';

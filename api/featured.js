@@ -67,6 +67,18 @@ export default async function handler(req, res) {
       });
       if (!resp.ok) throw new Error('DB_HTTP_' + resp.status);
       const rows = await resp.json();
+      // 兼容历史数据：verdict/results 列可能以 JSON 字符串存储，统一规范化为对象/数组
+      rows.forEach(function (row) {
+        if (typeof row.verdict === 'string') {
+          try { row.verdict = JSON.parse(row.verdict); } catch (e) { row.verdict = null; }
+        }
+        if (typeof row.results === 'string') {
+          try {
+            var parsed = JSON.parse(row.results);
+            row.results = Array.isArray(parsed) ? parsed : [];
+          } catch (e) { row.results = []; }
+        }
+      });
       return res.status(200).json({ items: rows, limit: limit, offset: offset });
     } catch (err) {
       return jsonError(res, 500, '查询失败：' + String(err.message || err));
@@ -106,8 +118,8 @@ export default async function handler(req, res) {
     const record = {
       statement: statement,
       source_text: body.source_text ? String(body.source_text).slice(0, 2000) : null,
-      verdict: body.verdict ? JSON.stringify(body.verdict) : null,
-      results: body.results ? JSON.stringify(body.results) : null,
+      verdict: body.verdict || null,
+      results: body.results || null,
       mode: body.mode || 'llm',
       lang: body.lang === 'zh' ? 'zh' : 'en',
       pinned: !!body.pinned
