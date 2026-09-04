@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>观点理论支持检测</title>
+<title>心理学硕博小助手</title>
 <style>
   :root {
     --bg-top: #F2EDE4;
@@ -568,20 +568,111 @@
 
   footer { text-align: center; font-size: 12px; color: var(--comment); margin-top: 30px; font-style: italic; }
 
+  /* ==================== v2.0 平级导航与应用外壳 ==================== */
+  [hidden] { display: none !important; }
+
+  .top-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 24px;
+    padding: 9px 10px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0) 45%),
+      repeating-linear-gradient(90deg, rgba(90,70,30,.06) 0 3px, transparent 3px 8px),
+      linear-gradient(180deg, #D8CDAF, #C6B894);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.75), inset 0 -1px 0 rgba(0,0,0,.1), 0 3px 8px rgba(69,58,40,.2);
+  }
+  .nav-tab {
+    border: 1px solid #8F8366;
+    border-radius: 9px;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #6B5D43;
+    background: linear-gradient(180deg, #F6F0E2, #E4DAC2);
+    box-shadow: 0 2px 4px rgba(69,58,40,.22), inset 0 1px 0 rgba(255,255,255,.85);
+    cursor: pointer;
+    transition: all .12s;
+    text-align: center;
+  }
+  .nav-tab:hover { color: var(--brown-dark); background: linear-gradient(180deg, #FBF6EA, #EBE0C9); }
+  .nav-tab:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
+  .nav-tab.active {
+    color: #FFF6E0;
+    text-shadow: 0 -1px 0 rgba(0,0,0,.4);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 50%),
+      linear-gradient(180deg, #C99A3E, #A87A22 55%, #8A5E14);
+    border-color: #7A5C22;
+    box-shadow: 0 3px 6px rgba(69,58,40,.35), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 3px rgba(0,0,0,.25);
+  }
+  .nav-tab.disabled {
+    cursor: default;
+    color: #A99F8A;
+    background: rgba(255,255,255,.35);
+    border-style: dashed;
+    box-shadow: none;
+    pointer-events: none;
+  }
+  .app-view { position: relative; }
+
+  /* 占位视图 */
+  .placeholder-card { text-align: center; padding: 30px 18px 14px; }
+  .placeholder-card .placeholder-icon { font-size: 34px; color: var(--gold-deep); margin-bottom: 8px; font-weight: 700; }
+  .placeholder-card h3 {
+    display: inline-block;
+    font-size: 15px;
+    color: #FFF6E0;
+    text-shadow: 0 -1px 0 rgba(0,0,0,.35);
+    background: linear-gradient(180deg, #B99A4E, #8F6A1E);
+    border-radius: 7px;
+    padding: 3px 12px;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .placeholder-card p { color: var(--brown-mid); font-size: 14px; max-width: 620px; margin: 0 auto 16px; font-style: italic; }
+  .placeholder-card ul {
+    list-style: none;
+    display: inline-block;
+    text-align: left;
+    color: var(--brown-dark);
+    font-size: 13.5px;
+    line-height: 2;
+    background: rgba(255,255,255,.35);
+    border: 1px solid rgba(160,152,128,.4);
+    border-radius: 10px;
+    padding: 10px 22px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .placeholder-card ul li::before { content: '▸ '; color: var(--gold-deep); font-weight: 700; }
+
+  footer { text-align: center; font-size: 12px; color: var(--comment); margin-top: 30px; font-style: italic; }
+
   @media (max-width: 600px) {
     .container { padding: 18px 12px 44px; }
     header h1 { font-size: 21px; padding: 12px 22px; }
     .actions { flex-direction: column; align-items: stretch; }
     #checkBtn, #distillBtn, #clearBtn, #directBtn, #distillRetry, #distillGo { width: 100%; text-align: center; }
     .win-body { padding: 14px; }
+    .top-nav { gap: 6px; padding: 8px; margin-bottom: 18px; }
+    .nav-tab { flex: 1 1 auto; min-width: 0; padding: 8px 6px; font-size: 13px; letter-spacing: 0; }
+    .nav-tab.disabled { display: none; }
+    .placeholder-card { padding: 22px 10px 10px; }
   }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>观点理论支持检测</h1>
-    <p>输入你的观点，AI 先理解语义并判断是否存在学术支持，再检索学术文献给出信源（1~10 条）</p>
+    <h1>心理学硕博小助手</h1>
+    <p>论文小助手 · 统计学工具 · 信源查询 —— 心理学硕博生的一站式学术工具箱</p>
     <div class="slogan">妈妈再也不用担心我胡说八道了！</div>
   </header>
 
@@ -597,6 +688,17 @@
       <div id="noticeHistory" class="notice-history"></div>
     </div>
   </div>
+
+  <!-- 顶部平级导航（SPA 瞬时切换，无页面跳转、无子菜单） -->
+  <nav class="top-nav" id="topNav" aria-label="工具导航">
+    <button type="button" class="nav-tab" data-tool="paper" title="论文小助手：精选论文 / 观点墙与论文辅助">论文小助手</button>
+    <button type="button" class="nav-tab" data-tool="stats" title="统计学工具：描述统计 / t 检验 / 卡方 / 相关分析">统计学工具</button>
+    <button type="button" class="nav-tab" data-tool="source" title="信源查询：观点理论支持检测与分级信源">信源查询</button>
+    <span class="nav-tab disabled" title="更多平级工具开发中，敬请期待">＋ 更多（预留）</span>
+  </nav>
+
+  <!-- 1.3 信源查询视图（当前默认工具，收纳原观点检测全流程） -->
+  <section id="view-source" class="app-view" data-view="source">
 
   <!-- 输入区 -->
   <div class="win">
@@ -677,8 +779,10 @@
     </div>
   </div>
 
-  <footer>数据来源：AI 模型语义判断 + OpenAlex / Semantic Scholar / Crossref API · 中文文献经 OpenAlex 中文索引检索 · 仅供学术参考，不构成权威背书</footer>
+  </section>
 
+  <!-- 1.1 论文小助手视图：精选论文 / 观点墙 -->
+  <section id="view-paper" class="app-view" data-view="paper" hidden>
   <!-- 精选观点展示墙 -->
   <div id="featured" class="win">
     <div class="win-titlebar">
@@ -695,6 +799,34 @@
       <div id="featuredList"><div class="featured-loading">加载中…</div></div>
     </div>
   </div>
+  </section>
+
+  <!-- 1.2 统计学工具视图：v2.0 占位（开发中，预留入口） -->
+  <section id="view-stats" class="app-view" data-view="stats" hidden>
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">统计学工具</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">统计学工具开发中</span></div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">∑</div>
+          <h3>即将上线</h3>
+          <p>浏览器本地计算的心理学统计小工具：描述统计 / t 检验 / 卡方 / 相关分析。零外链、数据不出本机，结果按 APA 格式输出。</p>
+          <ul>
+            <li>描述统计（n / M / SD / 中位数 / 偏度 / 峰度）</li>
+            <li>独立样本 t 检验 + Cohen's d（Welch）</li>
+            <li>配对样本 t 检验 + Cohen's dz</li>
+            <li>卡方检验（含 2×2 Yates 校正）</li>
+            <li>相关分析（Pearson r / Spearman rho）</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>心理学硕博小助手 · 数据来源：AI 模型语义判断 + OpenAlex / Semantic Scholar / Crossref API · 中文文献经 OpenAlex 中文索引检索 · 仅供学术参考，不构成权威背书</footer>
 </div>
 
 <!-- 管理密钥弹窗 -->
@@ -713,6 +845,57 @@
 <script>
 (function () {
   'use strict';
+
+  // ==================== v2.0 应用外壳：顶部平级导航与 hash 路由（SPA 单页瞬时切换） ====================
+  var TOOLS = [
+    { id: 'paper',  hash: '#/tools/paper',  label: '论文小助手' },
+    { id: 'stats',  hash: '#/tools/stats',  label: '统计学工具' },
+    { id: 'source', hash: '#/tools/source', label: '信源查询' }
+  ];
+  var DEFAULT_TOOL = 'source';
+  var topNav = document.getElementById('topNav');
+
+  function isValidTool(id) {
+    return TOOLS.some(function (t) { return t.id === id; });
+  }
+  function toolMeta(id) {
+    return TOOLS.filter(function (t) { return t.id === id; })[0];
+  }
+  function toolFromHash() {
+    var m = (location.hash || '').match(/^#\/tools\/([A-Za-z0-9_-]+)/);
+    return (m && isValidTool(m[1])) ? m[1] : DEFAULT_TOOL;
+  }
+  function applyTool(id) {
+    if (!isValidTool(id)) id = DEFAULT_TOOL;
+    var meta = toolMeta(id);
+    TOOLS.forEach(function (t) {
+      var sec = document.getElementById('view-' + t.id);
+      var tab = topNav.querySelector('.nav-tab[data-tool="' + t.id + '"]');
+      var on = t.id === id;
+      if (sec) sec.hidden = !on;
+      if (tab) tab.classList.toggle('active', on);
+    });
+    document.title = meta.label + ' · 心理学硕博小助手';
+  }
+  topNav.addEventListener('click', function (e) {
+    var tab = e.target.closest('.nav-tab[data-tool]');
+    if (!tab || !isValidTool(tab.getAttribute('data-tool'))) return;
+    var target = toolMeta(tab.getAttribute('data-tool'));
+    if (location.hash === target.hash) { applyTool(target.id); return; }
+    location.hash = target.hash;
+  });
+  window.addEventListener('hashchange', function () {
+    applyTool(toolFromHash());
+  });
+  // 首启：地址栏 hash 为空或非法时归一化到默认工具（replaceState 不产生多余历史）
+  (function initShell() {
+    var cur = (location.hash || '').match(/^#\/tools\/([A-Za-z0-9_-]+)/);
+    var first = (cur && isValidTool(cur[1])) ? cur[1] : DEFAULT_TOOL;
+    applyTool(first);
+    if (!cur || cur[1] !== first) {
+      try { history.replaceState(null, '', toolMeta(first).hash); } catch (err) { location.hash = toolMeta(first).hash; }
+    }
+  })();
 
   // ==================== 富文本工具栏 ====================
   var toolbar = document.getElementById('toolbar');
@@ -865,6 +1048,16 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.0',
+      date: '2026-09-04',
+      changes: [
+        { type: 'add', text: '升级为「心理学硕博小助手」学术工具合集：网页总入口 + 顶部平级导航，SPA 单页瞬时切换（hash 路由，无页面跳转、无子菜单）' },
+        { type: 'add', text: '新增平级工具位：论文小助手（精选论文 / 观点墙）与统计学工具（开发中占位）' },
+        { type: 'add', text: '原观点理论支持检测完整收纳为平级工具「信源查询」（#/tools/source），功能保持不变' },
+        { type: 'add', text: '预留平级扩展位：后续更多学术工具沿导航继续追加' }
+      ]
+    },
     {
       version: 'v1.7',
       date: '2026-08-29',
