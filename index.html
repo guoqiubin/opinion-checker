@@ -714,6 +714,10 @@
     <button type="button" class="nav-tab" data-tool="paper" title="论文小助手：精选论文 / 观点墙与论文辅助">论文小助手</button>
     <button type="button" class="nav-tab" data-tool="stats" title="统计学工具：描述统计 / t 检验 / 卡方 / 相关分析">统计学工具</button>
     <button type="button" class="nav-tab" data-tool="source" title="信源查询：观点理论支持检测与分级信源">信源查询</button>
+    <button type="button" class="nav-tab" data-tool="defense" title="答辩助手（规划中，敬请期待）">答辩助手</button>
+    <button type="button" class="nav-tab" data-tool="resume" title="智能简历（规划中，敬请期待）">智能简历</button>
+    <button type="button" class="nav-tab" data-tool="campus" title="校招助手（规划中，敬请期待）">校招助手</button>
+    <button type="button" class="nav-tab" data-tool="cscsrv" title="中留服助手（规划中，敬请期待）">中留服助手</button>
     <span class="nav-tab disabled" title="更多平级工具开发中，敬请期待">＋ 更多（预留）</span>
   </nav>
 
@@ -869,6 +873,78 @@
     </div>
   </section>
 
+  <!-- 1.4 答辩助手视图：占位（开发中，敬请期待） -->
+  <section id="view-defense" class="app-view" data-view="defense" hidden>
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">答辩助手</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">答辩助手开发中</span></div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">◈</div>
+          <h3>敬请期待</h3>
+          <p>围绕论文 / 学位答辩场景的实用功能正在规划中，暂未开放。功能确定后将在本模块提供入口。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.5 智能简历视图：占位（开发中，敬请期待） -->
+  <section id="view-resume" class="app-view" data-view="resume" hidden>
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">智能简历</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">智能简历开发中</span></div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">❏</div>
+          <h3>敬请期待</h3>
+          <p>面向简历制作与优化场景的智能辅助正在规划中，暂未开放。功能确定后将在本模块提供入口。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.6 校招助手视图：占位（开发中，敬请期待） -->
+  <section id="view-campus" class="app-view" data-view="campus" hidden>
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">校招助手</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">校招助手开发中</span></div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">◎</div>
+          <h3>敬请期待</h3>
+          <p>围绕校园招聘场景的实用功能正在规划中，暂未开放。功能确定后将在本模块提供入口。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1.7 中留服助手视图：占位（开发中，敬请期待） -->
+  <section id="view-cscsrv" class="app-view" data-view="cscsrv" hidden>
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">中留服助手</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">中留服助手开发中</span></div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">✈</div>
+          <h3>敬请期待</h3>
+          <p>围绕中留服（学历学位认证 / 留学服务）相关场景的实用功能正在规划中，暂未开放。功能确定后将在本模块提供入口。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer>心理学硕博小助手 · 数据来源：AI 模型语义判断 + OpenAlex / Semantic Scholar / Crossref API · 中文文献经 OpenAlex 中文索引检索 · 仅供学术参考，不构成权威背书</footer>
 </div>
 
@@ -893,7 +969,11 @@
   var TOOLS = [
     { id: 'paper',  hash: '#/tools/paper',  label: '论文小助手' },
     { id: 'stats',  hash: '#/tools/stats',  label: '统计学工具' },
-    { id: 'source', hash: '#/tools/source', label: '信源查询' }
+    { id: 'source', hash: '#/tools/source', label: '信源查询' },
+    { id: 'defense', hash: '#/tools/defense', label: '答辩助手' },
+    { id: 'resume',  hash: '#/tools/resume',  label: '智能简历' },
+    { id: 'campus',  hash: '#/tools/campus',  label: '校招助手' },
+    { id: 'cscsrv',  hash: '#/tools/cscsrv',  label: '中留服助手' }
   ];
   var DEFAULT_TOOL = 'source';
   var topNav = document.getElementById('topNav');
