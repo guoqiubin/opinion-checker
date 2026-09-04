@@ -45,6 +45,18 @@
 
   /* 顶部标题 = 木质铭牌 */
   header { text-align: center; margin-bottom: 28px; }
+  header .brand { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  /* v2.0 logo：用户头像缩至 96x96 内嵌，圆形小图标置于标题前 */
+  .brand-logo {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #8A5E14;
+    background: #E6DECC;
+    box-shadow: 0 4px 10px rgba(69,58,40,.4), inset 0 0 0 2px rgba(255,255,255,.25);
+  }
   header h1 {
     display: inline-block;
     font-size: 28px;
@@ -62,9 +74,13 @@
     box-shadow: 0 6px 14px rgba(69,58,40,.45), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 4px rgba(0,0,0,.35);
   }
   header p { color: var(--brown-mid); font-size: 14px; margin-top: 14px; font-style: italic; }
-  header .slogan {
-    display: inline-block;
-    margin-top: 16px;
+  /* slogan 铭牌：v2.0 起仅存在于信源查询视图内（输入区上方），保留原视觉 */
+  .slogan {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto 18px;
+    text-align: center;
     font-size: 15px;
     font-weight: 700;
     font-style: italic;
@@ -658,6 +674,8 @@
   @media (max-width: 600px) {
     .container { padding: 18px 12px 44px; }
     header h1 { font-size: 21px; padding: 12px 22px; }
+    .brand-logo { width: 56px; height: 56px; }
+    header .brand { gap: 10px; }
     .actions { flex-direction: column; align-items: stretch; }
     #checkBtn, #distillBtn, #clearBtn, #directBtn, #distillRetry, #distillGo { width: 100%; text-align: center; }
     .win-body { padding: 14px; }
@@ -671,9 +689,11 @@
 <body>
 <div class="container">
   <header>
-    <h1>心理学硕博小助手</h1>
+    <div class="brand">
+      <img class="brand-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wgARCABgAGADASIAAhEBAxEB/8QAGwAAAgMBAQEAAAAAAAAAAAAAAwQCBQYBAAf/xAAYAQADAQEAAAAAAAAAAAAAAAAAAQQCA//aAAwDAQACEAMQAAABmXxdLk+5sdhnqkeXaaHFeD6bCqumLBaE0UsCirMBv8HnV1d6G2jqx1btFt6yeobWolAJgO8EJGYp5HXn5diKPy4UUK131lW4NrvMqIwunKc4EHN5GWduMIFnoPWuZ9dbKax6IxDKLfORBzFPsejZ7ByStZNtBaL3sa44DIJqUhkFO360EVLDvLtlZWYs6cq9BPvPlB2NaP8A/8QAIxAAAQQCAQQDAQAAAAAAAAAAAQACAwQFERIQEyAhIjIzIv/aAAgBAQABBQIBALS0rWQjrp+TtlNylndbINkWlpEIhDrYzHAukc57ncunthxtgyRkIooILJSdus/7VMdLYjiwSlxERHxLdugfRsFFFBBZOIyVmMMrsdoVt+ngrQabTYblRFFBBa2KdbhJDGGR2eTFDN3X3P6lxELXEooodAhVi41vzmrxvFaqxklmsJHU5+Ms36I+EJ2fbU082aIU80wVerxc/wCyPizSi1G+UyE22zE02ujJRRQ8IvZdzjQnYrFlu45ZHxoo+MX2kOhprl2Gx2j1PhXrBGsApE6Qxugd3LD6oe18b4+h6D2oK4Ymnk0PTi14kqRuMVMRTNeAn8VZr9pFf//EAB4RAAIBBAMBAAAAAAAAAAAAAAABAgMQESATITES/9oACAEDAQE/AdGrojBDiid6UM9jGVF3eE/lnL4JZKmlOPQxvOkarXpyK/8A/8QAHxEAAgICAgMBAAAAAAAAAAAAAAECEAMRIDESEyJB/9oACAECAQE/Aa3SdsyZZLpCkyF5HoQuyDuUfIel8iIcMj3IQlrg8S/D1u//xAAwEAABAwEFBgQGAwAAAAAAAAABAAIRIQMSIDEBEyEiUWFxBDAyQiMzUnKBkYKhsf/aAAgBAQAGPwLBdAvPXrDewXzf6UPI746qLNsovdUlQsoUtW7fmMX3GNgdFCptHfpcMhBNDsj6TikeyuxreW0FFoc0uszeHTFByKtGn2vhCFed4rcjsmtbbOeDzT7J96GiYbqnEeHuBw55d8d40e/km3s0bzQZEVV6MslvBR4FOvRAjVOjnizqERtAaGh/+Jz7wNchojjrrmiwCBogLO7+VdNo7+ITnbx72ke7yLp1X1BVMd0Gtqei4xHkTsqFZubQz5E2gqdF8P8ASgrogg+zpOi4hGGXepRqFXNcQlSLy3jS7tCDVBFFebVh2f/EACMQAQACAgICAgMBAQEAAAAAAAAAEAESExQxUWFxgZGhscHR4fH/2gAIAQEAAT8h8AQQiq9XAfcuGl0QmSTsfyK9Lp+4w+RCBMAuAcwFEOBXmbmwdRSU3zFOMXuYq1W4eycS+vAIIIJbh/LubILfQYmgHpCVqP8AY0xbbmWPY+0/pBBBB4K8qsepXT3Ki1qIwCGzLF43DUMqc+0SCDyUbiKYZ/LQSbxmn0hkxsgCO5FQ+8XWX05N34oKx+APBCKnS7IS1ejMbs6KckoDhrpLG26tDcAf9WU9a0fAhCUmAVZ3KUuTiVl0zJavr3KXrm+Qcfcak2VFRkncfAhCDUFHJFynFA3HzUL4ifJctf1c2Fp5/iB5ovAah5DtOZd5XrCPyBrKAi+a3HyEIS4LHaahZQwPzExnqRWxY+AwYZgeQGH6noFbwYQp7lQW4N/rBHAxXbiMU/bUXwIFAFsI3jHU5tXGzBoNSgB8pcL/ALmGl+qBBwYqNFZWmXRLGOuop//aAAwDAQACAAMAAAAQR4etiYJKGQ6k1e29zz8AX8JgleBI6kbRYZN0/8QAHBEBAAIDAQEBAAAAAAAAAAAAAQARECFBIVEx/9oACAEDAQE/EMBO0koaztKJKf5FeUb8QaCCioRQylxHUVp724heRNg+ECMTxli3x9RF+xcf/8QAGxEAAgMBAQEAAAAAAAAAAAAAAAEQETFBIVH/2gAIAQIBAT8QLGLLFP2duZ0MxK0o3cFylSUMltpsXWhyllCoqVLHPfAk8Fcf/8QAJBABAAICAQQCAwEBAAAAAAAAAQARITFBEFFhgXGRobHB0eH/2gAIAQEAAT8Q64Xs0bAbLz/iMiPmjB7bYZzLKgPW0EF2gGQ+Gj1LslTxTDqCjjr4PQJU4AOZZdaiK9/BMsvbmxL2h8ZdnknePS/7wdv9gofgvn/kch2dvs+ZR1eupojLkQScbfpXuFtWrbC9HEdcXWY9wANRdFb7ltGKRz8vEC8dAGn1L+TYNZjD8hfhOpbpogh/ZR3UzKDry8Ql4QYiLzcXQiLoiuat6SqjCzU19hZs6kPEGonwUF3Epmc2BeQyfhGEyYCzhQcnwl391K/amcV3oaZfAI7c7QK4go11HloCVa1dl/mXVbGmC4YOkZlWBrDhGs6MX4jpFAnyiKZs1kuviwfUAUsZVA0AcARhl+2BlvkpPJDUAyjmAiM2Phb6c7hxDFUR4kClgfEpYWKHAjmZ/o7N1GpEJzr7QxuSlVGzSWC9R5cJAlug4PEWa2/3DuYdNeh1YozazQNd6/stOoZsN7qHAi7aAPWVlyABowXdOEWuEhKpoU3MrmBBfUIMWQGI/MVpS0lA+OZjvZj8x08oMj6JfXmGUq5TiLMcUeoouhuIKHmGK+AFxxzvZFmBLSrAZYPducEcWHrBUBldEMpM6YLm+/6iV22K5Ph5jjAOBSS/5sDWSL5HXc5d/gg0VY1nsPEzs2tl8PWOMURoDawtWsTx/wBxWdh5LjtAbCx7HiUzHhk+GGQgbAon3AmPNIgnm7/kraDBa6CLxPnKMdwok5X3fx6H/9k=" alt="心理学硕博小助手 logo">
+      <h1>心理学硕博小助手</h1>
+    </div>
     <p>论文小助手 · 统计学工具 · 信源查询 —— 心理学硕博生的一站式学术工具箱</p>
-    <div class="slogan">妈妈再也不用担心我胡说八道了！</div>
   </header>
 
   <!-- 更新公告 -->
@@ -699,6 +719,9 @@
 
   <!-- 1.3 信源查询视图（当前默认工具，收纳原观点检测全流程） -->
   <section id="view-source" class="app-view" data-view="source">
+
+  <!-- slogan 铭牌（v2.0：从首页顶部移入信源查询模块，仅本视图可见） -->
+  <div class="slogan">妈妈再也不用担心我胡说八道了！</div>
 
   <!-- 输入区 -->
   <div class="win">
@@ -779,19 +802,15 @@
     </div>
   </div>
 
-  </section>
-
-  <!-- 1.1 论文小助手视图：精选论文 / 观点墙 -->
-  <section id="view-paper" class="app-view" data-view="paper" hidden>
-  <!-- 精选观点展示墙 -->
+  <!-- 精选分享（原论文小助手「精选观点墙」整体迁入信源查询模块，管理模式/分享功能原样可用） -->
   <div id="featured" class="win">
     <div class="win-titlebar">
       <span class="win-dots"><i></i><i></i><i></i></span>
-      <span class="win-title">精选观点</span>
+      <span class="win-title">精选分享</span>
     </div>
     <div class="win-body">
       <div class="featured-head">
-        <h2>精选观点</h2>
+        <h2>精选分享</h2>
         <div class="featured-tools">
           <button type="button" id="featuredManageBtn" class="featured-btn">管理模式</button>
         </div>
@@ -799,6 +818,30 @@
       <div id="featuredList"><div class="featured-loading">加载中…</div></div>
     </div>
   </div>
+
+  </section>
+
+  <!-- 1.1 论文小助手视图：v2.0 占位（开发中，预留入口；原精选观点墙已移入信源查询模块） -->
+  <section id="view-paper" class="app-view" data-view="paper" hidden>
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">论文小助手</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">论文小助手开发中</span></div>
+        <div class="placeholder-card">
+          <div class="placeholder-icon">✎</div>
+          <h3>即将上线</h3>
+          <p>面向心理学硕博生的论文阅读与观点精选辅助工具，正在规划中。零外链、数据不出本机。</p>
+          <ul>
+            <li>论文速读：自动提取摘要 / 方法 / 结论</li>
+            <li>论文观点精选：精选高质量论文与观点解读（规划中）</li>
+            <li>与信源查询联动：论文中的观点可直接发起信源支撑检测</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 1.2 统计学工具视图：v2.0 占位（开发中，预留入口） -->
