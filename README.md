@@ -17,6 +17,9 @@
   - 二级 · 期刊：正规学术期刊或知名出版社（Elsevier / Springer / Wiley / APA 等）
   - 三级 · 其他：预印本 / 无期刊归属来源
 - 信源按等级优先 + 引用数排序，支持跳转原文 / DOI / Google Scholar
+- 精选观点墙：站长可把优质「观点 + 判定 + 信源」收录为精选，访客按支持度浏览查看原始结论与来源
+- 答辩助手（v1）：中文答辩陈述 → AI 中译英（正式学术/答辩语气，≤600 字，含术语/句式译文说明）
+- 中英精选墙：站长将满意的中英双译收藏展示，双语对照供访客学习参考
 - 拟物（Skeuomorphism）风格 UI：皮革 / 金属质感、3D 凸起按钮、高光反射
 - 更新公告栏：内置版本历史记录
 
@@ -34,7 +37,10 @@ opinion-checker/
 ├── index.html          # 前端单文件（含样式、交互、公告栏）
 ├── api/
 │   ├── check.js        # Vercel Serverless 函数：LLM 判断 + 学术检索
-│   └── distill.js      # Vercel Serverless 函数：AI 观点提炼
+│   ├── distill.js      # Vercel Serverless 函数：AI 观点提炼
+│   ├── translate.js    # Vercel Serverless 函数：答辩助手 AI 中译英
+│   ├── featured.js     # Vercel Serverless 函数：精选观点墙读写（Supabase）
+│   └── def-fav.js      # Vercel Serverless 函数：中英精选墙读写（Supabase）
 ├── package.json        # 项目配置与脚本
 └── README.md
 ```
@@ -55,11 +61,14 @@ vercel --prod    # 部署生产环境
 
 | 变量名 | 必填 | 说明 |
 |---|---|---|
-| `DEEPSEEK_API_KEY` | 是 | DeepSeek 平台创建的 API Key（platform.deepseek.com → API keys） |
+| `DEEPSEEK_API_KEY` | 是 | DeepSeek 平台创建的 API Key（platform.deepseek.com → API keys），检测/提炼/翻译共用 |
 | `LLM_API_URL` | 否 | 默认 `https://api.deepseek.com/v1/chat/completions` |
 | `DEEPSEEK_MODEL` | 否 | 默认 `deepseek-chat` |
+| `SUPABASE_URL` | 精选墙功能需要 | Supabase 项目 URL，精选观点墙 / 中英精选墙读写依赖 |
+| `SUPABASE_SERVICE_KEY` | 精选墙功能需要 | Supabase 服务端密钥（service_role），仅存服务端，前端不接触 |
+| `FEATURED_MANAGE_KEY` | 精选墙功能需要 | 站长管理密钥，前端弹窗输入后存 localStorage，收藏 / 删除时经 `X-Manage-Key` 请求头校验 |
 
-密钥仅存于服务端环境变量，前端不包含任何模型设置区与密钥逻辑，访客零配置。
+模型密钥仅存于服务端环境变量，前端不包含任何模型设置区与密钥逻辑，访客零配置；站长管理密钥由站长主动输入并仅存本机 localStorage，用于精选内容收藏 / 删除。
 
 ### 3. 本地开发
 
@@ -131,6 +140,43 @@ vercel dev    # 本地启动，访问 http://localhost:3000
 
 - 未配置 `DEEPSEEK_API_KEY` 时自动降级为关键词检索模式（mode=keyword），准确率较低
 - 学术检索链路：OpenAlex 失败时自动降级 Semantic Scholar，再降级 Crossref
+
+`POST /api/translate`（答辩助手中译英，≤600 字）
+
+请求：
+
+```json
+{ "text": "感谢各位老师的提问。本研究的主要贡献在于提出了一种面向低资源场景的轻量级评测方法。" }
+```
+
+响应：
+
+```json
+{
+  "ok": true,
+  "translation": "Thank you for your questions. The main contribution of this study is proposing a lightweight evaluation method for low-resource scenarios.",
+  "notes": "\"低资源\"译为 low-resource 为该领域通用术语；句式改为英语答辩常用的正式书面表达。"
+}
+```
+
+- 与提炼/检测共用同一套 DeepSeek 服务端配置；未配置 `DEEPSEEK_API_KEY` 时返回 503 并提示站长启用
+
+`GET /api/def-fav`（中英精选墙公开读，按收藏时间倒序）
+
+```json
+{ "items": [ { "id": 1, "zh": "……", "en": "……", "notes": "……", "created_at": "2026-09-05T…" } ], "limit": 20, "offset": 0 }
+```
+
+`POST /api/def-fav`（站长收藏中英双译；请求头 `X-Manage-Key` 携带管理密钥，`crypto.timingSafeEqual` 服务端比对）
+
+```json
+{ "zh": "中文原句", "en": "英文译文", "notes": "可选译文说明" }
+```
+
+`DELETE /api/def-fav?id=1`（站长删除对应收藏）
+
+- 精选观点墙 `featured.js` 与中英精选墙 `def-fav.js` 同构：Supabase REST 直连 + 管理密钥 `timingSafeEqual` 校验，表结构不同（`featured_views` / `defense_favorites`）
+- 新表需先在 Supabase SQL Editor 手动执行建表 SQL（`defense_favorites` 字段：`zh` / `en` / `notes` / `status` / `created_at`），具体建表语句见《答辩助手v1实施方案.md》
 
 ## 免责声明
 

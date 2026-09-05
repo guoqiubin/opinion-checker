@@ -684,6 +684,95 @@
     .nav-tab.disabled { display: none; }
     .placeholder-card { padding: 22px 10px 10px; }
   }
+
+  /* ==================== 答辩助手 v1：中译英 + 中英精选墙 ==================== */
+  /* 编辑区 = 纸张内凹（仿信源模块 #editor 视觉，独立 id 防冲突） */
+  #defEditor {
+    min-height: 170px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 16px;
+    border: 1px solid #B5A98E;
+    border-radius: 0 0 8px 8px;
+    font-size: 15px;
+    outline: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(176,120,32,.025) 0 1px, transparent 1px 24px),
+      var(--paper);
+    caret-color: var(--gold-deep);
+    color: var(--brown-dark);
+    font-family: inherit;
+    box-shadow: inset 0 3px 8px rgba(69,58,40,.22), inset 0 1px 2px rgba(69,58,40,.15);
+    line-height: 1.8;
+  }
+  #defEditor:focus { border-color: var(--gold); box-shadow: inset 0 3px 8px rgba(69,58,40,.22), 0 0 0 3px rgba(176,120,32,.22); }
+  #defEditor:empty::before { content: attr(data-placeholder); color: #B3A88F; font-style: italic; }
+  #defEditor ul, #defEditor ol { padding-left: 26px; margin: 6px 0; }
+  #defEditor blockquote { border-left: 3px solid var(--gold); padding-left: 12px; color: var(--brown-mid); margin: 8px 0; font-style: italic; }
+  #defEditor b, #defEditor strong { color: var(--brown-dark); }
+
+  /* 译文结果区 */
+  #defResult { display: none; margin-bottom: 18px; }
+  #defResult.show { display: block; }
+  .def-zh-quote {
+    font-size: 13px; color: var(--comment); background: rgba(176,120,32,.07);
+    border-left: 3px solid var(--border); padding: 10px 14px; border-radius: 0 8px 8px 0;
+    margin-bottom: 12px; line-height: 1.7;
+  }
+  .def-zh-quote::before { content: '原文（中文）'; display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+  .def-en-text {
+    font-size: 17px; line-height: 1.9; color: var(--brown-dark); font-weight: 600;
+    background: #F4ECDB; border: 1px solid #D8C79E; border-radius: 10px; padding: 16px 18px;
+    box-shadow: inset 0 1px 3px rgba(69,58,40,.1);
+  }
+  .def-en-text::before { content: '英文译文'; display: block; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--gold-deep); margin-bottom: 8px; }
+  .def-notes { font-size: 12px; color: var(--brown-mid); font-style: italic; margin-top: 10px; }
+
+  /* 答辩助手主/次按钮（拟物，独立类避免改动既有按钮规则） */
+  .def-primary-btn {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 50%),
+      linear-gradient(180deg, var(--gold-light), var(--gold) 55%, var(--gold-deep));
+    color: #FFF6E0;
+    border: 1px solid #7A5C22;
+    border-radius: 10px;
+    padding: 11px 26px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 -1px 1px rgba(0,0,0,.45);
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(69,58,40,.4), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3);
+    transition: all .12s;
+  }
+  .def-primary-btn:hover { filter: brightness(1.06); box-shadow: 0 5px 10px rgba(69,58,40,.45), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3); }
+  .def-primary-btn:active {
+    box-shadow: inset 0 3px 6px rgba(0,0,0,.4), inset 0 -1px 0 rgba(255,255,255,.2);
+    transform: translateY(2px);
+  }
+  .def-primary-btn:disabled { opacity: .55; cursor: not-allowed; }
+  .def-secondary-btn {
+    background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
+    color: var(--brown-mid);
+    border: 1px solid #9A8F77;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(69,58,40,.25), inset 0 1px 0 rgba(255,255,255,.8);
+    transition: all .12s;
+  }
+  .def-secondary-btn:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
+  .def-secondary-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
+
+  /* 中英精选墙卡片 */
+  .def-fav-card { background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(120,90,30,.08); }
+  .def-fav-card .fav-zh { font-size: 14px; line-height: 1.7; color: var(--brown-mid); margin-bottom: 8px; }
+  .def-fav-card .fav-en { font-size: 15px; line-height: 1.8; color: var(--brown-dark); font-weight: 600; border-left: 3px solid var(--gold-deep); padding-left: 12px; }
+  .def-fav-card .fav-notes { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -714,7 +803,7 @@
     <button type="button" class="nav-tab" data-tool="paper" title="论文小助手：精选论文 / 观点墙与论文辅助">论文小助手</button>
     <button type="button" class="nav-tab" data-tool="stats" title="统计学工具：描述统计 / t 检验 / 卡方 / 相关分析">统计学工具</button>
     <button type="button" class="nav-tab" data-tool="source" title="信源查询：观点理论支持检测与分级信源">信源查询</button>
-    <button type="button" class="nav-tab" data-tool="defense" title="答辩助手（规划中，敬请期待）">答辩助手</button>
+    <button type="button" class="nav-tab" data-tool="defense" title="答辩助手：中文答辩陈述一键译英并收藏精选">答辩助手</button>
     <button type="button" class="nav-tab" data-tool="resume" title="智能简历（规划中，敬请期待）">智能简历</button>
     <button type="button" class="nav-tab" data-tool="campus" title="校招助手（规划中，敬请期待）">校招助手</button>
     <button type="button" class="nav-tab" data-tool="cscsrv" title="中留服助手（规划中，敬请期待）">中留服助手</button>
@@ -873,22 +962,71 @@
     </div>
   </section>
 
-  <!-- 1.4 答辩助手视图：占位（开发中，敬请期待） -->
+  <!-- 1.4 答辩助手视图：v1（中文→英文翻译 + 站长收藏 + 中英精选墙） -->
   <section id="view-defense" class="app-view" data-view="defense" hidden>
+
+    <!-- 输入区 -->
     <div class="win">
       <div class="win-titlebar">
         <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-title">答辩助手</span>
+        <span class="win-title">中文答辩陈述</span>
       </div>
       <div class="win-body">
-        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">答辩助手开发中</span></div>
-        <div class="placeholder-card">
-          <div class="placeholder-icon">◈</div>
-          <h3>敬请期待</h3>
-          <p>围绕论文 / 学位答辩场景的实用功能正在规划中，暂未开放。功能确定后将在本模块提供入口。</p>
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">输入你的中文回答，一键译为正式英文（≤600 字）</span></div>
+        <div class="toolbar" id="defToolbar">
+          <button type="button" data-cmd="bold" title="加粗"><b>B</b></button>
+          <button type="button" data-cmd="italic" title="斜体"><i>I</i></button>
+          <button type="button" data-cmd="underline" title="下划线"><u>U</u></button>
+          <span class="sep"></span>
+          <button type="button" data-cmd="insertUnorderedList" title="无序列表">• 列表</button>
+          <button type="button" data-cmd="insertOrderedList" title="有序列表">1. 列表</button>
+          <span class="sep"></span>
+          <button type="button" data-cmd="removeFormat" title="清除格式">清除格式</button>
         </div>
+        <div id="defEditor" contenteditable="true" data-placeholder="在此输入你的中文答辩陈述或想翻译的句子，例如：感谢各位老师的提问，我的研究主要关注……"></div>
+        <div class="char-count" id="defCharCount">0 / 600</div>
+        <div class="actions">
+          <button id="defTranslateBtn" class="def-primary-btn">提交翻译</button>
+          <button id="defClearBtn" class="def-secondary-btn">清空</button>
+        </div>
+        <div class="hint">流程：输入中文（≤600 字）→「提交翻译」输出英文答辩表达，支持 Ctrl/Cmd+Enter 快捷翻译。站长可将满意的句子「收藏这句」，中英双译将展示在本模块下方的「中英精选墙」。</div>
       </div>
     </div>
+
+    <!-- 译文结果 -->
+    <div id="defResult" class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">英译结果</span>
+      </div>
+      <div class="win-body">
+        <div class="def-zh-quote" id="defResultZh"></div>
+        <div class="def-en-text" id="defResultEn"></div>
+        <div class="def-notes" id="defNotes" style="display:none"></div>
+        <div class="actions">
+          <button id="favBtn" class="featured-btn">收藏这句</button>
+        </div>
+        <div class="hint">仅站长可收藏：点击后输入管理密钥即可将中英双译收录到下方「中英精选墙」，所有访客可见。</div>
+      </div>
+    </div>
+
+    <!-- 中英精选墙 -->
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">中英精选墙</span>
+      </div>
+      <div class="win-body">
+        <div class="featured-head">
+          <h2>中英精选墙</h2>
+          <div class="featured-tools">
+            <button type="button" id="defFavManageBtn" class="featured-btn">管理模式</button>
+          </div>
+        </div>
+        <div id="defFavList"><div class="featured-loading">加载中…</div></div>
+      </div>
+    </div>
+
   </section>
 
   <!-- 1.5 智能简历视图：占位（开发中，敬请期待） -->
@@ -1795,6 +1933,11 @@
     setStoredKey(key);
     if (keyModalMode === 'share') {
       submitFeatured(key);
+    } else if (keyModalMode === 'favorite') {
+      submitDefFavorite(key);
+    } else if (keyModalMode === 'defmanage') {
+      setStoredKey(key);
+      loadDefFav();
     } else {
       loadFeatured();
     }
@@ -1802,6 +1945,208 @@
   keyInputEl.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') { e.preventDefault(); document.getElementById('keyOk').click(); }
   });
+
+  // ==================== 答辩助手 v1：中译英 + 站长收藏 + 中英精选墙 ====================
+  var DEF_TRANSLATE_API = 'api/translate';
+  var DEF_FAV_API = 'api/def-fav';
+  var defEditorEl = document.getElementById('defEditor');
+  var defCharCountEl = document.getElementById('defCharCount');
+  var defResultEl = document.getElementById('defResult');
+  var defResultZhEl = document.getElementById('defResultZh');
+  var defResultEnEl = document.getElementById('defResultEn');
+  var defNotesEl = document.getElementById('defNotes');
+  var defFavListEl = document.getElementById('defFavList');
+  var defManageMode = false;
+  var pendingFavorite = null; // { zh, en, notes }
+
+  // --- 富文本工具栏（独立命名，不与其他视图冲突）---
+  document.getElementById('defToolbar').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-cmd]');
+    if (!btn) return;
+    e.preventDefault();
+    defEditorEl.focus();
+    document.execCommand(btn.getAttribute('data-cmd'), false, null);
+  });
+
+  function defPlainText() {
+    return (defEditorEl.innerText || defEditorEl.textContent || '').trim();
+  }
+
+  function updateDefCharCount() {
+    var len = defPlainText().length;
+    defCharCountEl.textContent = len + ' / 600';
+    defCharCountEl.classList.toggle('over', len > 600);
+  }
+  defEditorEl.addEventListener('input', updateDefCharCount);
+
+  document.getElementById('defClearBtn').addEventListener('click', function () {
+    defEditorEl.innerHTML = '';
+    updateDefCharCount();
+    defResultEl.classList.remove('show');
+    pendingFavorite = null;
+    defEditorEl.focus();
+  });
+
+  // --- 中译英 ---
+  document.getElementById('defTranslateBtn').addEventListener('click', runDefTranslate);
+  defEditorEl.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      runDefTranslate();
+    }
+  });
+
+  function runDefTranslate() {
+    var text = defPlainText();
+    if (!text) {
+      showStatus('warning', '请先输入需要翻译的中文内容');
+      return;
+    }
+    if (text.length > 600) {
+      showStatus('error', '内容过长（' + text.length + ' 字），请控制在 600 字以内');
+      return;
+    }
+    var btn = document.getElementById('defTranslateBtn');
+    btn.disabled = true;
+    btn.textContent = '翻译中…';
+    fetch(DEF_TRANSLATE_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.d || !res.d.ok) {
+          throw new Error((res.d && res.d.error) || '翻译失败');
+        }
+        pendingFavorite = { zh: text, en: String(res.d.translation || ''), notes: res.d.notes || '' };
+        defResultZhEl.textContent = text;
+        defResultEnEl.textContent = res.d.translation;
+        if (res.d.notes) {
+          defNotesEl.style.display = '';
+          defNotesEl.textContent = '译文说明：' + res.d.notes;
+        } else {
+          defNotesEl.style.display = 'none';
+          defNotesEl.textContent = '';
+        }
+        defResultEl.classList.add('show');
+        showStatus('ok', '翻译完成，站长可点击「收藏这句」加入精选墙');
+      })
+      .catch(function (err) {
+        showStatus('error', '翻译失败：' + String((err && err.message) || err));
+      })
+      .then(function () {
+        btn.disabled = false;
+        btn.textContent = '提交翻译';
+      });
+  }
+
+  // --- 收藏（复用 keyModal 与 localStorage['featured_manage_key']，mode=favorite）---
+  document.getElementById('favBtn').addEventListener('click', function () {
+    if (!pendingFavorite) {
+      showStatus('warning', '请先完成一次翻译，再收藏中英双译');
+      return;
+    }
+    openKeyModal('favorite');
+  });
+
+  function submitDefFavorite(key) {
+    if (!pendingFavorite) return;
+    fetch(DEF_FAV_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Manage-Key': key
+      },
+      body: JSON.stringify(pendingFavorite)
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error((res.d && res.d.error) || '收藏失败');
+        setStoredKey(key);
+        showStatus('ok', '已收藏到中英精选墙');
+        loadDefFav();
+      })
+      .catch(function (err) {
+        showStatus('error', '收藏失败：' + String((err && err.message) || err));
+      });
+  }
+
+  // --- 中英精选墙 ---
+  function loadDefFav() {
+    defFavListEl.innerHTML = '<div class="featured-loading">加载中…</div>';
+    fetch(DEF_FAV_API + '?limit=20')
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.d) throw new Error((res.d && res.d.error) || '加载失败');
+        var items = res.d.items || [];
+        if (!items.length) {
+          defFavListEl.innerHTML = '<div class="featured-empty">暂无收藏句子。站长完成翻译后可点击「收藏这句」，中英双语句子将展示在这里。</div>';
+          return;
+        }
+        defFavListEl.innerHTML = items.map(defFavCardHtml).join('');
+      })
+      .catch(function (err) {
+        defFavListEl.innerHTML = '<div class="featured-empty">精选墙加载失败：' + String((err && err.message) || err) + '</div>';
+      });
+  }
+
+  function defFavCardHtml(item) {
+    var html = '<div class="def-fav-card">';
+    html += '<div class="fav-zh">' + escapeHtml(item.zh || '') + '</div>';
+    html += '<div class="fav-en">' + escapeHtml(item.en || '') + '</div>';
+    if (item.notes) html += '<div class="fav-notes">' + escapeHtml(item.notes) + '</div>';
+    if (defManageMode) {
+      html += '<div class="actions" style="margin-top:10px"><button type="button" class="def-secondary-btn" data-defdel="' + escapeHtml(String(item.id)) + '">删除此条</button></div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  defFavListEl.addEventListener('click', function (e) {
+    var del = e.target.closest('[data-defdel]');
+    if (!del) return;
+    var id = del.getAttribute('data-defdel');
+    if (!id) return;
+    if (!window.confirm('确定删除这条精选句子吗？删除后所有访客将不可见。')) return;
+    var key = getStoredKey();
+    if (!key) {
+      openKeyModal('defmanage');
+      return;
+    }
+    fetch(DEF_FAV_API + '?id=' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'X-Manage-Key': key }
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) {
+          if (res.d && String(res.d.error).indexOf('管理密钥无效') !== -1) {
+            openKeyModal('defmanage');
+            return;
+          }
+          throw new Error((res.d && res.d.error) || '删除失败');
+        }
+        showStatus('ok', '已删除该条收藏');
+        loadDefFav();
+      })
+      .catch(function (err) {
+        showStatus('error', '删除失败：' + String((err && err.message) || err));
+      });
+  });
+
+  document.getElementById('defFavManageBtn').addEventListener('click', function () {
+    defManageMode = !defManageMode;
+    var btn = document.getElementById('defFavManageBtn');
+    btn.textContent = defManageMode ? '退出管理' : '管理模式';
+    btn.classList.toggle('danger', defManageMode);
+    if (defManageMode && !getStoredKey()) {
+      openKeyModal('defmanage');
+    }
+    loadDefFav();
+  });
+
+  loadDefFav();
 
   loadFeatured();
 })();
