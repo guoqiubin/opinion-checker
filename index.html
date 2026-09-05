@@ -771,8 +771,35 @@
   /* 中英精选墙卡片 */
   .def-fav-card { background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(120,90,30,.08); }
   .def-fav-card .fav-zh { font-size: 14px; line-height: 1.7; color: var(--brown-mid); margin-bottom: 8px; }
-  .def-fav-card .fav-en { font-size: 15px; line-height: 1.8; color: var(--brown-dark); font-weight: 600; border-left: 3px solid var(--gold-deep); padding-left: 12px; }
+  .def-fav-card .fav-en { display: flex; align-items: flex-start; gap: 10px; font-size: 15px; line-height: 1.8; color: var(--brown-dark); font-weight: 600; border-left: 3px solid var(--gold-deep); padding-left: 12px; }
+  .def-fav-card .fav-en-text { flex: 1; min-width: 0; }
   .def-fav-card .fav-notes { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 8px; }
+  /* 英文朗读控件（只作用于英文，不朗读中文） */
+  .def-play-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .def-play-btn, .def-rate-btn {
+    background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
+    color: var(--brown-mid);
+    border: 1px solid #9A8F77;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(69,58,40,.2), inset 0 1px 0 rgba(255,255,255,.7);
+    transition: all .12s;
+    white-space: nowrap;
+    line-height: 1.6;
+  }
+  .def-play-btn:hover, .def-rate-btn:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
+  .def-play-btn:active, .def-rate-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
+  .def-play-btn.playing {
+    background: linear-gradient(180deg, #e8b0a8, #c9705f);
+    border-color: #b15a48;
+    color: #5a1f14;
+    box-shadow: 0 2px 4px rgba(120,60,40,.25), inset 0 1px 0 rgba(255,255,255,.35);
+  }
 </style>
 </head>
 <body>
@@ -972,7 +999,7 @@
         <span class="win-title">中文答辩陈述</span>
       </div>
       <div class="win-body">
-        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">输入你的中文回答，一键译为正式英文（≤600 字）</span></div>
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">把你想说的中文翻译为答辩风格的英文句子（≤600 字）</span></div>
         <div class="toolbar" id="defToolbar">
           <button type="button" data-cmd="bold" title="加粗"><b>B</b></button>
           <button type="button" data-cmd="italic" title="斜体"><i>I</i></button>
@@ -1309,6 +1336,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.1',
+      date: '2026-09-05',
+      changes: [
+        { type: 'add', text: '新增「答辩助手」模块：中文答辩陈述一键译为正式英文（≤600 字，富文本输入、Ctrl/Cmd+Enter 快捷翻译）' },
+        { type: 'add', text: '翻译结果支持「收藏这句」：站长收藏的中英双译收录「中英精选墙」（站长管理、访客只读）' },
+        { type: 'add', text: '中英精选墙新增英文语音朗读：支持常速与慢速' }
+      ]
+    },
     {
       version: 'v2.0',
       date: '2026-09-04',
@@ -2074,6 +2110,9 @@
 
   // --- 中英精选墙 ---
   function loadDefFav() {
+    if (defSpeechActiveId) {
+      defStopSpeech();
+    }
     defFavListEl.innerHTML = '<div class="featured-loading">加载中…</div>';
     fetch(DEF_FAV_API + '?limit=20')
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
@@ -2094,7 +2133,11 @@
   function defFavCardHtml(item) {
     var html = '<div class="def-fav-card">';
     html += '<div class="fav-zh">' + escapeHtml(item.zh || '') + '</div>';
-    html += '<div class="fav-en">' + escapeHtml(item.en || '') + '</div>';
+    html += '<div class="fav-en"><span class="fav-en-text">' + escapeHtml(item.en || '') + '</span>' +
+      '<span class="def-play-controls">' +
+      '<button type="button" class="def-play-btn" data-defplay="' + escapeHtml(String(item.id)) + '">▶ 播放</button>' +
+      '<button type="button" class="def-rate-btn" data-defrate="' + escapeHtml(String(item.id)) + '">' + defRateLabel(String(item.id)) + '</button>' +
+      '</span></div>';
     if (item.notes) html += '<div class="fav-notes">' + escapeHtml(item.notes) + '</div>';
     if (defManageMode) {
       html += '<div class="actions" style="margin-top:10px"><button type="button" class="def-secondary-btn" data-defdel="' + escapeHtml(String(item.id)) + '">删除此条</button></div>';
@@ -2133,6 +2176,107 @@
       .catch(function (err) {
         showStatus('error', '删除失败：' + String((err && err.message) || err));
       });
+  });
+
+  // --- 英文语音朗读（Web Speech API，仅英文，不朗读中文）---
+  var defSpeechSupportedFlag = (typeof window !== 'undefined' && 'speechSynthesis' in window);
+  var defSpeechActiveId = null;
+  var defRateMap = {};
+  var DEF_RATE_CYCLE = [1, 0.75, 0.5];
+
+  function defRateLabel(id) {
+    var v = defRateMap[id] || 1;
+    return (v === 1) ? '1.0x' : ((v === 0.75) ? '0.75x' : '0.5x');
+  }
+
+  function defPickVoice() {
+    if (!defSpeechSupportedFlag) return null;
+    var voices = window.speechSynthesis.getVoices() || [];
+    if (!voices.length) return null;
+    var en = voices.filter(function (v) { return /^en([-_]|$)/i.test(v.lang || ''); });
+    var enUs = en.filter(function (v) { return /^en[-_]?US/i.test(v.lang || ''); });
+    var enGb = en.filter(function (v) { return /^en[-_]?GB/i.test(v.lang || ''); });
+    return enUs[0] || enGb[0] || en[0] || null;
+  }
+
+  function defResetPlayButtons() {
+    var btns = document.querySelectorAll('.def-play-btn.playing');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].textContent = '▶ 播放';
+      btns[i].classList.remove('playing');
+    }
+  }
+
+  function defStopSpeech() {
+    if (!defSpeechActiveId) return;
+    window.speechSynthesis.cancel();
+    defSpeechActiveId = null;
+    defResetPlayButtons();
+  }
+
+  function defToggleSpeech(playBtn) {
+    if (!defSpeechSupportedFlag) {
+      showStatus('warning', '当前浏览器不支持语音朗读');
+      return;
+    }
+    var id = playBtn.getAttribute('data-defplay');
+    if (!id) return;
+    if (defSpeechActiveId === id) {
+      defStopSpeech();
+      return;
+    }
+    var card = playBtn.closest('.def-fav-card');
+    var textEl = card && card.querySelector('.fav-en-text');
+    var text = (textEl && (textEl.textContent || '').trim()) || '';
+    if (!text) return;
+    if (defSpeechActiveId) {
+      defStopSpeech();
+    }
+    var utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'en-US';
+    utter.rate = defRateMap[id] || 1;
+    var voice = defPickVoice();
+    if (voice) utter.voice = voice;
+    defSpeechActiveId = id;
+    utter.onend = function () { defSpeechActiveId = null; defResetPlayButtons(); };
+    utter.onerror = function () { defSpeechActiveId = null; defResetPlayButtons(); };
+    window.speechSynthesis.speak(utter);
+    playBtn.textContent = '⏹ 停止';
+    playBtn.classList.add('playing');
+  }
+
+  function defCycleRate(rateBtn) {
+    var id = rateBtn.getAttribute('data-defrate');
+    if (!id) return;
+    var cur = defRateMap[id] || 1;
+    var idx = DEF_RATE_CYCLE.indexOf(cur);
+    var next = DEF_RATE_CYCLE[(idx + 1) % DEF_RATE_CYCLE.length];
+    defRateMap[id] = next;
+    rateBtn.textContent = defRateLabel(id);
+    if (defSpeechActiveId === id) {
+      var card = rateBtn.closest('.def-fav-card');
+      var playBtn = card && card.querySelector('[data-defplay]');
+      if (playBtn) {
+        window.speechSynthesis.cancel();
+        defSpeechActiveId = null;
+        defToggleSpeech(playBtn);
+      }
+    }
+  }
+
+  defFavListEl.addEventListener('click', function (e) {
+    var play = e.target.closest('[data-defplay]');
+    if (play) {
+      e.preventDefault();
+      defToggleSpeech(play);
+      return;
+    }
+    var rate = e.target.closest('[data-defrate]');
+    if (rate) {
+      e.preventDefault();
+      defCycleRate(rate);
+      return;
+    }
   });
 
   document.getElementById('defFavManageBtn').addEventListener('click', function () {

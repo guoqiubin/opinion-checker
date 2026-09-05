@@ -1,6 +1,6 @@
 {
   "name": "opinion-checker",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "心理学硕博小助手：论文小助手 / 统计学工具 / 信源查询 —— 平级学术工具合集（v2.0 应用外壳 + 顶部平级导航）。",
   "type": "module",
   "scripts": {
