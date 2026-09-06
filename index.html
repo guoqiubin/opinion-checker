@@ -1222,7 +1222,7 @@
       <div class="win-body">
         <div class="cmd-label"><span class="dollar">§</span> <span class="fname">在 Jamovi 中完成该分析的分步操作指引（English）</span></div>
         <div class="sts-actions">
-          <button type="button" id="stsStepsBtn" class="sts-primary-btn" disabled>查看英文操作步骤</button>
+          <button type="button" id="stsStepsBtn" class="sts-primary-btn" disabled title="请先在①选择分析场景并点击②生成题目，生成后可查看英文操作指引">查看英文操作步骤</button>
         </div>
         <div id="stsSteps"></div>
       </div>
@@ -1237,7 +1237,7 @@
       <div class="win-body">
         <div class="cmd-label"><span class="dollar">§</span> <span class="fname">围绕 AI 生成的模拟题目与数据集，查看 APA 结果与解读</span></div>
         <div class="sts-actions">
-          <button type="button" id="stsAnalyzeBtn" class="sts-primary-btn" disabled>查看数据分析</button>
+          <button type="button" id="stsAnalyzeBtn" class="sts-primary-btn" disabled title="请先在①选择分析场景并点击②生成题目，生成后可查看数据分析">查看数据分析</button>
         </div>
         <div class="sts-lang-switch" id="stsLangSwitch" style="display:none">
           <button type="button" id="stsLangZh" class="sts-lang-btn active">中文</button>
@@ -2990,6 +2990,10 @@
       stsSelectionEl.style.display = '';
       stsSelectionEl.innerHTML = '尚未选择分析场景：请在上方场景树中点击一个细分方法';
       stsGenBtn.disabled = true;
+      stsStepsBtn.disabled = true;
+      stsAnalyzeBtn.disabled = true;
+      stsStepsBtn.title = '请先在①选择分析场景并点击②生成题目，生成后可查看英文操作指引';
+      stsAnalyzeBtn.title = '请先在①选择分析场景并点击②生成题目，生成后可查看数据分析';
     }
   }
 
@@ -3023,6 +3027,8 @@
         renderStsDataset(res.d.dataset, res.d.question);
         stsStepsBtn.disabled = false;
         stsAnalyzeBtn.disabled = false;
+        stsStepsBtn.title = '查看「' + stsMethodLabel(STS_STATE.module, STS_STATE.method) + '」在 Jamovi 中的英文操作指引';
+        stsAnalyzeBtn.title = '查看当前模拟题目的数据分析解读（中 / 英）';
         showStatus('ok', '题目生成完成：可导出 Excel 数据集、查看英文操作步骤或查看数据分析');
       })
       .catch(function (err) {
@@ -3244,7 +3250,10 @@
 
   // ---- 查看英文操作步骤 ----
   stsStepsBtn.addEventListener('click', function () {
-    if (!STS_STATE.method) return;
+    if (!STS_STATE.method || !STS_STATE.data) {
+      stsStepsEl.innerHTML = '<div class="sts-fallback">请先在①选择分析场景并点击②生成题目，生成成功后再来查看英文操作步骤。</div>';
+      return;
+    }
     var key = 'jamovi.' + STS_STATE.module + '.' + STS_STATE.method;
     var entry = STS_STEPS[key];
     var selLabel = stsMethodLabel(STS_STATE.module, STS_STATE.method);
@@ -3291,7 +3300,10 @@
   }
 
   stsAnalyzeBtn.addEventListener('click', function () {
-    if (!STS_STATE.data) return;
+    if (!STS_STATE.data) {
+      stsAnalysisEl.innerHTML = '<div class="sts-fallback">请先在①选择分析场景并点击②生成题目，生成成功后再来查看数据分析。</div>';
+      return;
+    }
     STS_STATE.lang = 'zh';
     document.getElementById('stsLangZh').classList.add('active');
     document.getElementById('stsLangEn').classList.remove('active');
