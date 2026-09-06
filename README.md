@@ -20,6 +20,7 @@
 - 精选观点墙：站长可把优质「观点 + 判定 + 信源」收录为精选，访客按支持度浏览查看原始结论与来源
 - 答辩助手（v1）：中文答辩陈述 → AI 中译英（正式学术/答辩语气，≤600 字，含术语/句式译文说明）
 - 中英精选墙：站长将满意的中英双译收藏展示，双语对照供访客学习参考
+- 统计学工具（v2.2）：8 大主场景（Exploration / T-Tests / ANOVA / Regression / Frequencies / Factor / Chi² Tools / SEM）共 29 个高频方法，条件筛选 → 生成题目 → 中英双语数据分析与英文操作步骤，支持一键导出 Excel（前端内嵌 xlsx 生成器，零外链）
 - 拟物（Skeuomorphism）风格 UI：皮革 / 金属质感、3D 凸起按钮、高光反射
 - 更新公告栏：内置版本历史记录
 
@@ -39,6 +40,7 @@ opinion-checker/
 │   ├── check.js        # Vercel Serverless 函数：LLM 判断 + 学术检索
 │   ├── distill.js      # Vercel Serverless 函数：AI 观点提炼
 │   ├── translate.js    # Vercel Serverless 函数：答辩助手 AI 中译英
+│   ├── stats-gen.js    # Vercel Serverless 函数：统计学工具题目生成（DeepSeek）
 │   ├── featured.js     # Vercel Serverless 函数：精选观点墙读写（Supabase）
 │   └── def-fav.js      # Vercel Serverless 函数：中英精选墙读写（Supabase）
 ├── package.json        # 项目配置与脚本

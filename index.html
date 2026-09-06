@@ -800,6 +800,216 @@
     color: #5a1f14;
     box-shadow: 0 2px 4px rgba(120,60,40,.25), inset 0 1px 0 rgba(255,255,255,.35);
   }
+
+  /* ==================== 统计学工具 v2.2（.sts-* 独立命名，避免与既有模块冲突） ==================== */
+  .sts-toolbar-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .sts-toolbar-row .sts-label { font-size: 13px; font-weight: 700; color: var(--brown-mid); }
+  .sts-tool-btn {
+    background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
+    color: var(--brown-mid);
+    border: 1px solid #9A8F77;
+    border-radius: 10px;
+    padding: 7px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(69,58,40,.2), inset 0 1px 0 rgba(255,255,255,.7);
+    transition: all .12s;
+    line-height: 1.5;
+  }
+  .sts-tool-btn:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
+  .sts-tool-btn.active {
+    background: var(--gold-grad, linear-gradient(#d9b25f, #b98d3a));
+    border-color: #a87e31;
+    color: #4a3200;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 4px rgba(120,90,30,.25);
+  }
+  .sts-tool-btn:disabled {
+    opacity: .55; cursor: not-allowed;
+    background: linear-gradient(180deg, #EDEAE0, #DCD7C9);
+    color: var(--comment);
+    box-shadow: none;
+  }
+  .sts-tool-hint { font-size: 12px; color: var(--comment); font-style: italic; margin-left: 2px; }
+
+  .sts-modules { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .sts-module {
+    background: #FFFDF5;
+    border: 1px solid #e3cf9f;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(120,90,30,.06);
+    transition: border-color .12s;
+  }
+  .sts-module.open { border-color: #c9a94f; }
+  .sts-module-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    user-select: none;
+    background: linear-gradient(180deg, #FBF4E4, #F3E7CB);
+  }
+  .sts-module-head:hover { background: linear-gradient(180deg, #FDF8EC, #F5EAD2); }
+  .sts-module-head .sts-module-arrow {
+    display: inline-block; width: 0; height: 0;
+    border-left: 6px solid var(--gold-deep);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transition: transform .15s;
+    flex-shrink: 0;
+  }
+  .sts-module.open .sts-module-arrow { transform: rotate(90deg); }
+  .sts-module-head .sts-module-name { font-size: 15px; font-weight: 700; color: var(--brown-dark); flex: 1; }
+  .sts-module-head .sts-module-badge {
+    font-size: 11px; font-weight: 700; color: var(--brown-mid);
+    background: rgba(255,255,255,.6); border: 1px solid #dcc894;
+    border-radius: 10px; padding: 1px 8px;
+  }
+  .sts-module-body { padding: 12px 14px; display: none; }
+  .sts-module.open .sts-module-body { display: block; }
+  .sts-group-label {
+    font-size: 12px; font-weight: 700; letter-spacing: .5px;
+    color: var(--comment); margin: 6px 0 6px; text-transform: uppercase;
+  }
+  .sts-group-label.nonparametric { color: #b0713a; }
+  .sts-methods { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+  .sts-method-chip {
+    background: #FFFDF5;
+    border: 1px solid #dcc894;
+    color: var(--brown-mid);
+    border-radius: 999px;
+    padding: 5px 13px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(120,90,30,.08);
+    transition: all .12s;
+    line-height: 1.5;
+  }
+  .sts-method-chip:hover { border-color: var(--gold-deep); color: var(--brown-dark); background: #FFF8E8; }
+  .sts-method-chip.selected {
+    background: var(--gold-grad, linear-gradient(#d9b25f, #b98d3a));
+    border-color: #a87e31;
+    color: #4a3200;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 4px rgba(120,90,30,.22);
+  }
+  .sts-method-chip.nonparam-chip { border-style: dashed; }
+
+  .sts-selection {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: #FBF1D8;
+    border-left: 3px solid var(--gold-deep);
+    border-radius: 0 10px 10px 0;
+    font-size: 13px;
+    color: var(--brown-mid);
+    line-height: 1.7;
+  }
+  .sts-selection b { color: var(--brown-dark); }
+  .sts-selection .sts-clear-link {
+    margin-left: 10px; color: #c9705f; cursor: pointer; text-decoration: underline; font-size: 12px;
+  }
+
+  .sts-primary-btn {
+    background: var(--gold-grad, linear-gradient(#d9b25f, #b98d3a));
+    color: #4a3200;
+    border: 1px solid #a87e31;
+    border-radius: 10px;
+    padding: 8px 22px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 4px rgba(120,90,30,.18);
+    transition: all .12s;
+    line-height: 1.5;
+  }
+  .sts-primary-btn:hover { filter: brightness(1.05); box-shadow: 0 5px 10px rgba(120,90,30,.28), inset 0 1px 0 rgba(255,255,255,.5); }
+  .sts-primary-btn:disabled { opacity: .55; cursor: not-allowed; filter: none; box-shadow: none; }
+  .sts-secondary-btn {
+    background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
+    color: var(--brown-mid);
+    border: 1px solid #9A8F77;
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(69,58,40,.2), inset 0 1px 0 rgba(255,255,255,.7);
+    transition: all .12s;
+    line-height: 1.5;
+  }
+  .sts-secondary-btn:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
+  .sts-secondary-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+  .sts-question-card { background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(120,90,30,.08); }
+  .sts-question-card h3 { font-size: 16px; color: var(--brown-dark); margin-bottom: 10px; }
+  .sts-field { margin-bottom: 10px; line-height: 1.7; font-size: 14px; color: var(--brown-mid); }
+  .sts-field b { color: var(--brown-dark); font-weight: 700; }
+  .sts-field .sts-apa-pill {
+    display: inline-block; background: #F5E9CC; border: 1px solid #dcc894; color: var(--brown-dark);
+    border-radius: 8px; padding: 2px 10px; font-family: 'Courier New', monospace; font-size: 13px;
+  }
+  .sts-var-table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 13px; }
+  .sts-var-table th { background: #F3E7CB; color: var(--brown-dark); padding: 7px 10px; text-align: left; font-weight: 700; border: 1px solid #e3cf9f; }
+  .sts-var-table td { padding: 6px 10px; border: 1px solid #ecdbb4; color: var(--brown-mid); }
+  .sts-var-table tr:nth-child(even) td { background: #FFFCF1; }
+  .sts-data-preview-wrap { max-height: 220px; overflow: auto; border: 1px solid #e3cf9f; border-radius: 8px; margin: 8px 0 4px; }
+  .sts-data-preview { border-collapse: collapse; width: 100%; font-size: 12px; }
+  .sts-data-preview th { position: sticky; top: 0; background: #F3E7CB; color: var(--brown-dark); padding: 6px 10px; text-align: left; font-weight: 700; border: 1px solid #e3cf9f; white-space: nowrap; z-index: 1; }
+  .sts-data-preview td { padding: 5px 10px; border: 1px solid #ecdbb4; color: var(--brown-mid); white-space: nowrap; }
+  .sts-note { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 8px; line-height: 1.6; }
+
+  .sts-lang-switch { display: flex; gap: 6px; margin-bottom: 12px; }
+  .sts-lang-btn {
+    background: linear-gradient(180deg, #F1EBDE, #DDD3BD);
+    color: var(--brown-mid);
+    border: 1px solid #9A8F77;
+    border-radius: 8px;
+    padding: 5px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .sts-lang-btn:hover { color: var(--brown-dark); }
+  .sts-lang-btn.active {
+    background: var(--gold-grad, linear-gradient(#d9b25f, #b98d3a));
+    border-color: #a87e31;
+    color: #4a3200;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+  }
+
+  .sts-step-block { margin-bottom: 14px; }
+  .sts-step-block h4 { font-size: 14px; color: var(--brown-dark); margin-bottom: 8px; }
+  .sts-step-item { display: flex; gap: 10px; margin-bottom: 8px; line-height: 1.7; font-size: 13.5px; color: var(--brown-mid); }
+  .sts-step-num {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gold-grad, linear-gradient(#d9b25f, #b98d3a));
+    color: #4a3200; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  .sts-step-text b { color: var(--brown-dark); display: block; }
+  .sts-tip-item { font-size: 13px; color: var(--comment); font-style: italic; margin: 4px 0; padding-left: 6px; border-left: 2px solid #e3cf9f; line-height: 1.7; }
+
+  .sts-fallback {
+    text-align: center; padding: 22px 16px; color: var(--comment);
+    font-size: 13px; font-style: italic; background: #FBF6E9;
+    border: 1px dashed #dcc894; border-radius: 10px; line-height: 1.8;
+  }
+  .sts-loading { text-align: center; padding: 18px; color: var(--comment); font-size: 13px; font-style: italic; }
+  .sts-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 2px; }
+  .sts-badge-lang { font-size: 11px; font-weight: 700; color: #fff; background: #c9a94f; border-radius: 8px; padding: 1px 8px; margin-left: 6px; vertical-align: 1px; }
+  @media (max-width: 560px) {
+    .sts-module-body { padding: 10px; }
+    .sts-method-chip { padding: 5px 10px; font-size: 12px; }
+    .sts-var-table, .sts-data-preview { font-size: 11px; }
+  }
 </style>
 </head>
 <body>
@@ -964,29 +1174,79 @@
     </div>
   </section>
 
-  <!-- 1.2 统计学工具视图：v2.0 占位（开发中，预留入口） -->
+  <!-- 1.2 统计学工具视图：v2.2（① 条件筛选 → ② 生成题目 → ③ 英文步骤 → ④ 双语数据分析） -->
   <section id="view-stats" class="app-view" data-view="stats" hidden>
+
+    <!-- ① 条件筛选：统计工具 + 场景树 -->
     <div class="win">
       <div class="win-titlebar">
         <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-title">统计学工具</span>
+        <span class="win-title">① 条件筛选：选择统计工具与分析场景</span>
       </div>
       <div class="win-body">
-        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">统计学工具开发中</span></div>
-        <div class="placeholder-card">
-          <div class="placeholder-icon">∑</div>
-          <h3>即将上线</h3>
-          <p>浏览器本地计算的心理学统计小工具：描述统计 / t 检验 / 卡方 / 相关分析。零外链、数据不出本机，结果按 APA 格式输出。</p>
-          <ul>
-            <li>描述统计（n / M / SD / 中位数 / 偏度 / 峰度）</li>
-            <li>独立样本 t 检验 + Cohen's d（Welch）</li>
-            <li>配对样本 t 检验 + Cohen's dz</li>
-            <li>卡方检验（含 2×2 Yates 校正）</li>
-            <li>相关分析（Pearson r / Spearman rho）</li>
-          </ul>
+        <div class="sts-toolbar-row">
+          <span class="sts-label">统计工具</span>
+          <button type="button" id="stsToolJamovi" class="sts-tool-btn active">Jamovi</button>
+          <button type="button" id="stsToolSPSS" class="sts-tool-btn" disabled title="SPSS 为预留项，即将支持">SPSS（预留）</button>
+          <span class="sts-tool-hint">分析场景沿用 JASP / Jamovi 模块风格</span>
         </div>
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">选择主场景 → 细分分析方法（参数 / 非参数分组）</span></div>
+        <div class="sts-modules" id="stsTree"><div class="sts-loading">场景加载中…</div></div>
+        <div class="sts-selection" id="stsSelection" style="display:none">尚未选择分析场景</div>
       </div>
     </div>
+
+    <!-- ② 生成题目（AI 模拟研究题 + 数据集导出） -->
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">② 生成题目（AI 模拟研究题）</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">依据所选工具与场景生成模拟研究题，配套 20~60 行模拟数据集</span></div>
+        <div class="sts-actions">
+          <button type="button" id="stsGenBtn" class="sts-primary-btn" disabled>生成题目</button>
+          <button type="button" id="stsClearBtn" class="sts-secondary-btn">清空结果</button>
+        </div>
+        <div id="stsQuestion"></div>
+        <div id="stsDataset" style="display:none"></div>
+      </div>
+    </div>
+
+    <!-- ③ 查看英文操作步骤 -->
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">③ 查看英文操作步骤</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">在 Jamovi 中完成该分析的分步操作指引（English）</span></div>
+        <div class="sts-actions">
+          <button type="button" id="stsStepsBtn" class="sts-primary-btn" disabled>查看英文操作步骤</button>
+        </div>
+        <div id="stsSteps"></div>
+      </div>
+    </div>
+
+    <!-- ④ 查看数据分析（中 / 英） -->
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">④ 查看数据分析（中 / 英）</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">围绕 AI 生成的模拟题目与数据集，查看 APA 结果与解读</span></div>
+        <div class="sts-actions">
+          <button type="button" id="stsAnalyzeBtn" class="sts-primary-btn" disabled>查看数据分析</button>
+        </div>
+        <div class="sts-lang-switch" id="stsLangSwitch" style="display:none">
+          <button type="button" id="stsLangZh" class="sts-lang-btn active">中文</button>
+          <button type="button" id="stsLangEn" class="sts-lang-btn">English</button>
+        </div>
+        <div id="stsAnalysis"></div>
+      </div>
+    </div>
+
   </section>
 
   <!-- 1.4 答辩助手视图：v1（中文→英文翻译 + 站长收藏 + 中英精选墙） -->
@@ -1336,6 +1596,16 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.2',
+      date: '2026-09-06',
+      changes: [
+        { type: 'add', text: '新增「统计学工具」模块：按 Jamovi 预留 / SPSS 预留选择工具，Exploration、T-Tests、ANOVA、Regression、Frequencies、Factor、Chi² Tools、SEM 八大主场景全量落地（29 个细分方法）' },
+        { type: 'add', text: 'AI 生成模拟研究题：输出题干、变量表与 20~60 行模拟数据集，一键导出 Excel（.xlsx）或复制 CSV（含 BOM）' },
+        { type: 'add', text: '高频分析方法配套英文操作步骤（Jamovi 界面路径），未覆盖方法展示指引整理中提示' },
+        { type: 'add', text: '查看数据分析支持中 / 英双语切换（AI 生成时一并产出，切换不重新请求），明示模拟数据仅供统计练习' }
+      ]
+    },
     {
       version: 'v2.1',
       date: '2026-09-05',
@@ -2291,6 +2561,760 @@
   });
 
   loadDefFav();
+
+  // ==================== 统计学工具 v2.2：条件筛选 → 生成题目 → 英文步骤 → 双语数据分析 ====================
+  var STS_API = 'api/stats-gen';
+  var STS_STATE = { tool: 'jamovi', module: null, method: null, data: null, lang: 'zh' };
+  var STS_MODULES = [
+    {
+      id: 'exploration', name: 'Exploration',
+      groups: [{ type: 'other', methods: [
+        { id: 'descriptives', label: 'Descriptives' },
+        { id: 'reliability', label: 'Reliability Analysis' }
+      ]}]
+    },
+    {
+      id: 'ttest', name: 'T-Tests',
+      groups: [
+        { type: 'parametric', label: 'Parametric', methods: [
+          { id: 'onesample', label: 'One Sample T-Test' },
+          { id: 'independent', label: 'Independent Samples T-Test' },
+          { id: 'paired', label: 'Paired Samples T-Test' }
+        ]},
+        { type: 'nonparametric', label: 'Non-Parametric', methods: [
+          { id: 'mannwhitney', label: 'Mann-Whitney U' },
+          { id: 'wilcoxon', label: 'Wilcoxon Signed-Rank' }
+        ]}
+      ]
+    },
+    {
+      id: 'anova', name: 'ANOVA',
+      groups: [
+        { type: 'parametric', label: 'Parametric', methods: [
+          { id: 'oneway', label: 'One-Way ANOVA' },
+          { id: 'anova', label: 'ANOVA' },
+          { id: 'rm', label: 'Repeated Measures ANOVA' },
+          { id: 'ancova', label: 'ANCOVA' },
+          { id: 'mancova', label: 'MANCOVA' }
+        ]},
+        { type: 'nonparametric', label: 'Non-Parametric', methods: [
+          { id: 'kruskal', label: 'One-Way ANOVA (Kruskal-Wallis)' },
+          { id: 'friedman', label: 'Repeated Measures ANOVA (Friedman)' }
+        ]}
+      ]
+    },
+    {
+      id: 'regression', name: 'Regression',
+      groups: [{ type: 'other', methods: [
+        { id: 'correlation', label: 'Correlation' },
+        { id: 'linear', label: 'Linear Regression' },
+        { id: 'multiple', label: 'Multiple Linear Regression' },
+        { id: 'logistic', label: 'Logistic Regression' }
+      ]}]
+    },
+    {
+      id: 'frequencies', name: 'Frequencies',
+      groups: [{ type: 'other', methods: [
+        { id: 'binomial', label: 'Binomial Test' },
+        { id: 'multinomial', label: 'Multinomial Test' },
+        { id: 'contingency', label: 'Contingency Tables' },
+        { id: 'loglinear', label: 'Log-Linear Regression' }
+      ]}]
+    },
+    {
+      id: 'factor', name: 'Factor',
+      groups: [{ type: 'other', methods: [
+        { id: 'pca', label: 'Principal Component Analysis' },
+        { id: 'efa', label: 'Exploratory Factor Analysis' },
+        { id: 'cfa', label: 'Confirmatory Factor Analysis' }
+      ]}]
+    },
+    {
+      id: 'chisq', name: 'Chi\u00B2 Tools',
+      groups: [{ type: 'other', methods: [
+        { id: 'gof', label: 'Goodness of Fit' },
+        { id: 'independence', label: 'Test of Independence' }
+      ]}]
+    },
+    {
+      id: 'sem', name: 'SEM',
+      groups: [{ type: 'other', methods: [
+        { id: 'sem', label: 'Structural Equation Modeling (SEM)' },
+        { id: 'sem-multigroup', label: 'Multigroup SEM' }
+      ]}]
+    }
+  ];
+
+  // ---- 英文操作步骤静态库（首版覆盖高频方法；key = tool.module.method） ----
+  var STS_STEPS = {
+    'jamovi.exploration.descriptives': {
+      title: 'Descriptives in Jamovi',
+      intro: 'Get descriptive statistics (n, M, SD, etc.) for one or more continuous variables.',
+      steps: [
+        { action: 'Open your dataset in Jamovi.', detail: 'File → Open → Browse, and select your .xlsx or .csv file.' },
+        { action: 'Open the Descriptives module.', detail: 'In the left Analyses panel, click Exploration → Descriptives.' },
+        { action: 'Assign variables.', detail: 'Move one or more continuous variables to the Variables box.' },
+        { action: 'Choose statistics in the options panel.', detail: 'Under Statistics, tick Mean, Median, SD, Min, Max as needed; tick Shapiro-Wilk under Normality Tests if you need a normality check.' }
+      ],
+      tips: ['Frequency tables can be enabled for nominal variables by moving them to Variables and ticking Frequency tables.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.exploration.reliability': {
+      title: 'Reliability Analysis in Jamovi',
+      intro: 'Estimate internal consistency (Cronbach\u2019s alpha / McDonald\u2019s omega) for a scale.',
+      steps: [
+        { action: 'Open the Reliability module.', detail: 'Analyses panel → Exploration → Reliability Analysis.' },
+        { action: 'Assign scale items.', detail: 'Move all item variables (e.g., item1\u2013item10) to the Items box.' },
+        { action: 'Set reverse-scored items (if any).', detail: 'In the Reverse-scaled items area, move the variables that need to be reverse coded.' },
+        { action: 'Request reliability statistics.', detail: 'Under Statistics tick Cronbach\u2019s \u03B1 and (optionally) McDonald\u2019s \u03C9.' }
+      ],
+      tips: ['Report both \u03B1 and \u03C9 when possible; values above .70 are generally considered acceptable in psychology research.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.ttest.onesample': {
+      title: 'One Sample T-Test in Jamovi',
+      intro: 'Compare the mean of a single group against a known reference value.',
+      steps: [
+        { action: 'Open the T-Tests module.', detail: 'Analyses panel → T-Tests → One Sample T-Test.' },
+        { action: 'Assign the variable.', detail: 'Move the continuous variable to the Variables box.' },
+        { action: 'Set the test value.', detail: 'Type the reference value (e.g., 0 or 50) into the Test value field.' },
+        { action: 'Add effect size and assumptions.', detail: 'Tick Effect Size under Additional Statistics to obtain Cohen\u2019s d; tick Shapiro-Wilk under Assumption Checks for normality.' }
+      ],
+      tips: ['Report as t(df) = value, p = value, d = value.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.ttest.independent': {
+      title: 'Independent Samples T-Test in Jamovi',
+      intro: 'Compare means between two independent groups (Student / Welch t-test).',
+      steps: [
+        { action: 'Open the T-Tests module.', detail: 'Analyses panel → T-Tests → Independent Samples T-Test.' },
+        { action: 'Assign the outcome.', detail: 'Move the continuous outcome to the Dependent Variables box.' },
+        { action: 'Assign the grouping variable.', detail: 'Move the categorical (two-level) variable to the Grouping Variable box; define group values if asked.' },
+        { action: 'Choose the t-test variant and effect size.', detail: 'Under Tests tick Student and/or Welch\u2019s (report Welch when variances differ); tick Effect Size for Cohen\u2019s d.' }
+      ],
+      tips: ['Use Levene\u2019s test output to decide between Student and Welch; Welch is safer by default.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.ttest.paired': {
+      title: 'Paired Samples T-Test in Jamovi',
+      intro: 'Compare two measurements from the same participants (pre\u2013post / matched pairs).',
+      steps: [
+        { action: 'Open the T-Tests module.', detail: 'Analyses panel → T-Tests → Paired Samples T-Test.' },
+        { action: 'Create a pair.', detail: 'Move the two repeated-measure variables (e.g., pre and post) into the same Pair box (left/right).' },
+        { action: 'Add effect size.', detail: 'Tick Effect Size under Additional Statistics to obtain Cohen\u2019s dz.' }
+      ],
+      tips: ['The order of variables defines the direction of the difference (first minus second).'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.ttest.mannwhitney': {
+      title: 'Mann-Whitney U in Jamovi',
+      intro: 'Non-parametric alternative to the independent t-test for skewed / ordinal data.',
+      steps: [
+        { action: 'Open the T-Tests module.', detail: 'Analyses panel → T-Tests → Independent Samples T-Test.' },
+        { action: 'Assign variables.', detail: 'Move the outcome to Dependent Variables and the two-level grouping variable to Grouping Variable.' },
+        { action: 'Enable the rank-based test.', detail: 'Under Tests tick Mann-Whitney U (leave Student/Welch unticked for the non-parametric comparison).' }
+      ],
+      tips: ['Report U, the associated z (if shown) and p; add rank-biserial correlation as an effect size if available.'],
+      sourceNote: 'Path based on Jamovi 2.x interface (non-parametric options live inside the t-test module).'
+    },
+    'jamovi.ttest.wilcoxon': {
+      title: 'Wilcoxon Signed-Rank Test in Jamovi',
+      intro: 'Non-parametric alternative to the paired t-test.',
+      steps: [
+        { action: 'Open the T-Tests module.', detail: 'Analyses panel → T-Tests → Paired Samples T-Test.' },
+        { action: 'Create a pair.', detail: 'Move the two paired variables into the same Pair box.' },
+        { action: 'Enable the rank-based test.', detail: 'Under Tests tick Wilcoxon signed-rank (uncheck Student for the non-parametric comparison).' }
+      ],
+      tips: ['Report W and p; describe the direction using medians of the two measurements.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.anova.oneway': {
+      title: 'One-Way ANOVA in Jamovi',
+      intro: 'Compare means across three or more independent groups (one categorical factor).',
+      steps: [
+        { action: 'Open the ANOVA module.', detail: 'Analyses panel → ANOVA → ANOVA (Jamovi uses the same ANOVA screen for one-way designs).' },
+        { action: 'Assign variables.', detail: 'Move the continuous outcome to the Dependent Variable box; move the grouping factor to Fixed Factors.' },
+        { action: 'Run the omnibus test.', detail: 'The F test appears in the Results panel; tick \u03B7\u00B2 under Effect Size for the output.' },
+        { action: 'Add post-hoc tests.', detail: 'Under Post Hoc Tests tick Tukey to compare pairs after a significant omnibus F.' }
+      ],
+      tips: ['A single factor in Fixed Factors = one-way ANOVA; two or more factors = factorial ANOVA.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.anova.anova': {
+      title: 'Factorial ANOVA in Jamovi',
+      intro: 'Analyze two or more categorical factors and their interaction on a continuous outcome.',
+      steps: [
+        { action: 'Open the ANOVA module.', detail: 'Analyses panel → ANOVA → ANOVA.' },
+        { action: 'Assign variables.', detail: 'Move the continuous outcome to Dependent Variable; move two or more factors to Fixed Factors.' },
+        { action: 'Read main effects and the interaction.', detail: 'The results table shows F for each factor and for the factor interactions; tick \u03B7p\u00B2 under Effect Size.' },
+        { action: 'Add post-hoc comparisons.', detail: 'Select a factor in Post Hoc Tests and tick Tukey if group comparisons are needed.' }
+      ],
+      tips: ['Interpret a significant interaction first; simple effects may require additional analyses.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.anova.rm': {
+      title: 'Repeated Measures ANOVA in Jamovi',
+      intro: 'Compare means across three or more within-subject conditions.',
+      steps: [
+        { action: 'Open the ANOVA module.', detail: 'Analyses panel → ANOVA → Repeated Measures ANOVA.' },
+        { action: 'Define the within-subjects factor.', detail: 'Click Repeated Measures Factors; name the factor (e.g., time) and add its levels, then assign each condition variable to the corresponding level cell.' },
+        { action: 'Run and read output.', detail: 'Move to the results to read the F test for the within-subjects factor; tick \u03B7p\u00B2 under Effect Size.' }
+      ],
+      tips: ['Add post-hoc contrasts on the repeated-measures factor for pairwise follow-ups.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.anova.ancova': {
+      title: 'ANCOVA in Jamovi',
+      intro: 'Compare group means while statistically controlling a continuous covariate.',
+      steps: [
+        { action: 'Open the ANCOVA module.', detail: 'Analyses panel → ANOVA → ANCOVA.' },
+        { action: 'Assign variables.', detail: 'Move the continuous outcome to Dependent Variable; move the categorical factor to Fixed Factors.' },
+        { action: 'Add the covariate.', detail: 'Move the continuous covariate to Covariates.' },
+        { action: 'Run and interpret.', detail: 'Read the adjusted F for the factor and the covariate effect; tick \u03B7p\u00B2 for effect size.' }
+      ],
+      tips: ['Check the homogeneity-of-regression-slopes assumption before trusting the adjusted means.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.anova.kruskal': {
+      title: 'Kruskal-Wallis Test in Jamovi',
+      intro: 'Non-parametric one-way ANOVA for three or more groups (skewed / ordinal outcome).',
+      steps: [
+        { action: 'Open the appropriate module.', detail: 'In Jamovi 2.x the rank-based version may be run via the One-Way ANOVA (Kruskal-Wallis) option available in JASP-style installs or the Rj module; in JASP: ANOVA → One-Way ANOVA.' },
+        { action: 'Assign variables.', detail: 'Move the outcome to Dependent Variable and the grouping factor to Grouping / Fixed Factors.' },
+        { action: 'Enable the non-parametric test.', detail: 'Tick Kruskal-Wallis (under Non-parametric options) and read H(\u03C7\u00B2), df, and p.' }
+      ],
+      tips: ['Follow up with Dunn\u2019s post-hoc tests if the overall test is significant.'],
+      sourceNote: 'Rank-based ANOVA is exposed as Kruskal-Wallis in JASP-style menus; consult your Jamovi install for the equivalent entry.'
+    },
+    'jamovi.anova.friedman': {
+      title: 'Friedman Test in Jamovi',
+      intro: 'Non-parametric repeated-measures ANOVA for three or more within-subject conditions.',
+      steps: [
+        { action: 'Open the module.', detail: 'In JASP: ANOVA → Repeated Measures ANOVA and tick Friedman; in Jamovi use the equivalent rank-based repeated measures entry (e.g., via Rj).' },
+        { action: 'Assign the repeated variables.', detail: 'Move all within-subject condition variables into the repeated measures definition.' },
+        { action: 'Enable Friedman and read output.', detail: 'Tick the Friedman (non-parametric) option and read \u03C7\u00B2, df, and p.' }
+      ],
+      tips: ['Use Wilcoxon signed-rank tests with a Bonferroni correction for follow-up comparisons.'],
+      sourceNote: 'Rank-based repeated measures ANOVA is exposed as Friedman in JASP-style menus.'
+    },
+    'jamovi.regression.correlation': {
+      title: 'Correlation Matrix in Jamovi',
+      intro: 'Compute Pearson r / Spearman rho between continuous variables.',
+      steps: [
+        { action: 'Open the Regression module.', detail: 'Analyses panel → Regression → Correlation Matrix.' },
+        { action: 'Assign variables.', detail: 'Move the continuous variables to the Variables box.' },
+        { action: 'Choose correlation type.', detail: 'Tick Pearson (parametric) and/or Spearman (non-parametric) under Correlation Coefficients; tick \u201CReport significance\u201D to obtain p values.' }
+      ],
+      tips: ['Add the flag option to display significance stars next to r values.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.regression.linear': {
+      title: 'Linear Regression in Jamovi',
+      intro: 'Predict one continuous outcome from one continuous or categorical predictor.',
+      steps: [
+        { action: 'Open the Regression module.', detail: 'Analyses panel → Regression → Linear Regression.' },
+        { action: 'Assign variables.', detail: 'Move the continuous outcome to the Dependent Variable box; move the predictor to the Covariates box (a categorical predictor goes to Factors).' },
+        { action: 'Request the model fit.', detail: 'Tick Model Fit (R\u00B2) and read the Coefficients table for b, SE, t, and p of the predictor.' }
+      ],
+      tips: ['Standardized estimates (\u03B2) can be enabled under Estimates if you want comparable coefficients.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.regression.multiple': {
+      title: 'Multiple Linear Regression in Jamovi',
+      intro: 'Predict one continuous outcome from several predictors simultaneously.',
+      steps: [
+        { action: 'Open the Regression module.', detail: 'Analyses panel → Regression → Linear Regression.' },
+        { action: 'Assign variables.', detail: 'Move the outcome to Dependent Variable; move two or more predictors to Covariates (continuous) and Factors (categorical).' },
+        { action: 'Evaluate the overall model.', detail: 'Tick Model Fit to read R\u00B2 and the F test of the whole model.' },
+        { action: 'Read individual predictors.', detail: 'In the Coefficients table check each predictor\u2019s b, t, p; report standardized \u03B2 for comparison.' }
+      ],
+      tips: ['Check VIF / tolerance in the Assumption Checks to screen for multicollinearity.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.regression.logistic': {
+      title: 'Logistic Regression in Jamovi',
+      intro: 'Predict a binary categorical outcome from continuous / categorical predictors.',
+      steps: [
+        { action: 'Open the Regression module.', detail: 'Analyses panel → Regression → 2 Outcomes (Binomial) → Logistic Regression.' },
+        { action: 'Assign variables.', detail: 'Move the binary outcome to the Dependent Variable box; move predictors to Covariates / Factors.' },
+        { action: 'Choose the reference level.', detail: 'Set the outcome levels and the reference category as needed for interpretable odds ratios.' },
+        { action: 'Read the output.', detail: 'Read the Model Fit (Deviance / AIC), the Coefficients table with odds ratios (exp(b)), z, and p.' }
+      ],
+      tips: ['Report odds ratios with 95% confidence intervals rather than raw log-odds.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.chisq.gof': {
+      title: 'Chi-Square Goodness of Fit in Jamovi',
+      intro: 'Test whether observed category frequencies match expected proportions.',
+      steps: [
+        { action: 'Open the Frequencies module.', detail: 'Analyses panel → Frequencies → N Outcomes (Multinomial) and select the Goodness of Fit entry (JASP: Frequencies \u2192 Multinomial Test).' },
+        { action: 'Assign the categorical variable.', detail: 'Move the nominal variable to the Variable box; specify expected proportions (e.g., equal or theory-based).' },
+        { action: 'Run and read output.', detail: 'Read \u03C7\u00B2, df, and p from the Goodness of Fit table.' }
+      ],
+      tips: ['Ensure expected counts are reasonably large (commonly > 5 per cell) before relying on the \u03C7\u00B2 approximation.'],
+      sourceNote: 'Goodness-of-fit is grouped under Frequencies in JASP-style interfaces.'
+    },
+    'jamovi.chisq.independence': {
+      title: 'Chi-Square Test of Independence in Jamovi',
+      intro: 'Test the association between two categorical variables (contingency table).',
+      steps: [
+        { action: 'Open the Frequencies module.', detail: 'Analyses panel → Frequencies → Contingency Tables (JASP: Frequencies \u2192 Contingency Tables).' },
+        { action: 'Assign variables.', detail: 'Move the row variable to Rows and the column variable to Columns.' },
+        { action: 'Choose statistics.', detail: 'Under Statistics tick \u03C7\u00B2; if any expected count < 5 also tick Fisher\u2019s exact test.' },
+        { action: 'Add effect size.', detail: 'Tick Cramer\u2019s V (or \u03C6 for 2\u00D72 tables) to quantify association strength.' }
+      ],
+      tips: ['Report the contingency table, \u03C7\u00B2(df, N) = value, p = value, Cramer\u2019s V = value.'],
+      sourceNote: 'Path based on JASP-style Frequencies module (Jamovi-compatible contingency tables may require the Frequencies add-on).'
+    },
+    'jamovi.factor.pca': {
+      title: 'Principal Component Analysis in Jamovi',
+      intro: 'Extract a small set of components that summarize the variance of many variables.',
+      steps: [
+        { action: 'Open the Factor module.', detail: 'Analyses panel → Factor → Principal Component Analysis.' },
+        { action: 'Assign variables.', detail: 'Move all scale items to the Variables box.' },
+        { action: 'Choose extraction.', detail: 'Keep components = auto or set a fixed number; choose rotation (e.g., varimax / oblimin) if more than one component is retained.' },
+        { action: 'Read the output.', detail: 'Check the eigenvalues (Kaiser criterion > 1), the variance explained table, and the component loadings matrix.' }
+      ],
+      tips: ['Use the loading table to interpret which items belong to each component (|loading| > .40 as a rule of thumb).'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.factor.efa': {
+      title: 'Exploratory Factor Analysis in Jamovi',
+      intro: 'Uncover latent factors underlying a set of observed variables (with measurement error).',
+      steps: [
+        { action: 'Open the Factor module.', detail: 'Analyses panel → Factor → Exploratory Factor Analysis.' },
+        { action: 'Assign variables.', detail: 'Move all scale items to the Variables box.' },
+        { action: 'Select extraction and rotation.', detail: 'Choose extraction method (e.g., minimum residual / maximum likelihood) and an oblique rotation (e.g., oblimin) if factors are expected to correlate.' },
+        { action: 'Decide the number of factors.', detail: 'Use parallel analysis / scree plot output and theoretical expectations to fix the number of factors.' }
+      ],
+      tips: ['Report factor loadings, communalities, and the correlation between factors when using oblique rotation.'],
+      sourceNote: 'Path based on Jamovi 2.x interface.'
+    },
+    'jamovi.factor.cfa': {
+      title: 'Confirmatory Factor Analysis in Jamovi',
+      intro: 'Test whether the observed variables load on the latent factors as theoretically specified.',
+      steps: [
+        { action: 'Install / open the SEM module (separable).', detail: 'In Jamovi, confirmatory factor models are estimated through the SEM module or via the Rj module using lavaan syntax.' },
+        { action: 'Define the model.', detail: 'Write the lavaan-style model: latent factor =~ item1 + item2 + item3; assign the observed variables.' },
+        { action: 'Run the model.', detail: 'Click the run button and wait for the estimation to finish.' },
+        { action: 'Evaluate fit.', detail: 'Read fit indices (\u03C7\u00B2/df, CFI, TLI, RMSEA) and standardized loadings; modify the model only with substantive justification.' }
+      ],
+      tips: ['Report CFI/TLI > .90 (ideally > .95) and RMSEA < .08 as commonly used cutoffs.'],
+      sourceNote: 'CFA in Jamovi relies on the SEM / lavaan backend; the interface path may vary by add-on.'
+    }
+  };
+
+  // ---- 场景树渲染与选中 ----
+  var stsTreeEl = document.getElementById('stsTree');
+  var stsSelectionEl = document.getElementById('stsSelection');
+  var stsGenBtn = document.getElementById('stsGenBtn');
+  var stsClearBtn = document.getElementById('stsClearBtn');
+  var stsQuestionEl = document.getElementById('stsQuestion');
+  var stsDatasetEl = document.getElementById('stsDataset');
+  var stsStepsBtn = document.getElementById('stsStepsBtn');
+  var stsStepsEl = document.getElementById('stsSteps');
+  var stsAnalyzeBtn = document.getElementById('stsAnalyzeBtn');
+  var stsAnalysisEl = document.getElementById('stsAnalysis');
+  var stsLangSwitchEl = document.getElementById('stsLangSwitch');
+
+  function stsModuleCount(m) {
+    var n = 0;
+    m.groups.forEach(function (g) { n += g.methods.length; });
+    return n;
+  }
+
+  function renderStsTree() {
+    var html = '';
+    STS_MODULES.forEach(function (m, mi) {
+      html += '<div class="sts-module' + (mi === 0 ? ' open' : '') + '" data-module="' + m.id + '">';
+      html += '<div class="sts-module-head" role="button" tabindex="0" aria-expanded="' + (mi === 0 ? 'true' : 'false') + '">';
+      html += '<span class="sts-module-arrow"></span><span class="sts-module-name">' + escapeHtml(m.name) + '</span>';
+      html += '<span class="sts-module-badge">' + stsModuleCount(m) + '</span></div>';
+      html += '<div class="sts-module-body">';
+      m.groups.forEach(function (g) {
+        var isNP = g.type === 'nonparametric';
+        if (g.label) {
+          html += '<div class="sts-group-label' + (isNP ? ' nonparametric' : '') + '">' + escapeHtml(g.label) + '</div>';
+        }
+        html += '<div class="sts-methods">';
+        g.methods.forEach(function (meth) {
+          html += '<button type="button" class="sts-method-chip' + (isNP ? ' nonparam-chip' : '') + '" data-module="' + m.id + '" data-method="' + meth.id + '">' + escapeHtml(meth.label) + '</button>';
+        });
+        html += '</div>';
+      });
+      html += '</div></div>';
+    });
+    stsTreeEl.innerHTML = html;
+  }
+
+  stsTreeEl.addEventListener('click', function (e) {
+    var head = e.target.closest('.sts-module-head');
+    if (head) {
+      var mod = head.closest('.sts-module');
+      var isOpen = mod.classList.contains('open');
+      stsTreeEl.querySelectorAll('.sts-module.open').forEach(function (el) { el.classList.remove('open'); });
+      if (!isOpen) mod.classList.add('open');
+      return;
+    }
+    var chip = e.target.closest('.sts-method-chip');
+    if (!chip) return;
+    stsTreeEl.querySelectorAll('.sts-method-chip.selected').forEach(function (el) { el.classList.remove('selected'); });
+    chip.classList.add('selected');
+    STS_STATE.module = chip.getAttribute('data-module');
+    STS_STATE.method = chip.getAttribute('data-method');
+    updateStsSelection();
+  });
+
+  function stsMethodLabel(moduleId, methodId) {
+    var m = STS_MODULES.filter(function (x) { return x.id === moduleId; })[0];
+    if (!m) return methodId;
+    var found = null;
+    m.groups.forEach(function (g) {
+      g.methods.forEach(function (meth) { if (meth.id === methodId) found = meth.label; });
+    });
+    return found || methodId;
+  }
+
+  function updateStsSelection() {
+    if (STS_STATE.method) {
+      var mod = STS_MODULES.filter(function (x) { return x.id === STS_STATE.module; })[0];
+      stsSelectionEl.style.display = '';
+      stsSelectionEl.innerHTML = '当前选择：<b>' + escapeHtml(STS_STATE.tool === 'jamovi' ? 'Jamovi' : 'SPSS') + '</b> · <b>' + escapeHtml(mod ? mod.name : '') + '</b> → <b>' + escapeHtml(stsMethodLabel(STS_STATE.module, STS_STATE.method)) + '</b><span class="sts-clear-link" id="stsClearSel">重新选择</span>';
+      stsGenBtn.disabled = false;
+      document.getElementById('stsClearSel').addEventListener('click', function () {
+        STS_STATE.module = null; STS_STATE.method = null;
+        stsTreeEl.querySelectorAll('.sts-method-chip.selected').forEach(function (el) { el.classList.remove('selected'); });
+        updateStsSelection();
+      });
+    } else {
+      stsSelectionEl.style.display = '';
+      stsSelectionEl.innerHTML = '尚未选择分析场景：请在上方场景树中点击一个细分方法';
+      stsGenBtn.disabled = true;
+    }
+  }
+
+  // ---- 生成题目 ----
+  function runStsGen() {
+    if (!STS_STATE.method) { showStatus('warning', '请先在场景树中选择一个细分分析方法'); return; }
+    stsGenBtn.disabled = true;
+    var oldText = stsGenBtn.textContent;
+    stsGenBtn.textContent = '生成中…';
+    stsQuestionEl.innerHTML = '<div class="sts-loading">AI 正在生成题目与模拟数据集，请稍候…</div>';
+    stsDatasetEl.style.display = 'none';
+    stsStepsEl.innerHTML = '';
+    stsAnalysisEl.innerHTML = '';
+    stsLangSwitchEl.style.display = 'none';
+    stsStepsBtn.disabled = true;
+    stsAnalyzeBtn.disabled = true;
+    STS_STATE.data = null;
+
+    fetch(STS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool: STS_STATE.tool, module: STS_STATE.module, method: STS_STATE.method })
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.d || !res.d.ok) {
+          throw new Error((res.d && res.d.error) || '生成失败');
+        }
+        STS_STATE.data = res.d;
+        renderStsQuestion(res.d.question);
+        renderStsDataset(res.d.dataset, res.d.question);
+        stsStepsBtn.disabled = false;
+        stsAnalyzeBtn.disabled = false;
+        showStatus('ok', '题目生成完成：可导出 Excel 数据集、查看英文操作步骤或查看数据分析');
+      })
+      .catch(function (err) {
+        stsQuestionEl.innerHTML = '';
+        showStatus('error', '题目生成失败：' + String((err && err.message) || err));
+      })
+      .then(function () {
+        stsGenBtn.disabled = false;
+        stsGenBtn.textContent = oldText;
+        updateStsSelection();
+      });
+  }
+  stsGenBtn.addEventListener('click', runStsGen);
+  stsClearBtn.addEventListener('click', function () {
+    STS_STATE.data = null;
+    stsQuestionEl.innerHTML = '';
+    stsDatasetEl.style.display = 'none';
+    stsDatasetEl.innerHTML = '';
+    stsStepsEl.innerHTML = '';
+    stsAnalysisEl.innerHTML = '';
+    stsLangSwitchEl.style.display = 'none';
+    stsStepsBtn.disabled = true;
+    stsAnalyzeBtn.disabled = true;
+  });
+
+  // ---- 题目 / 数据集渲染 ----
+  function renderStsQuestion(q) {
+    var html = '<div class="sts-question-card"><h3>' + escapeHtml(q.title) + '</h3>';
+    html += '<div class="sts-field"><b>题干背景：</b>' + escapeHtml(q.scenario) + '</div>';
+    if (q.researchDesign) html += '<div class="sts-field"><b>研究设计：</b>' + escapeHtml(q.researchDesign) + '</div>';
+    if (q.hypothesis) html += '<div class="sts-field"><b>研究假设：</b>' + escapeHtml(q.hypothesis) + '</div>';
+    html += '<div class="sts-field"><b>期望分析方法：</b>' + escapeHtml(q.expectedMethod) + '　<b>样本量：</b>' + escapeHtml(String(q.sampleSize)) + '</div>';
+    if (q.apaResult) html += '<div class="sts-field"><b>APA 数值结果（示意）：</b><span class="sts-apa-pill">' + escapeHtml(q.apaResult) + '</span></div>';
+    if (q.variables && q.variables.length) {
+      html += '<table class="sts-var-table"><thead><tr><th>变量名</th><th>中文标签</th><th>角色</th><th>类型</th><th>尺度</th></tr></thead><tbody>';
+      q.variables.forEach(function (v) {
+        var roleMap = { independent: '自变量', dependent: '因变量', covariate: '协变量' };
+        var typeMap = { categorical: '分类', numeric: '数值' };
+        var scaleMap = { nominal: '定类', ordinal: '定序', continuous: '连续' };
+        html += '<tr><td>' + escapeHtml(v.name || '') + '</td><td>' + escapeHtml(v.label || '') + '</td><td>' + escapeHtml(roleMap[v.role] || v.role) + '</td><td>' + escapeHtml(typeMap[v.type] || v.type) + '</td><td>' + escapeHtml(scaleMap[v.scale] || v.scale) + '</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+    html += '</div>';
+    stsQuestionEl.innerHTML = html;
+  }
+
+  function renderStsDataset(ds, q) {
+    var headers = (ds.variables || []).map(function (v) { return v.label || v.name || ''; });
+    var rows = (ds.data || []).slice(0, 8);
+    var html = '<div class="sts-question-card"><h3>模拟数据集（导出后可导入 Jamovi 练习）</h3>';
+    html += '<div class="sts-note">' + escapeHtml(ds.note || '模拟数据由 AI 生成，仅供统计练习。') + '</div>';
+    html += '<div class="sts-data-preview-wrap"><table class="sts-data-preview"><thead><tr>';
+    headers.forEach(function (h) { html += '<th>' + escapeHtml(h) + '</th>'; });
+    html += '</tr></thead><tbody>';
+    rows.forEach(function (row) {
+      html += '<tr>';
+      row.forEach(function (cell) { html += '<td>' + escapeHtml(cell === null || cell === undefined ? '' : String(cell)) + '</td>'; });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    html += '<div class="sts-note">数据行数：' + (ds.data ? ds.data.length : 0) + '（预览仅显示前 8 行，导出包含全部数据）</div>';
+    html += '<div class="sts-actions">';
+    html += '<button type="button" id="stsExportXlsx" class="sts-primary-btn">导出 Excel 数据集 (.xlsx)</button>';
+    html += '<button type="button" id="stsCopyCsv" class="sts-secondary-btn">复制 CSV（兜底）</button>';
+    html += '</div></div>';
+    stsDatasetEl.innerHTML = html;
+    stsDatasetEl.style.display = '';
+  }
+
+  // ---- 内嵌轻量 xlsx 生成器（纯 JS 手工 zip+xml，零外链） ----
+  function stsUtf8Bytes(str) {
+    var out = [], i, c;
+    for (i = 0; i < str.length; i++) {
+      c = str.charCodeAt(i);
+      if (c < 128) { out.push(c); }
+      else if (c < 2048) { out.push(192 | (c >> 6), 128 | (c & 63)); }
+      else if (c < 55296 || c >= 57344) { out.push(224 | (c >> 12), 128 | ((c >> 6) & 63), 128 | (c & 63)); }
+      else { i++; var c2 = str.charCodeAt(i); var cp = 65536 + ((c - 55296) << 10) + (c2 - 56320); out.push(240 | (cp >> 18), 128 | ((cp >> 12) & 63), 128 | ((cp >> 6) & 63), 128 | (cp & 63)); }
+    }
+    return out;
+  }
+  var stsCrcTable = (function () {
+    var t = [], n, c, k;
+    for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) { c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); } t[n] = c >>> 0; }
+    return t;
+  })();
+  function stsCrc32(bytes) {
+    var crc = 0xFFFFFFFF, n;
+    for (n = 0; n < bytes.length; n++) { crc = stsCrcTable[(crc ^ bytes[n]) & 255] ^ (crc >>> 8); }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+  function stsU16(v) { return [v & 255, (v >> 8) & 255]; }
+  function stsU32(v) { return [v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >> 24) & 255]; }
+  function stsFlatten(parts) {
+    var out = [];
+    parts.forEach(function (p) { if (typeof p === 'number') { out.push(p); } else { for (var i = 0; i < p.length; i++) { out.push(p[i]); } } });
+    return out;
+  }
+  function stsZipFiles(files) {
+    var body = [], central = [], offset = 0;
+    var dosTime = ((12 << 11) | (0 << 5) | 0);
+    var dosDate = (((2026 - 1980) << 9) | (9 << 5) | 6);
+    files.forEach(function (f) {
+      var nameB = stsUtf8Bytes(f.name);
+      var crc = stsCrc32(f.bytes);
+      var len = f.bytes.length;
+      var lh = stsFlatten([
+        stsU32(0x04034b50), stsU16(20), stsU16(0), stsU16(0), stsU16(dosTime), stsU16(dosDate),
+        stsU32(crc), stsU32(len), stsU32(len), stsU16(nameB.length), stsU16(0), nameB
+      ]);
+      var ce = stsFlatten([
+        stsU32(0x02014b50), stsU16(20), stsU16(20), stsU16(0), stsU16(0), stsU16(dosTime), stsU16(dosDate),
+        stsU32(crc), stsU32(len), stsU32(len), stsU16(nameB.length), stsU16(0), stsU16(0), stsU16(0), stsU16(0),
+        stsU32(0), stsU32(offset), nameB
+      ]);
+      body = body.concat(lh, f.bytes);
+      central = central.concat(ce);
+      offset += lh.length + len;
+    });
+    var eocd = stsFlatten([
+      stsU32(0x06054b50), stsU16(0), stsU16(0), stsU16(files.length), stsU16(files.length),
+      stsU32(central.length), stsU32(offset), stsU16(0)
+    ]);
+    return new Uint8Array(stsFlatten([body, central, eocd]));
+  }
+  function stsColName(i) {
+    var s = '';
+    i = i + 1;
+    while (i > 0) { var r = (i - 1) % 26; s = String.fromCharCode(65 + r) + s; i = Math.floor((i - 1) / 26); }
+    return s;
+  }
+  function stsSheetXml(headers, rows) {
+    var lines = ['<?xml version="1.0" encoding="UTF-8" standalone="yes"?>', '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>'];
+    function cellXml(r, c, v) {
+      var ref = stsColName(c) + (r + 1);
+      if (typeof v === 'number') { return '<c r="' + ref + '"><v>' + v + '</v></c>'; }
+      return '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + escapeHtml(String(v === null || v === undefined ? '' : v)) + '</t></is></c>';
+    }
+    lines.push('<row r="1">');
+    headers.forEach(function (h, ci) { lines.push(cellXml(0, ci, h)); });
+    lines.push('</row>');
+    rows.forEach(function (row, ri) {
+      lines.push('<row r="' + (ri + 2) + '">');
+      row.forEach(function (v, ci) { lines.push(cellXml(ri + 1, ci, v)); });
+      lines.push('</row>');
+    });
+    lines.push('</sheetData></worksheet>');
+    return lines.join('');
+  }
+  function stsBuildXlsx(headers, rows) {
+    var files = [
+      { name: '[Content_Types].xml', bytes: stsUtf8Bytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>') },
+      { name: '_rels/.rels', bytes: stsUtf8Bytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>') },
+      { name: 'xl/workbook.xml', bytes: stsUtf8Bytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Data" sheetId="1" r:id="rId1"/></sheets></workbook>') },
+      { name: 'xl/_rels/workbook.xml.rels', bytes: stsUtf8Bytes('<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>') },
+      { name: 'xl/worksheets/sheet1.xml', bytes: stsUtf8Bytes(stsSheetXml(headers, rows)) }
+    ];
+    return stsZipFiles(files);
+  }
+  function stsDownloadBytes(bytes, filename) {
+    var blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  stsDatasetEl.addEventListener('click', function (e) {
+    if (e.target.id === 'stsExportXlsx') { stsExportXlsx(); }
+    else if (e.target.id === 'stsCopyCsv') { stsCopyCsv(); }
+  });
+
+  function stsExportXlsx() {
+    if (!STS_STATE.data) return;
+    var ds = STS_STATE.data.dataset;
+    var headers = (ds.variables || []).map(function (v) { return v.label || v.name || ''; });
+    var rows = ds.data || [];
+    var q = STS_STATE.data.question || {};
+    var label = (STS_STATE.method || 'data').replace(/[^A-Za-z0-9_-]/g, '-');
+    var name = 'jamovi-' + label + '-dataset-' + new Date().toISOString().slice(0, 10) + '.xlsx';
+    try {
+      var bytes = stsBuildXlsx(headers, rows);
+      stsDownloadBytes(bytes, name);
+      showStatus('ok', '已导出 ' + name + '（共 ' + rows.length + ' 行数据），可用 Excel / Numbers / Jamovi 打开');
+    } catch (err) {
+      showStatus('error', 'Excel 导出失败：' + String((err && err.message) || err) + '，可改用「复制 CSV」');
+    }
+  }
+
+  function stsCopyCsv() {
+    if (!STS_STATE.data || !STS_STATE.data.dataset) return;
+    var csv = '\ufeff' + (STS_STATE.data.dataset.csvText || '');
+    function done() { showStatus('ok', 'CSV（含 BOM，已兼容中文）已复制，可粘贴到文件后以 .csv 保存导入 Jamovi'); }
+    function fallback() {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = csv;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        done();
+      } catch (err2) {
+        showStatus('error', '复制失败，请使用「导出 Excel」或手动保存数据');
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(csv).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  // ---- 查看英文操作步骤 ----
+  stsStepsBtn.addEventListener('click', function () {
+    if (!STS_STATE.method) return;
+    var key = 'jamovi.' + STS_STATE.module + '.' + STS_STATE.method;
+    var entry = STS_STEPS[key];
+    var selLabel = stsMethodLabel(STS_STATE.module, STS_STATE.method);
+    if (!entry) {
+      stsStepsEl.innerHTML = '<div class="sts-fallback">「' + escapeHtml(selLabel) + '」的操作指引正在整理中，可先使用「查看数据分析」练习解读。</div>';
+      return;
+    }
+    var html = '<div class="sts-question-card">';
+    html += '<h3>' + escapeHtml(entry.title) + '<span class="sts-badge-lang">EN</span></h3>';
+    if (entry.intro) html += '<div class="sts-field"><b>Overview: </b>' + escapeHtml(entry.intro) + '</div>';
+    html += '<div class="sts-step-block"><h4>Steps</h4>';
+    (entry.steps || []).forEach(function (s, i) {
+      html += '<div class="sts-step-item"><span class="sts-step-num">' + (i + 1) + '</span><div class="sts-step-text"><b>' + escapeHtml(s.action) + '</b>' + (s.detail ? escapeHtml(s.detail) : '') + '</div></div>';
+    });
+    html += '</div>';
+    if (entry.tips && entry.tips.length) {
+      html += '<div class="sts-step-block"><h4>Tips</h4>';
+      entry.tips.forEach(function (tip) { html += '<div class="sts-tip-item">' + escapeHtml(tip) + '</div>'; });
+      html += '</div>';
+    }
+    if (entry.sourceNote) html += '<div class="sts-note">' + escapeHtml(entry.sourceNote) + '</div>';
+    html += '</div>';
+    stsStepsEl.innerHTML = html;
+    stsStepsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  // ---- 查看数据分析（中 / 英切换，不重新请求） ----
+  function renderStsAnalysis() {
+    if (!STS_STATE.data) return;
+    var lang = STS_STATE.lang;
+    var interp = (STS_STATE.data.interpretation || {})[lang] || {};
+    var q = STS_STATE.data.question || {};
+    var langName = lang === 'zh' ? '中文解读' : 'English Interpretation';
+    var html = '<div class="sts-question-card"><h3>' + (lang === 'zh' ? '数据分析解读' : 'Data Analysis Interpretation') + '<span class="sts-badge-lang">' + (lang === 'zh' ? '中文' : 'EN') + '</span></h3>';
+    if (q.apaResult) {
+      html += '<div class="sts-field"><b>' + (lang === 'zh' ? 'APA 结果：' : 'APA Result: ') + '</b><span class="sts-apa-pill">' + escapeHtml(q.apaResult) + '</span></div>';
+    }
+    if (interp.summary) html += '<div class="sts-field"><b>' + (lang === 'zh' ? '解读：' : 'Summary: ') + '</b>' + escapeHtml(interp.summary) + '</div>';
+    if (interp.apa) html += '<div class="sts-field"><b>' + (lang === 'zh' ? '可复用的 APA 报告句式：' : 'APA reporting sentence: ') + '</b>' + escapeHtml(interp.apa) + '</div>';
+    if (interp.practical) html += '<div class="sts-field"><b>' + (lang === 'zh' ? '实操提示：' : 'Practical tip: ') + '</b>' + escapeHtml(interp.practical) + '</div>';
+    html += '<div class="sts-note">' + (lang === 'zh' ? '说明：围绕 AI 生成的模拟题目与模拟数据给出解读。模拟数据由 AI 生成，仅供统计练习。' : 'Note: The interpretation refers to the AI-generated practice scenario and simulated dataset. Simulated data is AI-generated and intended for statistical practice only.') + '</div>';
+    html += '</div>';
+    stsAnalysisEl.innerHTML = html;
+  }
+
+  stsAnalyzeBtn.addEventListener('click', function () {
+    if (!STS_STATE.data) return;
+    STS_STATE.lang = 'zh';
+    document.getElementById('stsLangZh').classList.add('active');
+    document.getElementById('stsLangEn').classList.remove('active');
+    stsLangSwitchEl.style.display = '';
+    renderStsAnalysis();
+    stsAnalysisEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  document.getElementById('stsLangZh').addEventListener('click', function () {
+    STS_STATE.lang = 'zh';
+    document.getElementById('stsLangZh').classList.add('active');
+    document.getElementById('stsLangEn').classList.remove('active');
+    renderStsAnalysis();
+  });
+  document.getElementById('stsLangEn').addEventListener('click', function () {
+    STS_STATE.lang = 'en';
+    document.getElementById('stsLangEn').classList.add('active');
+    document.getElementById('stsLangZh').classList.remove('active');
+    renderStsAnalysis();
+  });
+
+  renderStsTree();
+  updateStsSelection();
 
   loadFeatured();
 })();
