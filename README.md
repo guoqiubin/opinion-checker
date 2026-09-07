@@ -1,3 +1,14 @@
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: 17cd36bbe0a965acd2f6c94474085e62_7f6b2fe3a9a111f1be88525400aeaaa3
+    ReservedCode1: ffSRkoNmdISAF9+vMPaaPkf6JbY8Nx6ni/Tzdwj8mM3o1M+Kw1WDSTUWaSsKi5K6BMy1NCYMw/KzRklf4hz79FzVZ/Y/RuK3kSGGAVhawmvHF3OC4c7o7gdyFkwJpKgNYusFENnTrCmodzOI8p1FKycXLYvEeoZsptHs17SY7gdXGLXtMsR+zg6YNiQ=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: 17cd36bbe0a965acd2f6c94474085e62_7f6b2fe3a9a111f1be88525400aeaaa3
+    ReservedCode2: ffSRkoNmdISAF9+vMPaaPkf6JbY8Nx6ni/Tzdwj8mM3o1M+Kw1WDSTUWaSsKi5K6BMy1NCYMw/KzRklf4hz79FzVZ/Y/RuK3kSGGAVhawmvHF3OC4c7o7gdyFkwJpKgNYusFENnTrCmodzOI8p1FKycXLYvEeoZsptHs17SY7gdXGLXtMsR+zg6YNiQ=
+---
+
 # Opinion Checker 观点理论支持检测器
 
 输入你的观点，AI 先理解语义并判断是否存在学术理论支持，再检索学术文献给出分级信源。妈妈再也不用担心我胡说八道了。
@@ -187,3 +198,4 @@ vercel dev    # 本地启动，访问 http://localhost:3000
 ## License
 
 MIT
+*（内容由AI生成，仅供参考）*

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校招助手 · Q&A 内容管理</title>
+<style>
+  :root {
+    --bg-top: #F2EDE4;
+    --bg-bottom: #DDD5C5;
+    --panel-top: #F6F1E8;
+    --panel-bottom: #E6DECC;
+    --paper: #FBF7EE;
+    --paper-deep: #F1EAD9;
+    --gold: #B07820;
+    --gold-light: #D9A641;
+    --gold-deep: #8A5E14;
+    --brown: #5C4F3A;
+    --brown-dark: #453A28;
+    --brown-mid: #7A6C55;
+    --border: #A09880;
+    --comment: #8A7F6E;
+    --red: #B03A2E;
+    --green-deep: #3F6B3F;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Georgia, "Times New Roman", "Songti SC", "STSong", "SimSun", serif;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(255,255,255,.55), transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(176,120,32,.08), transparent 55%),
+      repeating-linear-gradient(45deg, rgba(0,0,0,.014) 0 1px, transparent 1px 4px),
+      linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    color: var(--brown);
+    line-height: 1.6;
+    min-height: 100vh;
+    font-size: 15px;
+  }
+  ::selection { background: rgba(176,120,32,.35); }
+  .container { max-width: 860px; margin: 0 auto; padding: 36px 20px 64px; }
+
+  header { text-align: center; margin-bottom: 26px; }
+  header h1 {
+    display: inline-block;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #F7EFDC;
+    text-shadow: 0 1px 0 rgba(255,255,255,.18), 0 -1px 0 rgba(0,0,0,.35), 0 3px 6px rgba(0,0,0,.4);
+    padding: 12px 30px;
+    border-radius: 12px;
+    border: 1px solid #7A5C22;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.16), rgba(0,0,0,.12)),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 2px, transparent 2px 5px),
+      linear-gradient(180deg, #A87E2E, #8A5E14 55%, #6F4A0E);
+    box-shadow: 0 6px 14px rgba(69,58,40,.45), inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 4px rgba(0,0,0,.35);
+  }
+  header p { color: var(--brown-mid); font-size: 13px; margin-top: 12px; font-style: italic; }
+
+  /* win 拟物窗口 */
+  .win {
+    background: linear-gradient(180deg, var(--panel-top), var(--panel-bottom));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(69,58,40,.28), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -1px 0 rgba(0,0,0,.06);
+    overflow: hidden;
+    margin-bottom: 18px;
+  }
+  .win-titlebar {
+    display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,0) 45%),
+      repeating-linear-gradient(90deg, rgba(90,70,30,.08) 0 3px, transparent 3px 8px),
+      linear-gradient(180deg, #CBBE9C, #B4A67F);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(0,0,0,.15);
+  }
+  .win-dots { display: flex; gap: 6px; }
+  .win-dots i { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 1px 2px rgba(0,0,0,.4), inset 0 -1px 1px rgba(255,255,255,.6), 0 1px 1px rgba(0,0,0,.2); }
+  .win-dots i:nth-child(1) { background: radial-gradient(circle at 35% 30%, #ff8d84, #C0463A 70%); }
+  .win-dots i:nth-child(2) { background: radial-gradient(circle at 35% 30%, #ffd98a, #C99A2E 70%); }
+  .win-dots i:nth-child(3) { background: radial-gradient(circle at 35% 30%, #8fe0a2, #3E8A52 70%); }
+  .win-title { font-size: 13px; font-weight: 700; color: var(--brown-dark); letter-spacing: 1px; text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+  .win-body { padding: 18px; }
+
+  .cmd-label { font-size: 14px; font-weight: 700; color: var(--brown-dark); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(160,152,128,.55); text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+  .cmd-label .dollar { color: var(--gold-deep); }
+  .cmd-label .fname { color: var(--brown); font-style: italic; }
+
+  label { display: block; font-size: 12.5px; font-weight: 700; color: var(--brown-dark); margin: 12px 0 5px; letter-spacing: 1px; }
+  input[type="password"], select, textarea {
+    width: 100%; padding: 9px 12px; border: 1px solid #cbb27a; border-radius: 8px;
+    background: #FFFDF4; font-family: inherit; font-size: 14px; color: var(--brown-dark);
+    box-shadow: inset 0 2px 4px rgba(69,58,40,.08);
+  }
+  input[type="password"]:focus, select:focus, textarea:focus {
+    outline: none; border-color: var(--gold); box-shadow: inset 0 3px 8px rgba(69,58,40,.14), 0 0 0 3px rgba(176,120,32,.18);
+  }
+  textarea { resize: vertical; min-height: 52px; line-height: 1.6; }
+
+  /* 黄铜钮 */
+  .c-btn {
+    display: inline-block; border-radius: 8px; padding: 7px 16px; font-family: inherit;
+    font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid #a87e31;
+    color: #4a3200; background: linear-gradient(180deg, #d9b25f, #b98d3a);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 4px rgba(0,0,0,.12);
+    transition: all .12s;
+  }
+  .c-btn:hover { filter: brightness(1.06); }
+  .c-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.25); transform: translateY(1px); }
+  .c-btn:disabled { opacity: .55; cursor: not-allowed; }
+  .c-btn.ghost { background: linear-gradient(180deg, #F3EDDF, #DCD2BB); border-color: #9A8F77; color: var(--brown-dark); }
+  .c-btn.danger { background: linear-gradient(180deg, #e8b0a8, #c9705f); border-color: #b15a48; color: #5a1f14; }
+
+  .toolbar { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .msg { margin: 10px 0; padding: 9px 12px; border-radius: 8px; font-size: 13px; display: none; }
+  .msg.show { display: block; }
+  .msg.ok { background: #EAF3E3; color: var(--green-deep); border: 1px solid #BCD9AC; }
+  .msg.err { background: #FAE9E4; color: var(--red); border: 1px solid #E5BCAE; }
+  .msg.warn { background: #F8EFD8; color: #7A5C22; border: 1px solid #E2CF9B; }
+
+  /* 问答编辑卡片 */
+  .qa-card {
+    background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px; padding: 14px 16px;
+    margin-bottom: 12px; box-shadow: 0 2px 6px rgba(120,90,30,.08);
+  }
+  .qa-card.new-card { border-style: dashed; border-color: var(--gold); }
+  .qa-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .qa-head select { width: auto; min-width: 120px; padding: 5px 8px; }
+  .qa-status { font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 20px; letter-spacing: 1px; }
+  .qa-status.pub { background: #EAF3E3; color: var(--green-deep); border: 1px solid #BCD9AC; }
+  .qa-status.hid { background: #EFE8D8; color: var(--comment); border: 1px solid #D6C9A8; }
+  .qa-sort { font-size: 12px; color: var(--comment); font-style: italic; }
+  .qa-ops { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
+  .qa-ops .c-btn, .qa-actions .c-btn { padding: 5px 12px; font-size: 12.5px; }
+  .qa-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .empty { text-align: center; padding: 40px 10px; color: var(--comment); font-size: 13px; font-style: italic; }
+  .hint { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 12px; line-height: 1.7; }
+  .loading { text-align: center; padding: 24px; color: var(--comment); font-size: 13px; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>校招助手 · Q&A 内容管理</h1>
+    <p>心理学硕博小助手 · 后台（秋招问答信息流）</p>
+  </header>
+
+  <!-- 密钥登录 -->
+  <section id="loginGate" class="win">
+    <div class="win-titlebar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="win-title">站长登录</span>
+    </div>
+    <div class="win-body">
+      <div class="cmd-label"><span class="dollar">§</span> <span class="fname">请输入管理密钥（与精选墙管理密钥相同）</span></div>
+      <label for="adminKey">管理密钥</label>
+      <input type="password" id="adminKey" placeholder="输入管理密钥后回车 / 点击进入" autocomplete="off">
+      <div class="hint">密钥仅用于本地会话校验，仅保存在浏览器 sessionStorage，关闭浏览器即失效。本站所有请求均通过服务端比对，密钥不会出现在页面代码中。</div>
+      <div class="qa-actions" style="margin-top:14px">
+        <button type="button" class="c-btn" id="loginBtn">进入管理</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 主管理区 -->
+  <section id="mainPanel" class="win" hidden>
+    <div class="win-titlebar">
+      <span class="win-dots"><i></i><i></i><i></i></span>
+      <span class="win-title">问答管理（保存即生效，无需重新部署）</span>
+    </div>
+    <div class="win-body">
+      <div class="toolbar">
+        <button type="button" class="c-btn" id="addBtn">＋ 新增问答</button>
+        <span style="font-size:12px;color:var(--comment);font-style:italic" id="countText"></span>
+        <button type="button" class="c-btn ghost" id="logoutBtn">退出管理</button>
+      </div>
+      <div class="msg" id="msg"></div>
+      <div id="qaList"><div class="loading">加载中…</div></div>
+    </div>
+  </section>
+
+  <p class="hint" style="text-align:center">删除操作不可恢复；隐藏后前台访客立即不可见。排序用「上移 / 下移」调整前台展示顺序。</p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var API = 'api/campus-admin';
+  var CATEGORIES = ['网申', '笔试', '面试', 'offer选择', '其他'];
+  var STORE_KEY = 'campus_manage_key';
+
+  var loginGateEl = document.getElementById('loginGate');
+  var mainPanelEl = document.getElementById('mainPanel');
+  var adminKeyEl = document.getElementById('adminKey');
+  var loginBtnEl = document.getElementById('loginBtn');
+  var addBtnEl = document.getElementById('addBtn');
+  var logoutBtnEl = document.getElementById('logoutBtn');
+  var msgEl = document.getElementById('msg');
+  var qaListEl = document.getElementById('qaList');
+  var countTextEl = document.getElementById('countText');
+
+  function getKey() { try { return sessionStorage.getItem(STORE_KEY) || ''; } catch (e) { return ''; } }
+  function setKey(k) { try { sessionStorage.setItem(STORE_KEY, k); } catch (e) {} }
+  function clearKey() { try { sessionStorage.removeItem(STORE_KEY); } catch (e) {} }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function showMsg(type, text) {
+    msgEl.className = 'msg show ' + type;
+    msgEl.textContent = text;
+    setTimeout(function () { if (msgEl.className.indexOf('show') >= 0) msgEl.className = 'msg'; }, 3200);
+  }
+
+  function callAdmin(payload) {
+    return fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Manage-Key': getKey() },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; });
+    });
+  }
+
+  function handleAuthErr(status, d) {
+    if (status === 401 || (d && String(d.error || '').indexOf('管理密钥无效') >= 0)) {
+      clearKey();
+      showGate('密钥无效或已过期，请重新输入');
+      return true;
+    }
+    return false;
+  }
+
+  function showGate(errText) {
+    loginGateEl.hidden = false;
+    mainPanelEl.hidden = true;
+    adminKeyEl.value = '';
+    if (errText) {
+      showMsg('err', errText);
+      loginGateEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    adminKeyEl.focus();
+  }
+
+  function enterMain() {
+    loginGateEl.hidden = true;
+    mainPanelEl.hidden = false;
+    loadList();
+  }
+
+  function renderOptions(selected) {
+    var html = '';
+    CATEGORIES.forEach(function (c) {
+      html += '<option value="' + escapeHtml(c) + '"' + (c === selected ? ' selected' : '') + '>' + escapeHtml(c) + '</option>';
+    });
+    return html;
+  }
+
+  function cardHtml(item, isNew) {
+    var cat = CATEGORIES.indexOf(item.category) >= 0 ? item.category : CATEGORIES[CATEGORIES.length - 1];
+    var pub = !!item.published;
+    var html = '<div class="qa-card' + (isNew ? ' new-card' : '') + '" data-id="' + escapeHtml(String(item.id == null ? '' : item.id)) + '">';
+    html += '<div class="qa-head">';
+    html += '<select data-field="category">' + renderOptions(cat) + '</select>';
+    html += '<span class="qa-status ' + (pub ? 'pub' : 'hid') + '">' + (pub ? '已发布' : '已隐藏') + '</span>';
+    html += '<span class="qa-sort">#' + escapeHtml(String(item.sort == null ? '' : item.sort)) + '</span>';
+    html += '<div class="qa-ops">';
+    html += '<button type="button" class="c-btn ghost" data-act="up" title="上移">↑ 上移</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="down" title="下移">↓ 下移</button>';
+    html += '<button type="button" class="c-btn danger" data-act="del" title="删除">删除</button>';
+    html += '</div></div>';
+    html += '<label>问题</label>';
+    html += '<textarea data-field="question" rows="2" placeholder="请输入问题">' + escapeHtml(item.question || '') + '</textarea>';
+    html += '<label>答案</label>';
+    html += '<textarea data-field="answer" rows="5" placeholder="请输入答案（支持多行）">' + escapeHtml(item.answer || '') + '</textarea>';
+    html += '<div class="qa-actions">';
+    html += '<button type="button" class="c-btn" data-act="save">保存</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="toggle">' + (pub ? '设为隐藏' : '设为发布') + '</button>';
+    html += '</div></div>';
+    return html;
+  }
+
+  function loadList() {
+    qaListEl.innerHTML = '<div class="loading">加载中…</div>';
+    callAdmin({ action: 'list' }).then(function (res) {
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        qaListEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml((res.d && res.d.error) || '未知错误') + '</div>';
+        return;
+      }
+      var items = (res.d && res.d.items) || [];
+      countTextEl.textContent = '共 ' + items.length + ' 条';
+      if (!items.length) {
+        qaListEl.innerHTML = '<div class="empty">还没有问答内容，点击「＋ 新增问答」开始录入（保存后前台即可展示）。</div>';
+        return;
+      }
+      qaListEl.innerHTML = items.map(function (it) { return cardHtml(it, false); }).join('');
+    }).catch(function (err) {
+      qaListEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(String((err && err.message) || err)) + '</div>';
+    });
+  }
+
+  function readCard(card) {
+    var id = card.getAttribute('data-id') || '';
+    var category = card.querySelector('[data-field="category"]').value;
+    var question = card.querySelector('[data-field="question"]').value.trim();
+    var answer = card.querySelector('[data-field="answer"]').value.trim();
+    return { id: id, category: category, question: question, answer: answer };
+  }
+
+  function markBusy(btn, busyText) {
+    var old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = busyText || '处理中…';
+    return function () { btn.disabled = false; btn.textContent = old; };
+  }
+
+  function saveCard(card, btn) {
+    var data = readCard(card);
+    if (!data.question) { showMsg('warn', '问题不能为空'); return; }
+    if (!data.answer) { showMsg('warn', '答案不能为空'); return; }
+    var restore = markBusy(btn, '保存中…');
+    var action = data.id ? 'update' : 'create';
+    var payload = { action: action, category: data.category, question: data.question, answer: data.answer };
+    if (data.id) payload.id = data.id;
+    callAdmin(payload).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '保存失败');
+        return;
+      }
+      showMsg('ok', '已保存');
+      loadList();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '保存失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function toggleCard(card, btn) {
+    var id = card.getAttribute('data-id');
+    var pub = card.querySelector('.qa-status').textContent === '已发布';
+    var restore = markBusy(btn, '处理中…');
+    callAdmin({ action: 'toggle_publish', id: id, published: !pub }).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '操作失败');
+        return;
+      }
+      showMsg('ok', pub ? '已设为隐藏' : '已设为发布');
+      loadList();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '操作失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function deleteCard(card, btn) {
+    var id = card.getAttribute('data-id');
+    if (!window.confirm('确定删除这条问答吗？删除后不可恢复，所有访客将不可见。')) return;
+    var restore = markBusy(btn, '删除中…');
+    callAdmin({ action: 'delete', id: id }).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '删除失败');
+        return;
+      }
+      showMsg('ok', '已删除');
+      loadList();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '删除失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function moveCard(card, btn, dir) {
+    var id = card.getAttribute('data-id');
+    var restore = markBusy(btn, '移动中…');
+    callAdmin({ action: 'move', id: id, dir: dir }).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '移动失败');
+        return;
+      }
+      if (res.d && res.d.moved === false) {
+        showMsg('warn', (res.d && res.d.reason) || '已到边界');
+      } else {
+        showMsg('ok', dir === 'up' ? '已上移' : '已下移');
+      }
+      loadList();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '移动失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function addNewCard() {
+    // 在列表顶部插入一张空白待保存卡片（data-id 为空，保存时走 create）
+    var empty = { id: '', category: CATEGORIES[0], question: '', answer: '', published: true, sort: '' };
+    var existing = qaListEl.querySelector('.qa-card.new-card');
+    if (existing) { existing.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    var wrap = document.createElement('div');
+    wrap.innerHTML = cardHtml(empty, true);
+    qaListEl.insertBefore(wrap.firstChild, qaListEl.firstChild);
+    showMsg('ok', '请在下方填写问题与答案，点击「保存」即上线（如需先存草稿可先「设为隐藏」）。');
+  }
+
+  // 事件：登录
+  loginBtnEl.addEventListener('click', doLogin);
+  adminKeyEl.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); doLogin(); }
+  });
+  function doLogin() {
+    var key = adminKeyEl.value.trim();
+    if (!key) { showMsg('warn', '请输入管理密钥'); return; }
+    var btn = loginBtnEl;
+    var old = btn.textContent;
+    btn.disabled = true; btn.textContent = '校验中…';
+    // 用 list 请求试探密钥：成功则进入，401 则拒绝
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Manage-Key': key },
+      body: JSON.stringify({ action: 'list' })
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; });
+    }).then(function (res) {
+      btn.disabled = false; btn.textContent = old;
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '校验失败');
+        return;
+      }
+      setKey(key);
+      showMsg('ok', '校验通过');
+      enterMain();
+    }).catch(function (err) {
+      btn.disabled = false; btn.textContent = old;
+      showMsg('err', '无法连接服务：' + String((err && err.message) || err));
+    });
+  }
+
+  // 事件：新增 / 退出
+  addBtnEl.addEventListener('click', addNewCard);
+  logoutBtnEl.addEventListener('click', function () {
+    clearKey();
+    showGate('');
+  });
+
+  // 事件：列表按钮（事件委托）
+  qaListEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    var card = btn.closest('.qa-card');
+    if (!card) return;
+    var act = btn.getAttribute('data-act');
+    if (act === 'save') { saveCard(card, btn); return; }
+    if (act === 'toggle') { toggleCard(card, btn); return; }
+    if (act === 'del') { deleteCard(card, btn); return; }
+    if (act === 'up') { moveCard(card, btn, 'up'); return; }
+    if (act === 'down') { moveCard(card, btn, 'down'); return; }
+  });
+
+  // 启动
+  if (getKey()) { enterMain(); } else { showGate(''); }
+})();
+</script>
+</body>
+</html>

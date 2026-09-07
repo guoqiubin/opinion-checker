@@ -1010,6 +1010,75 @@
     .sts-method-chip { padding: 5px 10px; font-size: 12px; }
     .sts-var-table, .sts-data-preview { font-size: 11px; }
   }
+
+  /* ==================== 校招助手 v2.3：秋招问答（campus 前缀，独立命名空间） ==================== */
+  .campus-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .campus-tab {
+    border: 1px solid #9A8F77; border-radius: 20px; padding: 5px 16px; font-size: 13px;
+    font-family: inherit; font-weight: 600; color: var(--brown-dark); cursor: pointer;
+    background: linear-gradient(180deg, #F3EDDF, #DCD2BB);
+    box-shadow: 0 2px 3px rgba(69,58,40,.22), inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 2px rgba(0,0,0,.1);
+    transition: all .12s;
+  }
+  .campus-tab:hover { background: linear-gradient(180deg, #FBF6EA, #E6DCC6); }
+  .campus-tab:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.25); transform: translateY(1px); }
+  .campus-tab.active {
+    color: #FFF6E0; text-shadow: 0 -1px 0 rgba(0,0,0,.4);
+    background: linear-gradient(180deg, #C99A3E, #A87A22 55%, #8A5E14);
+    border-color: #7A5C22;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.35), inset 0 -1px 0 rgba(255,255,255,.25);
+  }
+  .campus-item {
+    background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px;
+    margin-bottom: 10px; box-shadow: 0 2px 6px rgba(120,90,30,.08);
+    overflow: hidden; transition: box-shadow .15s, border-color .15s;
+  }
+  .campus-item.open { border-color: var(--gold); box-shadow: 0 4px 10px rgba(120,90,30,.16); }
+  .campus-q-head {
+    display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px; cursor: pointer;
+    user-select: none; -webkit-user-select: none;
+  }
+  .campus-q-head:hover { background: rgba(217,178,95,.08); }
+  .campus-arrow {
+    flex-shrink: 0; width: 20px; height: 20px; margin-top: 2px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #FFF6E0; text-shadow: 0 -1px 0 rgba(0,0,0,.3);
+    background: linear-gradient(180deg, #C99A3E, #A87A22 55%, #8A5E14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35);
+    transition: transform .15s;
+  }
+  .campus-item.open .campus-arrow { transform: rotate(90deg); }
+  .campus-q-main { flex: 1; min-width: 0; }
+  .campus-q-title { font-size: 15px; font-weight: 700; color: var(--brown-dark); line-height: 1.55; }
+  .campus-q-meta { margin-top: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .campus-cat {
+    font-size: 11px; font-weight: 700; color: #4a3200; letter-spacing: 1px;
+    padding: 0 9px; border-radius: 5px;
+    background: linear-gradient(180deg, #EDDFB4, #DEC98F);
+    border: 1px solid #CDB26A; box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .campus-date { font-size: 12px; color: var(--comment); font-style: italic; }
+  .campus-a-body {
+    display: none; padding: 4px 16px 16px 46px;
+  }
+  .campus-item.open .campus-a-body { display: block; animation: campusFadeIn .18s ease; }
+  @keyframes campusFadeIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+  .campus-answer {
+    background: #FBF1D8; border-left: 3px solid var(--gold-deep); border-radius: 0 8px 8px 0;
+    padding: 10px 14px; font-size: 13.5px; line-height: 1.85; color: var(--brown-mid);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .campus-loading, .campus-empty {
+    text-align: center; padding: 34px 16px; color: var(--comment);
+    font-size: 13px; font-style: italic; background: #FBF6E9;
+    border: 1px dashed #dcc894; border-radius: 10px; line-height: 1.8;
+  }
+  .campus-empty .campus-empty-icon { font-size: 26px; color: var(--gold-deep); font-style: normal; display: block; margin-bottom: 8px; }
+  .campus-count { text-align: center; font-size: 12.5px; color: var(--comment); font-style: italic; margin-top: 14px; }
+  @media (max-width: 560px) {
+    .campus-a-body { padding-left: 16px; }
+    .campus-q-head { padding: 12px 12px; }
+  }
 </style>
 </head>
 <body>
@@ -1334,20 +1403,18 @@
     </div>
   </section>
 
-  <!-- 1.6 校招助手视图：占位（开发中，敬请期待） -->
+  <!-- 1.6 校招助手视图：秋招问答 Q&A 信息流（v2.3，分类 Tab + 单开手风琴） -->
   <section id="view-campus" class="app-view" data-view="campus" hidden>
     <div class="win">
       <div class="win-titlebar">
         <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-title">校招助手</span>
+        <span class="win-title">校招助手 · 秋招问答</span>
       </div>
       <div class="win-body">
-        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">校招助手开发中</span></div>
-        <div class="placeholder-card">
-          <div class="placeholder-icon">◎</div>
-          <h3>敬请期待</h3>
-          <p>围绕校园招聘场景的实用功能正在规划中，暂未开放。功能确定后将在本模块提供入口。</p>
-        </div>
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">秋招常见问题速查，点击问题展开答案（内容由站长持续更新）</span></div>
+        <div class="campus-tabs" id="campusTabs"></div>
+        <div id="campusList"><div class="campus-loading">加载中…</div></div>
+        <div class="campus-count" id="campusCount"></div>
       </div>
     </div>
   </section>
@@ -1596,6 +1663,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.3',
+      date: '2026-09-07',
+      changes: [
+        { type: 'add', text: '「校招助手」首板块落地：秋招问答信息流（Q&A），分类 Tab（网申 / 笔试 / 面试 / offer 选择 / 其他）筛选' },
+        { type: 'add', text: '单列问答卡片点击展开 / 收起答案（单开手风琴，自动收起上一条），分类小标签 + 更新时间常显' },
+        { type: 'add', text: '独立内容管理后台：管理密钥登录（与精选墙密钥一致），支持新增、编辑、发布 / 隐藏、删除、上移 / 下移排序，保存即生效' }
+      ]
+    },
     {
       version: 'v2.2',
       date: '2026-09-06',
@@ -3327,6 +3403,145 @@
 
   renderStsTree();
   updateStsSelection();
+
+  // ==================== 校招助手 v2.3：秋招问答（campus 前缀命名空间） ====================
+  var CAMPUS_API = 'api/campus-qa';
+  var CAMPUS_CATEGORIES = ['网申', '笔试', '面试', 'offer选择', '其他'];
+  var campusTabsEl = document.getElementById('campusTabs');
+  var campusListEl = document.getElementById('campusList');
+  var campusCountEl = document.getElementById('campusCount');
+  var campusItems = [];         // 全量已发布问答
+  var campusActiveCat = '全部'; // 当前分类 Tab（'全部' 或 CAMPUS_CATEGORIES 内一项）
+  var campusOpenId = null;      // 当前展开问答 id（单开手风琴）
+
+  function campusCatValid(c) {
+    return CAMPUS_CATEGORIES.indexOf(c) >= 0 ? c : '其他';
+  }
+
+  function campusDateText(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return mm + '-' + dd;
+  }
+
+  function campusRenderTabs() {
+    if (!campusTabsEl) return;
+    var cats = ['全部'].concat(CAMPUS_CATEGORIES);
+    campusTabsEl.innerHTML = cats.map(function (c) {
+      return '<button type="button" class="campus-tab' + (c === campusActiveCat ? ' active' : '') +
+        '" data-campus-cat="' + escapeHtml(c) + '">' + escapeHtml(c) + '</button>';
+    }).join('');
+  }
+
+  function campusFiltered() {
+    if (campusActiveCat === '全部') return campusItems;
+    return campusItems.filter(function (it) { return (it.category || '其他') === campusActiveCat; });
+  }
+
+  function campusCardHtml(item) {
+    var open = campusOpenId !== null && String(item.id) === String(campusOpenId);
+    var html = '<div class="campus-item' + (open ? ' open' : '') + '" data-campus-id="' + escapeHtml(String(item.id)) + '">';
+    html += '<div class="campus-q-head">';
+    html += '<span class="campus-arrow">▸</span>';
+    html += '<div class="campus-q-main">';
+    html += '<div class="campus-q-title">' + escapeHtml(item.question || '') + '</div>';
+    html += '<div class="campus-q-meta"><span class="campus-cat">' + escapeHtml(campusCatValid(item.category)) + '</span>';
+    var date = campusDateText(item.updated_at);
+    if (date) html += '<span class="campus-date">更新于 ' + date + '</span>';
+    html += '</div></div></div>';
+    html += '<div class="campus-a-body"><div class="campus-answer">' + escapeHtml(item.answer || '') + '</div></div>';
+    html += '</div>';
+    return html;
+  }
+
+  function campusRenderList() {
+    if (!campusListEl) return;
+    var items = campusFiltered();
+    if (!campusItems.length) {
+      campusListEl.innerHTML = '<div class="campus-empty"><span class="campus-empty-icon">◎</span>内容整理中，敬请期待</div>';
+      campusCountEl.textContent = '';
+      return;
+    }
+    if (!items.length) {
+      campusListEl.innerHTML = '<div class="campus-empty">该分类下暂无问答，可切换上方分类查看。</div>';
+      campusCountEl.textContent = '';
+      return;
+    }
+    campusListEl.innerHTML = items.map(campusCardHtml).join('');
+    campusCountEl.textContent = '共 ' + items.length + ' 条';
+  }
+
+  function campusLoad() {
+    if (!campusListEl) return;
+    campusListEl.innerHTML = '<div class="campus-loading">加载中…</div>';
+    campusCountEl.textContent = '';
+    fetch(CAMPUS_API)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var items = (data && Array.isArray(data.items)) ? data.items : [];
+        campusItems = items;
+        // 分类有效性兜底（非法值归入「其他」展示）
+        campusItems.forEach(function (it) { it.category = campusCatValid(it.category); });
+        if (campusActiveCat !== '全部' && campusItems.length && !campusFiltered().length) {
+          campusActiveCat = '全部';
+        }
+        campusOpenId = null;
+        campusRenderTabs();
+        campusRenderList();
+      })
+      .catch(function () {
+        campusListEl.innerHTML = '<div class="campus-empty">问答加载失败，请刷新重试。</div>';
+        campusCountEl.textContent = '';
+      });
+  }
+
+  // 进入校招助手视图时拉取一次（依赖 applyTool 先完成 hidden 切换，故追加监听在最后）
+  function campusVisibleCheck() {
+    var view = document.getElementById('view-campus');
+    if (!view || view.hidden) return;
+    campusLoad();
+  }
+  window.addEventListener('hashchange', function () {
+    if (location.hash && location.hash.indexOf('#/tools/campus') === 0) {
+      campusVisibleCheck();
+    }
+  });
+
+  // 分类 Tab 切换（事件委托，本地过滤 + 重绘）
+  if (campusTabsEl) {
+    campusTabsEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('.campus-tab[data-campus-cat]');
+      if (!btn) return;
+      var c = btn.getAttribute('data-campus-cat');
+      if (c === campusActiveCat) return;
+      campusActiveCat = c;
+      campusOpenId = null;
+      campusRenderTabs();
+      campusRenderList();
+    });
+  }
+
+  // 问答卡片点击展开 / 收起（单开手风琴，事件委托）
+  if (campusListEl) {
+    campusListEl.addEventListener('click', function (e) {
+      var head = e.target.closest('.campus-q-head');
+      if (!head) return;
+      var card = head.closest('.campus-item');
+      if (!card) return;
+      var id = card.getAttribute('data-campus-id');
+      if (campusOpenId !== null && String(campusOpenId) === String(id)) {
+        campusOpenId = null; // 再次点击收起当前
+      } else {
+        campusOpenId = id;   // 展开新卡片（自动收起上一条）
+      }
+      campusRenderList();
+    });
+  }
+
+  campusVisibleCheck();
 
   loadFeatured();
 })();
