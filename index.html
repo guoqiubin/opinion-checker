@@ -1079,6 +1079,134 @@
     .campus-a-body { padding-left: 16px; }
     .campus-q-head { padding: 12px 12px; }
   }
+
+  /* ==================== 心理学词典 v2.4（dict 前缀独立命名空间） ==================== */
+  .dict-search { display: flex; gap: 12px; margin: 14px 0 10px; flex-wrap: wrap; }
+  #dictInput {
+    flex: 1 1 260px;
+    min-width: 0;
+    background:
+      repeating-linear-gradient(0deg, rgba(176,120,32,.03) 0 1px, transparent 1px 26px),
+      var(--paper, #FFFDF6);
+    border: 1px solid #CBBE9D;
+    border-radius: 10px;
+    padding: 11px 15px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--brown-dark);
+    caret-color: var(--gold-deep);
+    box-shadow: inset 0 2px 5px rgba(69,58,40,.14);
+    outline: none;
+  }
+  #dictInput:focus { border-color: var(--gold); box-shadow: inset 0 2px 5px rgba(69,58,40,.14), 0 0 0 3px rgba(176,120,32,.22); }
+  .dict-btn {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.35), rgba(255,255,255,0) 50%),
+      linear-gradient(180deg, var(--gold-light), var(--gold) 55%, var(--gold-deep));
+    color: #FFF6E0;
+    border: 1px solid #7A5C22;
+    border-radius: 10px;
+    padding: 10px 24px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-shadow: 0 -1px 1px rgba(0,0,0,.45);
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(69,58,40,.4), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -2px 3px rgba(0,0,0,.3);
+    transition: all .12s;
+  }
+  .dict-btn:hover { filter: brightness(1.06); }
+  .dict-btn:active { box-shadow: inset 0 3px 6px rgba(0,0,0,.4), inset 0 -1px 0 rgba(255,255,255,.2); transform: translateY(2px); }
+  .dict-btn:disabled { opacity: .55; cursor: not-allowed; }
+  .dict-btn.dict-btn-sm { padding: 5px 14px; font-size: 13px; letter-spacing: 1px; border-radius: 8px; }
+  .dict-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; }
+  .dict-chip {
+    background: linear-gradient(180deg, #FBF6EA, #E6DCC6);
+    color: var(--brown-dark);
+    border: 1px solid #C9B987;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-family: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 1px 2px rgba(69,58,40,.18);
+    transition: all .12s;
+  }
+  .dict-chip:hover { border-color: var(--gold); color: var(--gold-deep); background: linear-gradient(180deg, #FFF9EC, #EFE3C6); }
+  .dict-chip:active { box-shadow: inset 0 2px 4px rgba(69,58,40,.22); transform: translateY(1px); }
+  .dict-empty, .dict-loading {
+    text-align: center; padding: 40px 16px; color: var(--comment);
+    font-size: 13.5px; font-style: italic; background: #FBF6E9;
+    border: 1px dashed #dcc894; border-radius: 10px; line-height: 1.8;
+  }
+  .dict-empty-icon { font-size: 28px; color: var(--gold-deep); font-style: normal; display: block; margin-bottom: 10px; }
+  .dict-loading .dict-spin { font-size: 30px; font-style: normal; display: block; margin-bottom: 10px; animation: dictSpin 1s linear infinite; }
+  @keyframes dictSpin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  .dict-loading .dict-ellipsis::after { content: '…'; animation: dictDots 1.2s steps(4,end) infinite; }
+  @keyframes dictDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } 100% { content: ''; } }
+  .dict-error {
+    background: #FDF0EC; border: 1px solid #E2B8A8; border-radius: 10px;
+    padding: 18px 20px; color: #7A3A28; font-size: 13.5px; line-height: 1.8;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .dict-error .dict-error-msg { flex: 1 1 220px; min-width: 0; }
+  .dict-error .dict-error-title { font-weight: 700; color: #8F4126; }
+  .dict-result-head { margin-bottom: 12px; }
+  .dict-result-term { font-size: 21px; font-weight: 700; color: var(--brown-dark); display: inline-block; margin-right: 10px; }
+  .dict-scope-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; vertical-align: 3px;
+    padding: 3px 9px; border-radius: 5px; background: linear-gradient(180deg, #EDDFB4, #DEC98F);
+    border: 1px solid #CDB26A; color: #5A440F; box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .dict-result-meta { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 4px; }
+  .dict-aigc {
+    font-size: 11px; color: #8A6A2F; background: rgba(176,120,32,.09);
+    border: 1px dashed #D2B675; border-radius: 6px; padding: 3px 10px;
+    display: inline-block; margin-bottom: 10px; letter-spacing: 1px;
+  }
+  .dict-card {
+    background: #FBF1D8; border: 1px solid #E3D2A4; border-left: 4px solid var(--gold-deep);
+    border-radius: 0 10px 10px 0; padding: 14px 18px 16px; margin-bottom: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 2px 5px rgba(69,58,40,.12);
+  }
+  .dict-card-label { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--gold-deep); margin-bottom: 8px; }
+  .dict-card-label::before { content: '❖ '; }
+  .dict-card-body { font-size: 14px; line-height: 1.95; color: var(--brown-dark); white-space: pre-wrap; word-break: break-word; }
+  .dict-notice {
+    background: #FBF6E9; border: 1px dashed #D9B878; border-radius: 10px; padding: 20px 22px;
+    text-align: center; color: var(--brown-mid); font-size: 14px; line-height: 1.9;
+  }
+  .dict-notice .dict-notice-icon { font-size: 30px; color: var(--gold-deep); display: block; margin-bottom: 8px; font-style: normal; }
+  .dict-helpbar {
+    background: linear-gradient(180deg, #FDF6EC, #F6E8D8); border: 1px solid #DFBC8C;
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 14px;
+    font-size: 13px; color: #7A5A22; line-height: 1.8;
+  }
+  .dict-helpbar b { color: #8F4126; }
+  .dict-graph-box { overflow-x: auto; background: #FFFDF6; border: 1px solid #E3D2A4; border-radius: 8px; padding: 10px; }
+  .dict-graph-box svg { display: block; margin: 0 auto; }
+  .dict-graph-title { font-size: 13px; font-weight: 700; color: var(--brown-dark); margin-bottom: 8px; }
+  .dict-graph-fallback { color: var(--comment); font-size: 13px; font-style: italic; padding: 12px 4px; }
+  .dict-node-text { font-size: 13px; }
+  .dict-node-note { font-size: 11px; fill: #9A8B6C; }
+  .dict-edge-label { font-size: 10.5px; fill: #7A6540; }
+  .dict-related-list { display: flex; flex-wrap: wrap; gap: 10px; }
+  .dict-related-chip {
+    background: linear-gradient(180deg, #FFFDF4, #EFE5CC);
+    border: 1px solid #C9B987; border-radius: 10px;
+    padding: 8px 13px; text-align: left; cursor: pointer;
+    font-family: inherit; font-size: 13px; color: var(--brown-dark);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 1px 3px rgba(69,58,40,.16);
+    transition: all .12s; max-width: 100%;
+  }
+  .dict-related-chip:hover { border-color: var(--gold); box-shadow: 0 2px 6px rgba(176,120,32,.3); transform: translateY(-1px); }
+  .dict-related-chip .dict-related-term { font-weight: 700; color: var(--gold-deep); display: block; margin-bottom: 2px; }
+  .dict-related-chip .dict-related-rel { font-size: 11.5px; color: var(--brown-mid); display: block; line-height: 1.5; }
+  @media (max-width: 560px) {
+    .dict-card-body { font-size: 13.5px; }
+    .dict-related-chip { width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -1110,8 +1238,9 @@
     <button type="button" class="nav-tab" data-tool="stats" title="统计学工具：描述统计 / t 检验 / 卡方 / 相关分析">统计学工具</button>
     <button type="button" class="nav-tab" data-tool="source" title="信源查询：观点理论支持检测与分级信源">信源查询</button>
     <button type="button" class="nav-tab" data-tool="defense" title="答辩助手：中文答辩陈述一键译英并收藏精选">答辩助手</button>
+    <button type="button" class="nav-tab" data-tool="dict" title="心理学词典：查询心理学与心理咨询专业概念">心理学词典</button>
     <button type="button" class="nav-tab" data-tool="resume" title="智能简历（规划中，敬请期待）">智能简历</button>
-    <button type="button" class="nav-tab" data-tool="campus" title="校招助手（规划中，敬请期待）">校招助手</button>
+    <button type="button" class="nav-tab" data-tool="campus" title="校招助手：秋招 Q&A 问答">校招助手</button>
     <button type="button" class="nav-tab" data-tool="cscsrv" title="中留服助手（规划中，敬请期待）">中留服助手</button>
     <span class="nav-tab disabled" title="更多平级工具开发中，敬请期待">＋ 更多（预留）</span>
   </nav>
@@ -1385,6 +1514,38 @@
 
   </section>
 
+  <!-- 1.5-dict 心理学词典视图：AI 实时查询（v2.4，范畴判定 + 四块内容 + 30 天缓存） -->
+  <section id="view-dict" class="app-view" data-view="dict" hidden>
+    <!-- 查询窗口 -->
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">心理学词典</span>
+      </div>
+      <div class="win-body">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">查询心理学与心理咨询专业概念（中英文均可，内容为 AI 实时生成，可能有延迟）</span></div>
+        <div class="dict-search">
+          <input id="dictInput" type="text" maxlength="60" autocomplete="off"
+                 placeholder="输入专业概念，如：焦虑 / CBT / 依恋 / 防御机制">
+          <button id="dictBtn" class="dict-btn" type="button">查询</button>
+        </div>
+        <div class="dict-chips" id="dictChips"></div>
+        <div class="hint">提示：非心理学概念（如「苹果」）会给出温馨提示而非定义；涉及抑郁、自杀等敏感词条会额外展示求助提示。同词 30 天内查询直接读取本地缓存，不重复请求 AI。</div>
+      </div>
+    </div>
+
+    <!-- 结果窗口：空态 / 加载态 / 四卡结果态 / 温馨提示态 / 错误态 -->
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">查询结果</span>
+      </div>
+      <div class="win-body">
+        <div id="dictResult"><div class="dict-empty"><span class="dict-empty-icon">📖</span>输入一个心理学概念开始查询</div></div>
+      </div>
+    </div>
+  </section>
+
   <!-- 1.5 智能简历视图：占位（开发中，敬请期待） -->
   <section id="view-resume" class="app-view" data-view="resume" hidden>
     <div class="win">
@@ -1463,6 +1624,7 @@
     { id: 'stats',  hash: '#/tools/stats',  label: '统计学工具' },
     { id: 'source', hash: '#/tools/source', label: '信源查询' },
     { id: 'defense', hash: '#/tools/defense', label: '答辩助手' },
+    { id: 'dict', hash: '#/tools/dict', label: '心理学词典' },
     { id: 'resume',  hash: '#/tools/resume',  label: '智能简历' },
     { id: 'campus',  hash: '#/tools/campus',  label: '校招助手' },
     { id: 'cscsrv',  hash: '#/tools/cscsrv',  label: '中留服助手' }
@@ -1663,6 +1825,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.4',
+      date: '2026-09-07',
+      changes: [
+        { type: 'add', text: '新增「心理学词典」模块：输入心理学 / 心理咨询 / 心理健康专业概念（中英文均可），AI 实时生成标准定义、通俗理解、图解与相关概念四块内容' },
+        { type: 'add', text: 'AI 自动判定术语范畴：明确非心理学概念弹温馨提示不输出定义；神经科学 / 社会学等边缘交叉概念按心理学视角解释' },
+        { type: 'add', text: '图解采用结构化图数据 + 前端 SVG 按层渲染（流程 / 层级 / 关系图），节点拟物小卡 + 贝塞尔连线；同词查询 30 天前端缓存降低 AI 成本，页面统一标注 AI 生成内容' }
+      ]
+    },
     {
       version: 'v2.3',
       date: '2026-09-07',
@@ -3542,6 +3713,374 @@
   }
 
   campusVisibleCheck();
+
+  // ==================== 心理学词典 v2.4：AI 实时查询 + 30 天缓存（dict 前缀独立命名空间） ====================
+  var dictInput = document.getElementById('dictInput');
+  var dictBtn = document.getElementById('dictBtn');
+  var dictChipsEl = document.getElementById('dictChips');
+  var dictResultEl = document.getElementById('dictResult');
+  var DICT_CACHE_KEY = 'dict_cache_v1';
+  var DICT_CACHE_TTL = 30 * 24 * 3600 * 1000; // 30 天
+  var DICT_CACHE_MAX = 200;                    // 本地缓存词条上限（超出淘汰最旧）
+  var dictInFlight = false;
+  var dictAbortCtrl = null;
+  var dictSensitiveRe = /抑郁|自杀|自伤|自残|轻生|自虐|了结生命|结束生命/;
+  var DICT_CHIP_WORDS = ['精神分析', '焦虑', '依恋', '防御机制', '认知行为疗法', 'CBT', '无条件积极关注', '集体无意识'];
+
+  // ---------- 基础工具 ----------
+  function dictNorm(s) {
+    return String(s || '').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function dictSensitiveHit(term) {
+    dictSensitiveRe.lastIndex = 0;
+    return dictSensitiveRe.test(term);
+  }
+  function dictSetResult(html) {
+    if (dictResultEl) dictResultEl.innerHTML = html;
+  }
+  function dictCacheLoad() {
+    try {
+      var raw = localStorage.getItem(DICT_CACHE_KEY);
+      if (!raw) return {};
+      var obj = JSON.parse(raw);
+      return (obj && typeof obj === 'object') ? obj : {};
+    } catch (e) { return {}; }
+  }
+  function dictCacheSave(obj) {
+    try { localStorage.setItem(DICT_CACHE_KEY, JSON.stringify(obj)); } catch (e) {}
+  }
+  function dictCacheGet(term) {
+    var obj = dictCacheLoad();
+    var ent = obj[term];
+    if (!ent || !ent.data || !ent.ts) return null;
+    if (Date.now() - ent.ts > DICT_CACHE_TTL) {
+      delete obj[term];
+      dictCacheSave(obj);
+      return null;
+    }
+    return ent;
+  }
+  function dictCachePut(term, data) {
+    var obj = dictCacheLoad();
+    var now = Date.now();
+    var keys = Object.keys(obj);
+    keys.forEach(function (k) {
+      var e = obj[k];
+      if (!e || !e.ts || (now - e.ts > DICT_CACHE_TTL)) delete obj[k];
+    });
+    keys = Object.keys(obj);
+    if (keys.length >= DICT_CACHE_MAX) {
+      keys.sort(function (a, b) { return (obj[a].ts || 0) - (obj[b].ts || 0); });
+      while (Object.keys(obj).length >= DICT_CACHE_MAX) { delete obj[keys.shift()]; }
+    }
+    obj[term] = { ts: now, data: data };
+    dictCacheSave(obj);
+  }
+
+  // ---------- 状态渲染 ----------
+  function dictScopeLabel(scope) {
+    if (scope === 'outside') return '非心理学范围';
+    if (scope === 'edge') return '交叉概念';
+    return '心理学概念';
+  }
+  function dictHeadHtml(data) {
+    var html = '<div class="dict-result-head">';
+    html += '<span class="dict-result-term">' + escapeHtml(data.term || '') + '</span>';
+    html += '<span class="dict-scope-tag">' + dictScopeLabel(data.scope) + '</span>';
+    html += '<div class="dict-result-meta">同词 30 天缓存 · AI 实时生成，如有出入请以专业教材与文献为准</div>';
+    html += '</div>';
+    html += '<div class="dict-aigc">AI 生成内容，仅供参考</div>';
+    return html;
+  }
+  function dictLoadingHtml(term) {
+    return '<div class="dict-loading"><span class="dict-spin">⟳</span>正在查阅专业资料：<b>' + escapeHtml(term) + '</b>，请稍候…</div>';
+  }
+  function dictErrorHtml(msg, term) {
+    var html = '<div class="dict-error"><div class="dict-error-msg"><div class="dict-error-title">查询失败</div>';
+    html += '<div>' + escapeHtml(msg) + '</div></div>';
+    if (term) html += '<button type="button" class="dict-btn dict-btn-sm" data-dict-retry="' + escapeHtml(term).replace(/"/g, '&quot;') + '">重试</button>';
+    html += '</div>';
+    return html;
+  }
+  function dictHelpbarHtml() {
+    return '<div class="dict-helpbar"><b>温馨提示：</b>若你或身边的人正经历心理困扰，请及时寻求专业帮助——联系心理咨询师 / 精神科医生，或拨打全国统一心理援助热线 <b>12356</b>。请勿独自承受。</div>';
+  }
+  function dictCardHtml(label, body) {
+    return '<div class="dict-card"><div class="dict-card-label">' + label + '</div><div class="dict-card-body">' + body + '</div></div>';
+  }
+  function dictRenderData(data, fromCache) {
+    if (!data) { dictSetResult(dictErrorHtml('返回数据为空，请重试。', '')); return; }
+    var scope = data.scope === 'outside' ? 'outside' : (data.scope === 'edge' ? 'edge' : 'psychology');
+    var html = dictHeadHtml(data);
+    if (dictSensitiveHit(data.term || '')) html += dictHelpbarHtml();
+    if (scope === 'outside') {
+      html += '<div class="dict-notice"><span class="dict-notice-icon">☂</span>' +
+        '<div>' + escapeHtml(data.notice || '该词不属于心理学词典范围。') + '</div></div>';
+      dictSetResult(html);
+      return;
+    }
+    if (data.notice) html += '<div class="dict-notice"><span class="dict-notice-icon">✧</span><div>' + escapeHtml(data.notice) + '</div></div>';
+    // 标准定义
+    html += dictCardHtml('标准定义', escapeHtml(data.definition || '（该部分生成失败，可稍后重试）'));
+    // 通俗理解
+    html += dictCardHtml('通俗理解', escapeHtml(data.plain || '（该部分生成失败，可稍后重试）'));
+    // 图解（SVG）
+    var graphBody = dictGraphBody(data.graph);
+    html += dictCardHtml('图解', graphBody);
+    // 相关概念（可点击 chip）
+    var rels = (Array.isArray(data.related) && data.related.length) ? data.related : [];
+    var relBody = rels.length
+      ? '<div class="dict-related-list">' + rels.map(function (r) {
+          return '<button type="button" class="dict-related-chip" data-dict-term="' +
+            escapeHtml(String(r.term || '')).replace(/"/g, '&quot;') + '">' +
+            '<span class="dict-related-term">' + escapeHtml(String(r.term || '')) + '</span>' +
+            '<span class="dict-related-rel">' + escapeHtml(String(r.relation || '')) + '</span></button>';
+        }).join('') + '</div>'
+      : '<div class="dict-graph-fallback">（相关概念生成失败，可稍后重试）</div>';
+    html += dictCardHtml('相关概念', relBody);
+    dictSetResult(html);
+    void fromCache;
+  }
+  function dictGraphBody(graph) {
+    var title = '';
+    var inner = '';
+    if (graph && Array.isArray(graph.nodes) && graph.nodes.length) {
+      title = graph.title ? '<div class="dict-graph-title">' + escapeHtml(graph.title) + '</div>' : '';
+      var svg = dictBuildGraphSvg(graph);
+      inner = svg ? '<div class="dict-graph-box">' + svg + '</div>' : '';
+    }
+    if (!inner) inner = '<div class="dict-graph-fallback">图解生成失败，可稍后重试</div>';
+    return title + inner;
+  }
+
+  // ---------- SVG 图解：BFS 分层 + 拟物节点 + 贝塞尔连线 ----------
+  function dictWrapLabel(s) {
+    var str = String(s || '').trim();
+    if (!str) return [];
+    var out = [];
+    var cur = '';
+    var w = 0;
+    var MAX_W = 102; // 节点内文字可用宽度（约 13px 字号中文 7~8 字/行）
+    for (var i = 0; i < str.length; i++) {
+      var cw = str.charCodeAt(i) > 255 ? 13 : 7;
+      if (cur && w + cw > MAX_W) { out.push(cur); cur = ''; w = 0; }
+      cur += str[i]; w += cw;
+    }
+    if (cur) out.push(cur);
+    if (out.length > 2) { out = out.slice(0, 2); out[1] = String(out[1]).slice(0, -1) + '…'; }
+    return out;
+  }
+  function dictBuildGraphSvg(graph) {
+    try {
+      var nodes = graph.nodes.slice();
+      var nodeSet = {};
+      nodes.forEach(function (n) {
+        if (n && (n.id !== undefined)) nodeSet[String(n.id)] = n;
+      });
+      var edges = [];
+      (Array.isArray(graph.edges) ? graph.edges : []).forEach(function (e) {
+        if (e && nodeSet[String(e.from)] && nodeSet[String(e.to)]) edges.push(e);
+      });
+      // BFS 分层：层 0 起自上而下
+      var adj = {};
+      var indeg = {};
+      nodes.forEach(function (n) { adj[n.id] = []; indeg[n.id] = 0; });
+      edges.forEach(function (e) {
+        if (!indeg.hasOwnProperty(e.from) || !indeg.hasOwnProperty(e.to)) return;
+        if (adj[e.from].indexOf(e.to) === -1) adj[e.from].push(e.to);
+        indeg[e.to] += 1;
+      });
+      var roots = nodes.filter(function (n) { return indeg[n.id] === 0; }).map(function (n) { return n.id; });
+      if (!roots.length) roots = [nodes[0].id];
+      var level = {};
+      var queue = [];
+      roots.forEach(function (r) { if (!level.hasOwnProperty(r)) { level[r] = 0; queue.push(r); } });
+      var qi = 0;
+      while (qi < queue.length) {
+        var cur = queue[qi]; qi += 1;
+        (adj[cur] || []).forEach(function (ch) {
+          if (!level.hasOwnProperty(ch)) { level[ch] = level[cur] + 1; queue.push(ch); }
+        });
+      }
+      var maxLevel = 0;
+      nodes.forEach(function (n) {
+        if (!level.hasOwnProperty(n.id)) level[n.id] = 0;
+        if (level[n.id] > maxLevel) maxLevel = level[n.id];
+      });
+      var layers = [];
+      for (var li = 0; li <= maxLevel; li++) {
+        layers.push(nodes.filter(function (n) { return level[n.id] === li; }));
+      }
+      // 节点尺寸自适应：同层节点多时缩小（允许横向滚动）
+      var maxRow = 1;
+      layers.forEach(function (L) { if (L.length > maxRow) maxRow = L.length; });
+      var NODE_W = maxRow > 6 ? 108 : 132;
+      var NODE_GAP = maxRow > 6 ? 12 : 20;
+      var nodeFontSm = maxRow > 6;
+      // 行高计算（label 换行 + note）
+      function nodeHeight(n) {
+        var lines = dictWrapLabel(n.label);
+        var h = 18 + Math.max(1, lines.length) * 17;
+        if (n.note) h += 16;
+        return h;
+      }
+      var layerHeights = layers.map(function (L) {
+        var mh = 0;
+        L.forEach(function (n) { mh = Math.max(mh, nodeHeight(n)); });
+        return mh;
+      });
+      var padSide = 28;
+      var padTop = 30;
+      var ROW_GAP = 62; // 层间留白（放边标签与箭头）
+      var pos = {};     // id -> {x, y, w, h}
+      var yCursor = padTop;
+      var totalW = padSide * 2;
+      layers.forEach(function (L, idx) {
+        var count = L.length;
+        var rowW = count * NODE_W + (count - 1) * NODE_GAP;
+        if (rowW + padSide * 2 > totalW) totalW = rowW + padSide * 2;
+        var startX = padSide + (maxRow === count ? 0 : Math.max(0, (maxRow - count)) * (NODE_W + NODE_GAP) / 2);
+        L.forEach(function (n, j) {
+          var h = nodeHeight(n);
+          pos[n.id] = { x: startX + j * (NODE_W + NODE_GAP), y: yCursor, w: NODE_W, h: h, node: n };
+        });
+        yCursor += layerHeights[idx] + ROW_GAP;
+      });
+      var totalH = yCursor - ROW_GAP + padTop;
+      var uid = 'dictsvg';
+      var html = '';
+      html += '<svg width="' + totalW + '" height="' + totalH + '" viewBox="0 0 ' + totalW + ' ' + totalH +
+        '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="图解">';
+      html += '<defs><marker id="' + uid + 'Arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">' +
+        '<path d="M0,0 L10,5 L0,10 z" fill="#8A5E14"></path></marker></defs>';
+      // 边（先画线，节点盖其上）
+      edges.forEach(function (e) {
+        var p1 = pos[e.from]; var p2 = pos[e.to];
+        if (!p1 || !p2) return;
+        var x1 = p1.x + p1.w / 2;
+        var y1 = p1.y + p1.h;
+        var x2 = p2.x + p2.w / 2;
+        var y2 = p2.y;
+        var yMid = (y1 + y2) / 2;
+        var d = 'M ' + x1 + ' ' + y1 + ' C ' + x1 + ' ' + yMid + ', ' + x2 + ' ' + yMid + ', ' + x2 + ' ' + y2;
+        html += '<path d="' + d + '" fill="none" stroke="#B07820" stroke-width="1.6" marker-end="url(#' + uid + 'Arrow)"></path>';
+        if (e.label) {
+          var mx = (x1 + x2) / 2;
+          var my = yMid - 4;
+          html += '<text x="' + mx + '" y="' + my + '" text-anchor="middle" class="dict-edge-label" ' +
+            'style="paint-order: stroke; stroke:#FFFDF6; stroke-width:3px">' +
+            escapeHtml(String(e.label).slice(0, 14)) + '</text>';
+        }
+      });
+      // 节点
+      nodes.forEach(function (n) {
+        var p = pos[n.id];
+        if (!p) return;
+        var lines = dictWrapLabel(n.label);
+        var bodyH = Math.max(1, lines.length) * 17;
+        var yText = p.y + (p.h - bodyH - (n.note ? 16 : 0)) / 2 + 13;
+        html += '<g>';
+        html += '<rect x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" rx="9" fill="#FFFDF6" stroke="#D9C391" stroke-width="1.2"></rect>';
+        html += '<rect x="' + (p.x + 1) + '" y="' + (p.y + 1) + '" width="' + (p.w - 2) + '" height="' + Math.min(6, p.h - 2) + '" rx="4" fill="#F1E7CB" opacity="0.85"></rect>';
+        lines.forEach(function (ln, i) {
+          var extra = nodeFontSm ? ' font-size="11px"' : '';
+          html += '<text x="' + (p.x + p.w / 2) + '" y="' + (yText + i * 17) + '" text-anchor="middle" ' +
+            'class="dict-node-text" ' + extra + ' fill="#4A3B22">' + escapeHtml(ln) + '</text>';
+        });
+        if (n.note) {
+          html += '<text x="' + (p.x + p.w / 2) + '" y="' + (yText + lines.length * 17 + 5) + '" text-anchor="middle" ' +
+            'class="dict-node-note" ' + (nodeFontSm ? 'font-size="10px"' : '') + '>' + escapeHtml(String(n.note).slice(0, 16)) + '</text>';
+        }
+        html += '</g>';
+      });
+      html += '</svg>';
+      return html;
+    } catch (err) {
+      return '';
+    }
+  }
+
+  // ---------- 请求与事件 ----------
+  function dictRenderError(err, term) {
+    dictInFlight = false;
+    if (dictAbortCtrl) { clearTimeout(dictAbortCtrl._t); dictAbortCtrl = null; }
+    if (dictBtn) dictBtn.disabled = false;
+    var msg = (err && err.name === 'AbortError')
+      ? '查询超时（30 秒），AI 生成较慢，请稍后重试。'
+      : String((err && err.message) || err || '网络异常，请稍后重试。');
+    dictSetResult(dictErrorHtml(msg, term || ''));
+  }
+  function dictRunQuery(rawTerm) {
+    var term = dictNorm(rawTerm);
+    if (!term) {
+      dictSetResult('<div class="dict-empty"><span class="dict-empty-icon">✎</span>请输入要查询的心理学概念</div>');
+      return;
+    }
+    if (dictInFlight) return; // 同一术语查询进行中，禁止重复提交
+    if (dictInput) dictInput.value = term;
+    var cache = dictCacheGet(term);
+    if (cache && cache.data) {
+      dictRenderData(cache.data, true);
+      return;
+    }
+    dictInFlight = true;
+    if (dictBtn) dictBtn.disabled = true;
+    dictSetResult(dictLoadingHtml(term));
+    dictAbortCtrl = new AbortController();
+    dictAbortCtrl._t = setTimeout(function () {
+      try { dictAbortCtrl.abort(); } catch (e) {}
+    }, 30000);
+    fetch('/api/dict?term=' + encodeURIComponent(term), {
+      signal: dictAbortCtrl.signal,
+      headers: { 'Accept': 'application/json' }
+    }).then(function (resp) {
+      if (!resp.ok) {
+        return resp.json().catch(function () { return {}; }).then(function (body) {
+          throw new Error((body && body.error) || ('服务返回 ' + resp.status));
+        });
+      }
+      return resp.json();
+    }).then(function (json) {
+      dictInFlight = false;
+      if (dictAbortCtrl) { clearTimeout(dictAbortCtrl._t); dictAbortCtrl = null; }
+      if (dictBtn) dictBtn.disabled = false;
+      var data = json && json.data;
+      if (!data) throw new Error('返回数据为空');
+      dictCachePut(term, data);
+      dictRenderData(data, false);
+    }).catch(function (err) {
+      dictRenderError(err, term);
+    });
+  }
+
+  // ---------- 初始化 ----------
+  function dictInit() {
+    if (dictChipsEl) {
+      DICT_CHIP_WORDS.forEach(function (w) {
+        var c = document.createElement('button');
+        c.type = 'button';
+        c.className = 'dict-chip';
+        c.textContent = w;
+        c.addEventListener('click', function () { dictRunQuery(w); });
+        dictChipsEl.appendChild(c);
+      });
+    }
+    if (dictBtn) dictBtn.addEventListener('click', function () { dictRunQuery(dictInput ? dictInput.value : ''); });
+    if (dictInput) {
+      dictInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); dictRunQuery(dictInput.value); }
+      });
+    }
+    if (dictResultEl) {
+      dictResultEl.addEventListener('click', function (e) {
+        var chip = e.target.closest('.dict-related-chip[data-dict-term]');
+        if (chip) { dictRunQuery(chip.getAttribute('data-dict-term')); return; }
+        var retry = e.target.closest('[data-dict-retry]');
+        if (retry) { dictRunQuery(retry.getAttribute('data-dict-retry')); }
+      });
+    }
+  }
+  dictInit();
 
   loadFeatured();
 })();
