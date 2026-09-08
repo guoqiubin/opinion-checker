@@ -112,6 +112,8 @@
   .c-btn:disabled { opacity: .55; cursor: not-allowed; }
   .c-btn.ghost { background: linear-gradient(180deg, #F3EDDF, #DCD2BB); border-color: #9A8F77; color: var(--brown-dark); }
   .c-btn.danger { background: linear-gradient(180deg, #e8b0a8, #c9705f); border-color: #b15a48; color: #5a1f14; }
+  .c-btn.saved { background: linear-gradient(180deg, #d5e8c7, #b6d49f); border-color: #8db778; color: var(--green-deep); }
+  .c-btn.saved:disabled { opacity: 1; cursor: default; }
 
   .toolbar { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; }
   .msg { margin: 10px 0; padding: 9px 12px; border-radius: 8px; font-size: 13px; display: none; }
@@ -131,6 +133,7 @@
   .qa-status { font-size: 12px; font-weight: 700; padding: 1px 9px; border-radius: 20px; letter-spacing: 1px; }
   .qa-status.pub { background: #EAF3E3; color: var(--green-deep); border: 1px solid #BCD9AC; }
   .qa-status.hid { background: #EFE8D8; color: var(--comment); border: 1px solid #D6C9A8; }
+  .qa-status.draft { background: #F8EFD8; color: #7A5C22; border: 1px solid #E2CF9B; }
   .qa-sort { font-size: 12px; color: var(--comment); font-style: italic; }
   .qa-ops { margin-left: auto; display: flex; gap: 6px; flex-wrap: wrap; }
   .qa-ops .c-btn, .qa-actions .c-btn { padding: 5px 12px; font-size: 12.5px; }
@@ -301,15 +304,17 @@
   function cardHtml(item, isNew) {
     var cat = CATEGORIES.indexOf(item.category) >= 0 ? item.category : CATEGORIES[CATEGORIES.length - 1];
     var pub = !!item.published;
+    var statusClass = isNew ? 'draft' : (pub ? 'pub' : 'hid');
+    var statusText = isNew ? '待保存' : (pub ? '已发布' : '已隐藏');
     var html = '<div class="qa-card' + (isNew ? ' new-card' : '') + '" data-id="' + escapeHtml(String(item.id == null ? '' : item.id)) + '">';
     html += '<div class="qa-head">';
     html += '<select data-field="category">' + renderOptions(cat) + '</select>';
-    html += '<span class="qa-status ' + (pub ? 'pub' : 'hid') + '">' + (pub ? '已发布' : '已隐藏') + '</span>';
+    html += '<span class="qa-status ' + statusClass + '">' + statusText + '</span>';
     html += '<span class="qa-sort">#' + escapeHtml(String(item.sort == null ? '' : item.sort)) + '</span>';
     html += '<div class="qa-ops">';
-    html += '<button type="button" class="c-btn ghost" data-act="up" title="上移">↑ 上移</button>';
-    html += '<button type="button" class="c-btn ghost" data-act="down" title="下移">↓ 下移</button>';
-    html += '<button type="button" class="c-btn danger" data-act="del" title="删除">删除</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="up" title="上移"' + (isNew ? ' disabled' : '') + '>↑ 上移</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="down" title="下移"' + (isNew ? ' disabled' : '') + '>↓ 下移</button>';
+    html += '<button type="button" class="c-btn danger" data-act="' + (isNew ? 'discard' : 'del') + '" title="' + (isNew ? '取消新增' : '删除') + '">' + (isNew ? '取消' : '删除') + '</button>';
     html += '</div></div>';
     html += '<label>问题</label>';
     html += '<textarea data-field="question" rows="2" placeholder="请输入问题">' + escapeHtml(item.question || '') + '</textarea>';
@@ -317,12 +322,43 @@
     html += '<textarea data-field="answer" rows="5" placeholder="请输入答案（支持多行）">' + escapeHtml(item.answer || '') + '</textarea>';
     html += '<div class="qa-actions">';
     html += '<button type="button" class="c-btn" data-act="save">保存</button>';
-    html += '<button type="button" class="c-btn ghost" data-act="toggle">' + (pub ? '设为隐藏' : '设为发布') + '</button>';
+    if (isNew) {
+      html += '<button type="button" class="c-btn ghost" disabled title="请先保存问答">保存后设置状态</button>';
+    } else {
+      html += '<button type="button" class="c-btn ghost" data-act="toggle">' + (pub ? '设为隐藏' : '设为发布') + '</button>';
+    }
     html += '</div></div>';
     return html;
   }
 
-  function loadList() {
+  function markSaved(btn) {
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = '已保存';
+    btn.classList.add('saved');
+  }
+
+  function markDirty(btn) {
+    if (!btn || !btn.classList.contains('saved')) return;
+    btn.disabled = false;
+    btn.textContent = '保存';
+    btn.classList.remove('saved');
+  }
+
+  function bindSaveState(listEl) {
+    listEl.addEventListener('input', function (e) {
+      if (!e.target.matches('[data-field]')) return;
+      var card = e.target.closest('.qa-card');
+      if (card) markDirty(card.querySelector('button[data-act="save"]'));
+    });
+    listEl.addEventListener('change', function (e) {
+      if (!e.target.matches('[data-field]')) return;
+      var card = e.target.closest('.qa-card');
+      if (card) markDirty(card.querySelector('button[data-act="save"]'));
+    });
+  }
+
+  function loadList(savedId) {
     qaListEl.innerHTML = '<div class="loading">加载中…</div>';
     callAdmin({ action: 'list' }).then(function (res) {
       if (!res.ok) {
@@ -337,6 +373,12 @@
         return;
       }
       qaListEl.innerHTML = items.map(function (it) { return cardHtml(it, false); }).join('');
+      if (savedId !== undefined && savedId !== null && savedId !== '') {
+        var savedCard = Array.prototype.slice.call(qaListEl.querySelectorAll('.qa-card')).filter(function (card) {
+          return String(card.getAttribute('data-id')) === String(savedId);
+        })[0];
+        if (savedCard) markSaved(savedCard.querySelector('button[data-act="save"]'));
+      }
     }).catch(function (err) {
       qaListEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(String((err && err.message) || err)) + '</div>';
     });
@@ -373,7 +415,8 @@
         return;
       }
       showMsg('ok', '已保存');
-      loadList();
+      markSaved(btn);
+      loadList(data.id || (res.d && res.d.item && res.d.item.id));
     }).catch(function (err) {
       restore();
       showMsg('err', '保存失败：' + String((err && err.message) || err));
@@ -382,6 +425,7 @@
 
   function toggleCard(card, btn) {
     var id = card.getAttribute('data-id');
+    if (!id) { showMsg('warn', '请先保存问答，再设置发布状态'); return; }
     var pub = card.querySelector('.qa-status').textContent === '已发布';
     var restore = markBusy(btn, '处理中…');
     callAdmin({ action: 'toggle_publish', id: id, published: !pub }).then(function (res) {
@@ -448,7 +492,12 @@
     var wrap = document.createElement('div');
     wrap.innerHTML = cardHtml(empty, true);
     qaListEl.insertBefore(wrap.firstChild, qaListEl.firstChild);
-    showMsg('ok', '请在下方填写问题与答案，点击「保存」即上线（如需先存草稿可先「设为隐藏」）。');
+    showMsg('ok', '请在下方填写问题与答案，点击「保存」即可上线；保存后可切换发布 / 隐藏。');
+  }
+
+  function discardCard(card) {
+    card.remove();
+    showMsg('ok', '已取消新增');
   }
 
   // 事件：登录
@@ -502,9 +551,11 @@
     if (act === 'save') { saveCard(card, btn); return; }
     if (act === 'toggle') { toggleCard(card, btn); return; }
     if (act === 'del') { deleteCard(card, btn); return; }
+    if (act === 'discard') { discardCard(card); return; }
     if (act === 'up') { moveCard(card, btn, 'up'); return; }
     if (act === 'down') { moveCard(card, btn, 'down'); return; }
   });
+  bindSaveState(qaListEl);
 
   // 启动
   if (getKey()) { enterMain(); } else { showGate(''); }
@@ -593,14 +644,16 @@
   // ---------- 论文模块卡片渲染（无分类字段） ----------
   function paperCardHtml(item, isNew) {
     var pub = !!item.published;
+    var statusClass = isNew ? 'draft' : (pub ? 'pub' : 'hid');
+    var statusText = isNew ? '待保存' : (pub ? '已发布' : '已隐藏');
     var html = '<div class="qa-card' + (isNew ? ' new-card' : '') + '" data-id="' + escapeHtml(String(item.id == null ? '' : item.id)) + '">';
     html += '<div class="qa-head">';
-    html += '<span class="qa-status ' + (pub ? 'pub' : 'hid') + '">' + (pub ? '已发布' : '已隐藏') + '</span>';
+    html += '<span class="qa-status ' + statusClass + '">' + statusText + '</span>';
     html += '<span class="qa-sort">#' + escapeHtml(String(item.sort == null ? '' : item.sort)) + '</span>';
     html += '<div class="qa-ops">';
-    html += '<button type="button" class="c-btn ghost" data-act="up" title="上移">↑ 上移</button>';
-    html += '<button type="button" class="c-btn ghost" data-act="down" title="下移">↓ 下移</button>';
-    html += '<button type="button" class="c-btn danger" data-act="del" title="删除">删除</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="up" title="上移"' + (isNew ? ' disabled' : '') + '>↑ 上移</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="down" title="下移"' + (isNew ? ' disabled' : '') + '>↓ 下移</button>';
+    html += '<button type="button" class="c-btn danger" data-act="' + (isNew ? 'discard' : 'del') + '" title="' + (isNew ? '取消新增' : '删除') + '">' + (isNew ? '取消' : '删除') + '</button>';
     html += '</div></div>';
     html += '<label>问题</label>';
     html += '<textarea data-field="question" rows="2" placeholder="请输入问题">' + escapeHtml(item.question || '') + '</textarea>';
@@ -608,12 +661,16 @@
     html += '<textarea data-field="answer" rows="5" placeholder="请输入答案（支持多行）">' + escapeHtml(item.answer || '') + '</textarea>';
     html += '<div class="qa-actions">';
     html += '<button type="button" class="c-btn" data-act="save">保存</button>';
-    html += '<button type="button" class="c-btn ghost" data-act="toggle">' + (pub ? '设为隐藏' : '设为发布') + '</button>';
+    if (isNew) {
+      html += '<button type="button" class="c-btn ghost" disabled title="请先保存问答">保存后设置状态</button>';
+    } else {
+      html += '<button type="button" class="c-btn ghost" data-act="toggle">' + (pub ? '设为隐藏' : '设为发布') + '</button>';
+    }
     html += '</div></div>';
     return html;
   }
 
-  function paperLoad() {
+  function paperLoad(savedId) {
     paperListEl.innerHTML = '<div class="loading">加载中…</div>';
     callPaperAdmin({ action: 'list' }).then(function (res) {
       if (!res.ok) {
@@ -628,6 +685,12 @@
         return;
       }
       paperListEl.innerHTML = items.map(function (it) { return paperCardHtml(it, false); }).join('');
+      if (savedId !== undefined && savedId !== null && savedId !== '') {
+        var savedCard = Array.prototype.slice.call(paperListEl.querySelectorAll('.qa-card')).filter(function (card) {
+          return String(card.getAttribute('data-id')) === String(savedId);
+        })[0];
+        if (savedCard) markSaved(savedCard.querySelector('button[data-act="save"]'));
+      }
     }).catch(function (err) {
       paperListEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(String((err && err.message) || err)) + '</div>';
     });
@@ -647,6 +710,33 @@
     return function () { btn.disabled = false; btn.textContent = old; };
   }
 
+  function markSaved(btn) {
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = '已保存';
+    btn.classList.add('saved');
+  }
+
+  function markDirty(btn) {
+    if (!btn || !btn.classList.contains('saved')) return;
+    btn.disabled = false;
+    btn.textContent = '保存';
+    btn.classList.remove('saved');
+  }
+
+  function bindSaveState(listEl) {
+    listEl.addEventListener('input', function (e) {
+      if (!e.target.matches('[data-field]')) return;
+      var card = e.target.closest('.qa-card');
+      if (card) markDirty(card.querySelector('button[data-act="save"]'));
+    });
+    listEl.addEventListener('change', function (e) {
+      if (!e.target.matches('[data-field]')) return;
+      var card = e.target.closest('.qa-card');
+      if (card) markDirty(card.querySelector('button[data-act="save"]'));
+    });
+  }
+
   function paperSave(card, btn) {
     var data = paperReadCard(card);
     if (!data.question) { showMsg('warn', '问题不能为空'); return; }
@@ -663,7 +753,8 @@
         return;
       }
       showMsg('ok', '已保存');
-      paperLoad();
+      markSaved(btn);
+      paperLoad(data.id || (res.d && res.d.item && res.d.item.id));
     }).catch(function (err) {
       restore();
       showMsg('err', '保存失败：' + String((err && err.message) || err));
@@ -672,6 +763,7 @@
 
   function paperToggle(card, btn) {
     var id = card.getAttribute('data-id');
+    if (!id) { showMsg('warn', '请先保存问答，再设置发布状态'); return; }
     var pub = card.querySelector('.qa-status').textContent === '已发布';
     var restore = markBusy(btn, '处理中…');
     callPaperAdmin({ action: 'toggle_publish', id: id, published: !pub }).then(function (res) {
@@ -737,7 +829,12 @@
     var wrap = document.createElement('div');
     wrap.innerHTML = paperCardHtml(empty, true);
     paperListEl.insertBefore(wrap.firstChild, paperListEl.firstChild);
-    showMsg('ok', '请在下方填写问题与答案，点击「保存」即在前台论文小助手问答区上线（如需先存草稿可先「设为隐藏」）。');
+    showMsg('ok', '请在下方填写问题与答案，点击「保存」即可上线；保存后可切换发布 / 隐藏。');
+  }
+
+  function paperDiscard(card) {
+    card.remove();
+    showMsg('ok', '已取消新增');
   }
 
   // 事件
@@ -751,9 +848,11 @@
     if (act === 'save') { paperSave(card, btn); return; }
     if (act === 'toggle') { paperToggle(card, btn); return; }
     if (act === 'del') { paperDelete(card, btn); return; }
+    if (act === 'discard') { paperDiscard(card); return; }
     if (act === 'up') { paperMove(card, btn, 'up'); return; }
     if (act === 'down') { paperMove(card, btn, 'down'); return; }
   });
+  bindSaveState(paperListEl);
 })();
 </script>
 </body>

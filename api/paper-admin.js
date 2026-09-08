@@ -45,6 +45,14 @@ function jsonError(res, status, message) {
   res.status(status).json({ error: message });
 }
 
+function operationError(err) {
+  const message = String((err && err.message) || err || '未知错误');
+  if (message === 'DB_HTTP_404') {
+    return '数据库未找到 paper_qa 表，请先在 Supabase 执行论文小助手建表 SQL';
+  }
+  return '操作失败：' + message;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -223,6 +231,6 @@ export default async function handler(req, res) {
 
     return jsonError(res, 400, '未知操作');
   } catch (err) {
-    return jsonError(res, 500, '操作失败：' + String(err.message || err));
+    return jsonError(res, 500, operationError(err));
   }
 }

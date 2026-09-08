@@ -48,6 +48,10 @@ export default async function handler(req, res) {
     const items = Array.isArray(rows) ? rows : [];
     return res.status(200).json({ ok: true, total: items.length, items: items });
   } catch (err) {
-    return res.status(500).json({ error: '查询失败：' + String(err.message || err) });
+    const message = String((err && err.message) || err || '未知错误');
+    if (message === 'DB_HTTP_404') {
+      return res.status(503).json({ error: '论文问答服务尚未完成数据库初始化' });
+    }
+    return res.status(500).json({ error: '查询失败：' + message });
   }
 }
