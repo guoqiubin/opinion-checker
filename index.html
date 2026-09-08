@@ -1207,6 +1207,114 @@
     .dict-card-body { font-size: 13.5px; }
     .dict-related-chip { width: 100%; }
   }
+
+  /* ==================== 论文小助手 v2.6：极简问答 + 想法评估（paper / idea 前缀独立命名空间） ==================== */
+  .paper-toolbar { display: flex; gap: 8px; margin: 0 2px 14px; flex-wrap: wrap; }
+  .paper-tab {
+    font-family: inherit; font-size: 14px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+    border: 1px solid #A98F54; border-radius: 20px; padding: 7px 22px;
+    color: #6B5A3C; background: linear-gradient(180deg, #F3EDDF, #DCD2BB);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.65), 0 1px 3px rgba(69,58,40,.18);
+    transition: all .12s;
+  }
+  .paper-tab:hover { filter: brightness(1.05); }
+  .paper-tab.active {
+    color: #4A3200; background: linear-gradient(180deg, #D9B25F, #B98D3A);
+    border-color: #A87E31; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 5px rgba(0,0,0,.22);
+  }
+  .paper-panel { min-height: 200px; }
+  #paperPanelIdea .actions .char-count { margin-top: 0; margin-left: auto; text-align: right; flex: 0 0 auto; }
+  #paperPanelIdea .actions .paper-idea-btn { margin-left: 0; }
+
+  /* —— 问答信息流（极简版，无分类） —— */
+  .paper-qa-list-empty { text-align: center; padding: 46px 10px; color: var(--comment); font-size: 13px; font-style: italic; }
+  .paper-qa-list-loading { text-align: center; padding: 36px 10px; color: var(--comment); font-size: 13px; font-style: italic; }
+  .paper-qa-item {
+    background: linear-gradient(180deg, #FFFDF4, #F6EBD8); border: 1px solid #E0CD9F;
+    border-radius: 10px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(120,90,30,.1);
+    overflow: hidden; transition: border-color .12s, box-shadow .12s;
+  }
+  .paper-qa-item.open { border-color: var(--gold); box-shadow: 0 4px 12px rgba(120,90,30,.18); }
+  .paper-qa-head { display: flex; align-items: center; gap: 12px; padding: 13px 16px; cursor: pointer; }
+  .paper-qa-arrow { color: var(--gold-deep); font-size: 13px; transition: transform .15s; flex: 0 0 auto; }
+  .paper-qa-item.open .paper-qa-arrow { transform: rotate(90deg); }
+  .paper-qa-main { flex: 1 1 auto; min-width: 0; }
+  .paper-qa-title { font-size: 15px; font-weight: 700; color: var(--brown-dark); line-height: 1.55; }
+  .paper-qa-date { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 4px; display: block; }
+  .paper-qa-a { border-top: 1px dashed #D9C08A; padding: 14px 18px; display: none; background: #FFFBF0; }
+  .paper-qa-item.open .paper-qa-a { display: block; }
+  .paper-qa-answer { font-size: 14px; color: var(--brown-dark); line-height: 2; white-space: pre-wrap; word-break: break-word; }
+  .paper-qa-count { font-size: 12.5px; color: var(--comment); font-style: italic; text-align: right; margin-top: 6px; }
+
+  /* —— 想法评估输入 —— */
+  .paper-idea-input {
+    width: 100%; min-height: 120px; resize: vertical; box-sizing: border-box;
+    padding: 12px 14px; border: 1px solid #C9B987; border-radius: 10px;
+    background: #FFFDF4; font-family: inherit; font-size: 14px; line-height: 1.8; color: var(--brown-dark);
+    box-shadow: inset 0 2px 4px rgba(69,58,40,.07);
+  }
+  .paper-idea-input:focus { outline: none; border-color: var(--gold); box-shadow: inset 0 3px 8px rgba(69,58,40,.12), 0 0 0 3px rgba(176,120,32,.16); }
+  .paper-idea-btn {
+    font-family: inherit; font-size: 13.5px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+    border: 1px solid #A87E31; border-radius: 8px; padding: 9px 20px; color: #4A3200;
+    background: linear-gradient(180deg, #D9B25F, #B98D3A);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 4px rgba(0,0,0,.14);
+    transition: all .12s;
+  }
+  .paper-idea-btn:hover { filter: brightness(1.06); }
+  .paper-idea-btn:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.25); transform: translateY(1px); }
+  .paper-idea-btn:disabled { opacity: .55; cursor: not-allowed; }
+  .paper-idea-btn.ghost {
+    background: linear-gradient(180deg, #F3EDDF, #DCD2BB); border-color: #9A8F77; color: var(--brown-dark); letter-spacing: 1px;
+  }
+  .paper-idea-loading { text-align: center; padding: 40px 10px; color: var(--comment); font-size: 13px; font-style: italic; }
+  .paper-idea-empty { text-align: center; padding: 44px 10px; color: var(--comment); font-size: 13px; font-style: italic; }
+  .paper-idea-error { color: #8A3A2A; }
+
+  /* —— 评估结果卡 —— */
+  .paper-aigc {
+    display: inline-block; font-size: 11px; color: #8A6A2F; background: rgba(176,120,32,.09);
+    border: 1px dashed #D2B675; border-radius: 6px; padding: 3px 10px;
+    letter-spacing: 1px; margin-bottom: 12px;
+  }
+  .paper-verdict-card {
+    background: #FBF1D8; border: 1px solid #E3D2A4; border-left: 4px solid var(--gold-deep);
+    border-radius: 0 10px 10px 0; padding: 16px 20px 18px; margin-bottom: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.75), 0 2px 5px rgba(69,58,40,.1);
+  }
+  .paper-verdict-card.fit { border-left-color: #3F7A46; }
+  .paper-verdict-card.borderline { border-left-color: var(--gold-deep); }
+  .paper-verdict-card.unfit { border-left-color: #B03A2E; }
+  .paper-badge {
+    display: inline-block; font-size: 12.5px; font-weight: 700; letter-spacing: 2px; padding: 3px 14px;
+    border-radius: 20px; margin-bottom: 10px; color: #fff;
+  }
+  .paper-badge.fit { background: linear-gradient(180deg, #5E9A63, #3F7A46); }
+  .paper-badge.borderline { background: linear-gradient(180deg, #D9A641, #B07820); }
+  .paper-badge.unfit { background: linear-gradient(180deg, #C9705F, #A3412F); }
+  .paper-verdict-text { font-size: 16px; font-weight: 700; color: var(--brown-dark); line-height: 1.7; margin-bottom: 8px; }
+  .paper-reason { font-size: 14px; color: var(--brown-dark); line-height: 2; white-space: pre-wrap; word-break: break-word; }
+  .paper-reason .paper-turn { color: #7A5A22; font-weight: 700; }
+  .paper-design-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--gold-deep); margin: 4px 0 10px; }
+  .paper-design-title::before { content: '❖ '; }
+  .paper-design-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+  .paper-design-card {
+    background: linear-gradient(180deg, #FFFDF4, #F3E8CF); border: 1px solid #D9C69A;
+    border-radius: 10px; padding: 11px 13px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 1px 3px rgba(69,58,40,.12);
+  }
+  .paper-design-key { font-size: 12px; font-weight: 700; color: var(--gold-deep); display: block; letter-spacing: 1px; margin-bottom: 5px; }
+  .paper-design-key::after { content: '：'; }
+  .paper-design-val { font-size: 13.5px; color: var(--brown-dark); line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+  .paper-idea-helpbar {
+    background: linear-gradient(180deg, #FDF6EC, #F6E8D8); border: 1px solid #DFBC8C;
+    border-radius: 10px; padding: 10px 14px; margin-top: 14px;
+    font-size: 12.5px; color: #7A5A22; line-height: 1.8;
+  }
+  @media (max-width: 560px) {
+    .paper-design-grid { grid-template-columns: 1fr; }
+    .paper-qa-title { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -1349,24 +1457,45 @@
 
   </section>
 
-  <!-- 1.1 论文小助手视图：v2.0 占位（开发中，预留入口；原精选观点墙已移入信源查询模块） -->
+  <!-- 1.1 论文小助手视图：v2.6（① 极简问答 Q&A ② 想法评估，工具内小 Tab 切换） -->
   <section id="view-paper" class="app-view" data-view="paper" hidden>
-    <div class="win">
-      <div class="win-titlebar">
-        <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-title">论文小助手</span>
+    <!-- 工具内 Tab -->
+    <div class="paper-toolbar">
+      <button type="button" class="paper-tab active" data-paper-panel="qa">问答</button>
+      <button type="button" class="paper-tab" data-paper-panel="idea">想法评估</button>
+    </div>
+
+    <!-- ① 极简问答（无分类信息流，数据来自 api/paper-qa.js） -->
+    <div id="paperPanelQa" class="paper-panel">
+      <div class="win">
+        <div class="win-titlebar">
+          <span class="win-dots"><i></i><i></i><i></i></span>
+          <span class="win-title">论文小助手 · 问答（先问先答）</span>
+        </div>
+        <div class="win-body">
+          <div class="cmd-label"><span class="dollar">§</span> <span class="fname">论文写作 / 投稿审稿 / 读研读博常见问题（管理员后台维护，点击展开查看答案）</span></div>
+          <div id="paperQaList"><div class="paper-qa-list-loading">加载中…</div></div>
+          <div class="paper-qa-count" id="paperQaCount"></div>
+        </div>
       </div>
-      <div class="win-body">
-        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">论文小助手开发中</span></div>
-        <div class="placeholder-card">
-          <div class="placeholder-icon">✎</div>
-          <h3>即将上线</h3>
-          <p>面向心理学硕博生的论文阅读与观点精选辅助工具，正在规划中。零外链、数据不出本机。</p>
-          <ul>
-            <li>论文速读：自动提取摘要 / 方法 / 结论</li>
-            <li>论文观点精选：精选高质量论文与观点解读（规划中）</li>
-            <li>与信源查询联动：论文中的观点可直接发起信源支撑检测</li>
-          </ul>
+    </div>
+
+    <!-- ② 想法评估（AI 判定研究想法是否适合做成论文，结果卡含 AIGC 标识 + 防连点） -->
+    <div id="paperPanelIdea" class="paper-panel" hidden>
+      <div class="win">
+        <div class="win-titlebar">
+          <span class="win-dots"><i></i><i></i><i></i></span>
+          <span class="win-title">论文小助手 · 想法评估</span>
+        </div>
+        <div class="win-body">
+          <div class="cmd-label"><span class="dollar">§</span> <span class="fname">输入你的研究想法（现象、对象、想检验的关系），AI 判断是否适合做成现代学术论文并给出设计建议</span></div>
+          <textarea id="ideaInput" class="paper-idea-input" maxlength="2000" placeholder="例如：我身边很多同学在用手机刷短视频后很难入睡，我想研究短视频使用与大学生的睡眠质量之间有没有关系？&#10;&#10;提示：描述越具体（研究对象、想检验的关系、可测量指标），评估越准。至少要 10 个字。"></textarea>
+          <div class="actions">
+            <span class="char-count" id="ideaCharCount">0 / 2000</span>
+            <button type="button" id="ideaSubmitBtn" class="paper-idea-btn">开始评估</button>
+            <button type="button" id="ideaClearBtn" class="paper-idea-btn ghost">清空</button>
+          </div>
+          <div id="ideaResult" class="paper-idea-empty">输入想法后点击「开始评估」，将返回三档结论（适合做成论文 / 方向可取需打磨 / 暂不适合）与理由。结果由 AI 生成，仅供参考。</div>
         </div>
       </div>
     </div>
@@ -1866,6 +1995,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.6',
+      date: '2026-09-08',
+      changes: [
+        { type: 'add', text: '「论文小助手」正式上线：①极简问答（Q&A）无分类信息流，先问先答，点击展开查看答案；运营后台升级为多工具 Tab，可在「校招问答 / 论文问答」间切换维护' },
+        { type: 'add', text: '新增「想法评估」：输入研究想法（现象 / 对象 / 想检验的关系），AI 判定三档结论——适合做成论文（fit，说明合适理由）/ 方向可取需打磨（borderline，梳理思路并给变量设计建议）/ 暂不适合（unfit，说明不科学理由并给出转向建议）' },
+        { type: 'add', text: '评估结果卡内嵌「如何做成研究设计」建议（研究对象 / 自变量 / 因变量 / 可测量性），页面统一标注 AIGC 标识，评估期间按钮防连点' }
+      ]
+    },
     {
       version: 'v2.5',
       date: '2026-09-08',
@@ -4131,6 +4269,253 @@
     }
   }
   dictInit();
+
+  // ==================== 论文小助手 v2.6（paper / idea 前缀独立命名空间） ====================
+  // —— ① 极简问答：公开只读信息流（无分类），数据来自 api/paper-qa ——
+  var paperPanelQa = document.getElementById('paperPanelQa');
+  var paperPanelIdea = document.getElementById('paperPanelIdea');
+  var paperQaList = document.getElementById('paperQaList');
+  var paperQaCount = document.getElementById('paperQaCount');
+  var paperOpenId = null;
+  var paperItems = [];
+
+  function paperDateText(iso) {
+    if (!iso) return '';
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.getFullYear() + '年' + String(d.getMonth() + 1).padStart(2, '0') + '月' + String(d.getDate()).padStart(2, '0') + '日 更新';
+    } catch (e) { return ''; }
+  }
+
+  function paperQaCardHtml(item) {
+    var id = String(item.id);
+    var open = paperOpenId !== null && String(paperOpenId) === id;
+    var date = paperDateText(item.updated_at);
+    return '<div class="paper-qa-item' + (open ? ' open' : '') + '" data-paper-id="' + escapeHtml(id) + '">' +
+      '<div class="paper-qa-head">' +
+        '<span class="paper-qa-arrow">▶</span>' +
+        '<div class="paper-qa-main">' +
+          '<div class="paper-qa-title">' + escapeHtml(item.question) + '</div>' +
+          (date ? '<span class="paper-qa-date">' + escapeHtml(date) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="paper-qa-a"><div class="paper-qa-answer">' + escapeHtml(item.answer) + '</div></div>' +
+    '</div>';
+  }
+
+  function paperQaRender(items) {
+    if (!paperQaList) return;
+    paperItems = Array.isArray(items) ? items : [];
+    if (!paperItems.length) {
+      paperQaList.innerHTML = '<div class="paper-qa-list-empty">暂无问答内容，站长正在整理中，敬请期待。</div>';
+      if (paperQaCount) paperQaCount.textContent = '';
+      return;
+    }
+    paperQaList.innerHTML = paperItems.map(paperQaCardHtml).join('');
+    if (paperQaCount) paperQaCount.textContent = '共 ' + paperItems.length + ' 条';
+  }
+
+  function paperQaLoad() {
+    if (!paperQaList) return;
+    if (paperQaCount) paperQaCount.textContent = '';
+    paperQaList.innerHTML = '<div class="paper-qa-list-loading">加载中…</div>';
+    apiFetch('/api/paper-qa')
+      .then(function (r) {
+        if (!r.ok) throw new Error('服务返回 ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        paperQaRender((data && Array.isArray(data.items)) ? data.items : []);
+      })
+      .catch(function () {
+        if (!paperQaList) return;
+        paperQaList.innerHTML = '<div class="paper-qa-list-empty">问答加载失败，请刷新重试。</div>';
+        paperQaCount.textContent = '';
+      });
+  }
+
+  if (paperQaList) {
+    paperQaList.addEventListener('click', function (e) {
+      var head = e.target.closest('.paper-qa-head');
+      if (!head) return;
+      var card = head.closest('.paper-qa-item');
+      if (!card) return;
+      var id = card.getAttribute('data-paper-id');
+      if (paperOpenId !== null && String(paperOpenId) === String(id)) {
+        paperOpenId = null;
+      } else {
+        paperOpenId = id;
+      }
+      paperQaRender(paperItems);
+    });
+  }
+
+  // —— ② 想法评估：AI 判定三档（fit / borderline / unfit），api/idea-check ——
+  var ideaInput = document.getElementById('ideaInput');
+  var ideaCharCount = document.getElementById('ideaCharCount');
+  var ideaSubmitBtn = document.getElementById('ideaSubmitBtn');
+  var ideaClearBtn = document.getElementById('ideaClearBtn');
+  var ideaResult = document.getElementById('ideaResult');
+  var ideaInFlight = false;
+  var ideaAbortCtrl = null;
+  var IDEA_MAX = 2000;
+  var IDEA_MIN = 10;
+
+  function ideaText() {
+    return ideaInput ? (ideaInput.value || '') : '';
+  }
+  function ideaUpdateChar() {
+    if (!ideaInput || !ideaCharCount) return;
+    var len = ideaText().length;
+    ideaCharCount.textContent = len + ' / ' + IDEA_MAX;
+    ideaCharCount.classList.toggle('over', len > IDEA_MAX);
+    if (ideaSubmitBtn) {
+      var t = ideaText().trim();
+      ideaSubmitBtn.disabled = ideaInFlight || t.length < IDEA_MIN || len > IDEA_MAX;
+    }
+  }
+  function ideaSetResult(html) {
+    if (ideaResult) ideaResult.innerHTML = html;
+  }
+  function ideaDesignCardHtml(key, label, val) {
+    var v = String(val || '').trim();
+    if (!v) return '';
+    return '<div class="paper-design-card"><span class="paper-design-key">' + escapeHtml(label) + '</span>' +
+      '<span class="paper-design-val">' + escapeHtml(v) + '</span></div>';
+  }
+  function ideaRenderData(data) {
+    if (!data) { ideaSetResult('<div class="paper-idea-error">返回数据为空，请重试。</div>'); return; }
+    var suit = data.suitability === 'fit' ? 'fit' : (data.suitability === 'unfit' ? 'unfit' : 'borderline');
+    var badgeText = suit === 'fit' ? '适合做成论文' : (suit === 'unfit' ? '暂不适合' : '方向可取 · 需打磨');
+    var html = '';
+    html += '<div class="paper-aigc">✦ AIGC 生成内容，仅供研究思路参考</div>';
+    html += '<div class="paper-verdict-card ' + suit + '">';
+    html += '<span class="paper-badge ' + suit + '">' + badgeText + '</span>';
+    html += '<div class="paper-verdict-text">' + escapeHtml(data.verdict || '（评估完成）') + '</div>';
+    var reason = String(data.reason || '').trim();
+    if (reason) {
+      reason = escapeHtml(reason).replace('转向建议：', '<span class="paper-turn">转向建议：</span>');
+      html += '<div class="paper-reason">' + reason + '</div>';
+    }
+    html += '</div>';
+    var d = (data.design && typeof data.design === 'object') ? data.design : {};
+    var cells = [
+      ['population', '研究对象', d.population],
+      ['iv', '自变量（前因 / 干预）', d.iv],
+      ['dv', '因变量（结果 / 效应）', d.dv],
+      ['method', '研究方法', d.method],
+      ['research_question', '可检验的研究问题', d.research_question],
+      ['notes', '设计注意事项', d.notes]
+    ];
+    var hasDesign = false;
+    cells.forEach(function (c) {
+      if (String(c[2] || '').trim()) hasDesign = true;
+    });
+    if (hasDesign && suit !== 'unfit') {
+      html += '<div class="paper-design-title">如何把它做成研究设计</div><div class="paper-design-grid">';
+      cells.forEach(function (c) {
+        html += ideaDesignCardHtml(c[0], c[1], c[2]);
+      });
+      html += '</div>';
+    }
+    if (suit === 'unfit') {
+      html += '<div class="paper-idea-helpbar">提示：心理学论文通常要求研究想法可操作化、可测量、可证伪。若想围绕该主题继续探索，可把其中的可实证成分（如具体练习、行为、情绪指标）单独拎出，先从小样本问卷或行为实验入手。</div>';
+    }
+    ideaSetResult(html);
+  }
+  function ideaRenderError(err) {
+    ideaInFlight = false;
+    if (ideaAbortCtrl) { clearTimeout(ideaAbortCtrl._t); ideaAbortCtrl = null; }
+    if (ideaSubmitBtn) ideaSubmitBtn.disabled = false;
+    ideaUpdateChar();
+    var msg = (err && err.name === 'AbortError')
+      ? '评估生成超时（30 秒），请稍后重试。'
+      : String((err && err.message) || err || '网络异常，请稍后重试。');
+    ideaSetResult('<div class="paper-idea-error">评估失败：' + escapeHtml(msg) + '</div>');
+  }
+  function ideaRun() {
+    if (ideaInFlight) return;
+    var text = ideaText().trim();
+    if (text.length < IDEA_MIN) {
+      ideaSetResult('<div class="paper-idea-error">描述太短（至少 ' + IDEA_MIN + ' 个字），请补充你的研究想法后再评估。</div>');
+      return;
+    }
+    if (text.length > IDEA_MAX) {
+      ideaSetResult('<div class="paper-idea-error">描述超过 ' + IDEA_MAX + ' 字上限，请精简后重试。</div>');
+      return;
+    }
+    ideaInFlight = true;
+    if (ideaSubmitBtn) ideaSubmitBtn.disabled = true;
+    ideaSetResult('<div class="paper-idea-loading">AI 正在评估你的研究想法，通常需要 5~15 秒…</div>');
+    ideaAbortCtrl = new AbortController();
+    ideaAbortCtrl._t = setTimeout(function () { try { ideaAbortCtrl.abort(); } catch (e) {} }, 30000);
+    apiFetch('/api/idea-check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ text: text }),
+      signal: ideaAbortCtrl.signal
+    }).then(function (resp) {
+      if (!resp.ok) {
+        return resp.json().catch(function () { return {}; }).then(function (body) {
+          throw new Error((body && body.error) || ('服务返回 ' + resp.status));
+        });
+      }
+      return resp.json();
+    }).then(function (json) {
+      ideaInFlight = false;
+      if (ideaAbortCtrl) { clearTimeout(ideaAbortCtrl._t); ideaAbortCtrl = null; }
+      if (ideaSubmitBtn) ideaSubmitBtn.disabled = false;
+      ideaRenderData(json && json.data);
+      ideaUpdateChar();
+    }).catch(function (err) {
+      ideaRenderError(err);
+    });
+  }
+
+  if (ideaInput) {
+    ideaInput.addEventListener('input', ideaUpdateChar);
+    ideaInput.addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+        e.preventDefault();
+        ideaRun();
+      }
+    });
+  }
+  if (ideaSubmitBtn) ideaSubmitBtn.addEventListener('click', ideaRun);
+  if (ideaClearBtn) {
+    ideaClearBtn.addEventListener('click', function () {
+      if (ideaInFlight) return;
+      if (ideaInput) ideaInput.value = '';
+      ideaUpdateChar();
+      ideaSetResult('<div class="paper-idea-empty">输入想法后点击「开始评估」，将返回三档结论（适合做成论文 / 方向可取需打磨 / 暂不适合）与理由。结果由 AI 生成，仅供参考。</div>');
+    });
+  }
+
+  // —— 内部 Tab：问答 / 想法评估 ——
+  var paperTabs = document.querySelectorAll('.paper-tab[data-paper-panel]');
+  paperTabs.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      paperTabs.forEach(function (b) { b.classList.toggle('active', b === btn); });
+      var which = btn.getAttribute('data-paper-panel');
+      if (paperPanelQa) paperPanelQa.hidden = (which !== 'qa');
+      if (paperPanelIdea) paperPanelIdea.hidden = (which !== 'idea');
+      if (which === 'qa') paperQaLoad();
+    });
+  });
+
+  // —— 进入论文小助手视图时拉取问答一次（与校招助手 campusVisibleCheck 同范式） ——
+  function paperVisibleCheck() {
+    var view = document.getElementById('view-paper');
+    if (!view || view.hidden) return;
+    if (paperPanelQa && !paperPanelQa.hidden) paperQaLoad();
+  }
+  window.addEventListener('hashchange', function () {
+    if (location.hash && location.hash.indexOf('#/tools/paper') === 0) paperVisibleCheck();
+  });
+
+  paperVisibleCheck();
+  ideaUpdateChar();
 
   loadFeatured();
 })();

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>校招助手 · Q&A 内容管理</title>
+<title>内容运营后台 · Q&A 管理</title>
 <style>
   :root {
     --bg-top: #F2EDE4;
@@ -138,6 +138,24 @@
   .empty { text-align: center; padding: 40px 10px; color: var(--comment); font-size: 13px; font-style: italic; }
   .hint { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 12px; line-height: 1.7; }
   .loading { text-align: center; padding: 24px; color: var(--comment); font-size: 13px; font-style: italic; }
+
+  /* 多工具 Tab（v2.6：校招 / 论文小助手） */
+  .module-tabs { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .module-tab {
+    font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: 1px;
+    border: 1px solid #a98f54; border-radius: 20px; padding: 5px 16px;
+    color: var(--brown-mid); background: linear-gradient(180deg, #F3EDDF, #DCD2BB);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 1px 2px rgba(69,58,40,.15);
+    transition: all .12s;
+  }
+  .module-tab:hover { filter: brightness(1.05); }
+  .module-tab.active {
+    color: #4a3200; background: linear-gradient(180deg, #d9b25f, #b98d3a);
+    border-color: #a87e31; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 4px rgba(0,0,0,.12);
+  }
+  .module-tab-hint { font-size: 12px; color: var(--comment); font-style: italic; }
+  .module-logout { margin-left: auto; }
+  .module-panel { min-height: 120px; }
 </style>
 </head>
 <body>
@@ -172,17 +190,35 @@
       <span class="win-title">问答管理（保存即生效，无需重新部署）</span>
     </div>
     <div class="win-body">
-      <div class="toolbar">
-        <button type="button" class="c-btn" id="addBtn">＋ 新增问答</button>
-        <span style="font-size:12px;color:var(--comment);font-style:italic" id="countText"></span>
-        <button type="button" class="c-btn ghost" id="logoutBtn">退出管理</button>
+      <div class="module-tabs">
+        <button type="button" class="module-tab active" data-module="campus">校招助手 Q&A</button>
+        <button type="button" class="module-tab" data-module="paper">论文小助手 Q&A</button>
+        <span class="module-tab-hint">两个问答库独立存储，共用同一把管理密钥</span>
+        <button type="button" class="c-btn ghost module-logout" id="logoutBtn">退出管理</button>
       </div>
       <div class="msg" id="msg"></div>
-      <div id="qaList"><div class="loading">加载中…</div></div>
+
+      <!-- 校招助手模块（原校招后台，逻辑保持原样） -->
+      <div id="moduleCampus" class="module-panel">
+        <div class="toolbar">
+          <button type="button" class="c-btn" id="addBtn">＋ 新增问答</button>
+          <span style="font-size:12px;color:var(--comment);font-style:italic" id="countText"></span>
+        </div>
+        <div id="qaList"><div class="loading">加载中…</div></div>
+      </div>
+
+      <!-- 论文小助手模块（极简 Q&A：无分类字段） -->
+      <div id="modulePaper" class="module-panel" hidden>
+        <div class="toolbar">
+          <button type="button" class="c-btn" id="paperAddBtn">＋ 新增问答</button>
+          <span style="font-size:12px;color:var(--comment);font-style:italic" id="paperCountText"></span>
+        </div>
+        <div id="paperQaList"><div class="loading">加载中…</div></div>
+      </div>
     </div>
   </section>
 
-  <p class="hint" style="text-align:center">删除操作不可恢复；隐藏后前台访客立即不可见。排序用「上移 / 下移」调整前台展示顺序。</p>
+  <p class="hint" style="text-align:center">删除操作不可恢复；隐藏后前台访客立即不可见。排序用「上移 / 下移」调整前台展示顺序。论文小助手 Q&A 为极简版：无分类，仅维护 问题 / 答案 / 发布 / 排序。</p>
 </div>
 
 <script>
@@ -472,6 +508,252 @@
 
   // 启动
   if (getKey()) { enterMain(); } else { showGate(''); }
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  // ==================== v2.6 多工具后台：模块 Tab 切换 + 论文小助手 Q&A 管理 ====================
+  // 说明：校招模块逻辑保留在上方旧 IIFE（数据/密钥均不改变），本段仅负责
+  //       ① 工具 Tab 切换（校招 / 论文）；② 论文模块 list/create/update/toggle/delete/move。
+  //       两个模块共用同一把管理密钥（sessionStorage 同键）。
+  var PAPER_API = 'api/paper-admin';
+  var STORE_KEY = 'campus_manage_key'; // 与旧后台共用同一密钥缓存
+
+  var moduleTabs = Array.prototype.slice.call(document.querySelectorAll('.module-tab'));
+  var moduleCampus = document.getElementById('moduleCampus');
+  var modulePaper = document.getElementById('modulePaper');
+  var paperAddBtnEl = document.getElementById('paperAddBtn');
+  var paperListEl = document.getElementById('paperQaList');
+  var paperCountEl = document.getElementById('paperCountText');
+  var msgEl = document.getElementById('msg');
+  var logoutBtnEl = document.getElementById('logoutBtn');
+  var paperLoaded = false;
+
+  function getKey() { try { return sessionStorage.getItem(STORE_KEY) || ''; } catch (e) { return ''; } }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function showMsg(type, text) {
+    msgEl.className = 'msg show ' + type;
+    msgEl.textContent = text;
+    setTimeout(function () { if (msgEl.className.indexOf('show') >= 0) msgEl.className = 'msg'; }, 3200);
+  }
+
+  function callPaperAdmin(payload) {
+    return fetch(PAPER_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Manage-Key': getKey() },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; });
+    });
+  }
+
+  function handleAuthErr(status, d) {
+    if (status === 401 || (d && String(d.error || '').indexOf('管理密钥无效') >= 0)) {
+      // 密钥失效：让旧后台统一回到登录态
+      showMsg('err', '密钥无效或已过期，请退出后重新登录');
+      return true;
+    }
+    return false;
+  }
+
+  // ---------- 模块 Tab 切换 ----------
+  moduleTabs.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var m = btn.getAttribute('data-module');
+      if (m === 'campus') {
+        moduleCampus.hidden = false;
+        modulePaper.hidden = true;
+      } else {
+        moduleCampus.hidden = true;
+        modulePaper.hidden = false;
+        if (!paperLoaded) { paperLoad(); paperLoaded = true; }
+      }
+      moduleTabs.forEach(function (b) { b.classList.toggle('active', b === btn); });
+    });
+  });
+
+  // 退出管理时复位论文模块状态（mainPanel 整体隐藏，由旧后台 showGate 控制）
+  if (logoutBtnEl) {
+    logoutBtnEl.addEventListener('click', function () {
+      paperLoaded = false;
+      paperListEl.innerHTML = '<div class="loading">加载中…</div>';
+      moduleCampus.hidden = false;
+      modulePaper.hidden = true;
+      moduleTabs.forEach(function (b, i) { b.classList.toggle('active', i === 0); });
+    });
+  }
+
+  // ---------- 论文模块卡片渲染（无分类字段） ----------
+  function paperCardHtml(item, isNew) {
+    var pub = !!item.published;
+    var html = '<div class="qa-card' + (isNew ? ' new-card' : '') + '" data-id="' + escapeHtml(String(item.id == null ? '' : item.id)) + '">';
+    html += '<div class="qa-head">';
+    html += '<span class="qa-status ' + (pub ? 'pub' : 'hid') + '">' + (pub ? '已发布' : '已隐藏') + '</span>';
+    html += '<span class="qa-sort">#' + escapeHtml(String(item.sort == null ? '' : item.sort)) + '</span>';
+    html += '<div class="qa-ops">';
+    html += '<button type="button" class="c-btn ghost" data-act="up" title="上移">↑ 上移</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="down" title="下移">↓ 下移</button>';
+    html += '<button type="button" class="c-btn danger" data-act="del" title="删除">删除</button>';
+    html += '</div></div>';
+    html += '<label>问题</label>';
+    html += '<textarea data-field="question" rows="2" placeholder="请输入问题">' + escapeHtml(item.question || '') + '</textarea>';
+    html += '<label>答案</label>';
+    html += '<textarea data-field="answer" rows="5" placeholder="请输入答案（支持多行）">' + escapeHtml(item.answer || '') + '</textarea>';
+    html += '<div class="qa-actions">';
+    html += '<button type="button" class="c-btn" data-act="save">保存</button>';
+    html += '<button type="button" class="c-btn ghost" data-act="toggle">' + (pub ? '设为隐藏' : '设为发布') + '</button>';
+    html += '</div></div>';
+    return html;
+  }
+
+  function paperLoad() {
+    paperListEl.innerHTML = '<div class="loading">加载中…</div>';
+    callPaperAdmin({ action: 'list' }).then(function (res) {
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        paperListEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml((res.d && res.d.error) || '未知错误') + '</div>';
+        return;
+      }
+      var items = (res.d && res.d.items) || [];
+      paperCountEl.textContent = '共 ' + items.length + ' 条';
+      if (!items.length) {
+        paperListEl.innerHTML = '<div class="empty">还没有问答内容，点击「＋ 新增问答」开始录入（保存后前台论文小助手问答区即可展示）。</div>';
+        return;
+      }
+      paperListEl.innerHTML = items.map(function (it) { return paperCardHtml(it, false); }).join('');
+    }).catch(function (err) {
+      paperListEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(String((err && err.message) || err)) + '</div>';
+    });
+  }
+
+  function paperReadCard(card) {
+    var id = card.getAttribute('data-id') || '';
+    var question = card.querySelector('[data-field="question"]').value.trim();
+    var answer = card.querySelector('[data-field="answer"]').value.trim();
+    return { id: id, question: question, answer: answer };
+  }
+
+  function markBusy(btn, busyText) {
+    var old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = busyText || '处理中…';
+    return function () { btn.disabled = false; btn.textContent = old; };
+  }
+
+  function paperSave(card, btn) {
+    var data = paperReadCard(card);
+    if (!data.question) { showMsg('warn', '问题不能为空'); return; }
+    if (!data.answer) { showMsg('warn', '答案不能为空'); return; }
+    var restore = markBusy(btn, '保存中…');
+    var action = data.id ? 'update' : 'create';
+    var payload = { action: action, question: data.question, answer: data.answer };
+    if (data.id) payload.id = data.id;
+    callPaperAdmin(payload).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '保存失败');
+        return;
+      }
+      showMsg('ok', '已保存');
+      paperLoad();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '保存失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function paperToggle(card, btn) {
+    var id = card.getAttribute('data-id');
+    var pub = card.querySelector('.qa-status').textContent === '已发布';
+    var restore = markBusy(btn, '处理中…');
+    callPaperAdmin({ action: 'toggle_publish', id: id, published: !pub }).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '操作失败');
+        return;
+      }
+      showMsg('ok', pub ? '已设为隐藏' : '已设为发布');
+      paperLoad();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '操作失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function paperDelete(card, btn) {
+    var id = card.getAttribute('data-id');
+    if (!window.confirm('确定删除这条问答吗？删除后不可恢复，前台将立即不可见。')) return;
+    var restore = markBusy(btn, '删除中…');
+    callPaperAdmin({ action: 'delete', id: id }).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '删除失败');
+        return;
+      }
+      showMsg('ok', '已删除');
+      paperLoad();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '删除失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function paperMove(card, btn, dir) {
+    var id = card.getAttribute('data-id');
+    var restore = markBusy(btn, '移动中…');
+    callPaperAdmin({ action: 'move', id: id, dir: dir }).then(function (res) {
+      restore();
+      if (!res.ok) {
+        if (handleAuthErr(res.status, res.d)) return;
+        showMsg('err', (res.d && res.d.error) || '移动失败');
+        return;
+      }
+      if (res.d && res.d.moved === false) {
+        showMsg('warn', (res.d && res.d.reason) || '已到边界');
+      } else {
+        showMsg('ok', dir === 'up' ? '已上移' : '已下移');
+      }
+      paperLoad();
+    }).catch(function (err) {
+      restore();
+      showMsg('err', '移动失败：' + String((err && err.message) || err));
+    });
+  }
+
+  function paperAddNew() {
+    var empty = { id: '', question: '', answer: '', published: true, sort: '' };
+    var existing = paperListEl.querySelector('.qa-card.new-card');
+    if (existing) { existing.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    var wrap = document.createElement('div');
+    wrap.innerHTML = paperCardHtml(empty, true);
+    paperListEl.insertBefore(wrap.firstChild, paperListEl.firstChild);
+    showMsg('ok', '请在下方填写问题与答案，点击「保存」即在前台论文小助手问答区上线（如需先存草稿可先「设为隐藏」）。');
+  }
+
+  // 事件
+  if (paperAddBtnEl) paperAddBtnEl.addEventListener('click', paperAddNew);
+  paperListEl.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    var card = btn.closest('.qa-card');
+    if (!card) return;
+    var act = btn.getAttribute('data-act');
+    if (act === 'save') { paperSave(card, btn); return; }
+    if (act === 'toggle') { paperToggle(card, btn); return; }
+    if (act === 'del') { paperDelete(card, btn); return; }
+    if (act === 'up') { paperMove(card, btn, 'up'); return; }
+    if (act === 'down') { paperMove(card, btn, 'down'); return; }
+  });
 })();
 </script>
 </body>
