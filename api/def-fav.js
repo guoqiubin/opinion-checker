@@ -5,6 +5,7 @@
 //   DELETE /api/def-fav?id=xxx                  站长删除（X-Manage-Key 校验）
 // 密钥/凭据只存在于服务端环境变量，绝不进入前端代码。
 import crypto from 'crypto';
+import * as guard from './_guard.js';
 
 const TABLE = 'defense_favorites';
 
@@ -41,7 +42,7 @@ function jsonError(res, status, message) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Manage-Key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Manage-Key, X-Device-Id');
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -56,6 +57,9 @@ export default async function handler(req, res) {
 
   // GET：公开读取中英精选列表
   if (req.method === 'GET') {
+    // 风控：宽松只读限流（同身份 120 次/分钟），仅挡脚本连发
+    const gr = await guard.limit(req, 'read');
+    if (!gr.ok) return guard.deny(res, gr.code);
     const limit = Math.min(parseInt(req.query.limit || '20', 10) || 20, 50);
     const offset = Math.max(parseInt(req.query.offset || '0', 10) || 0, 0);
     const url = base + '/rest/v1/' + TABLE +
@@ -75,7 +79,13 @@ export default async function handler(req, res) {
 
   // POST / DELETE：需要管理密钥
   if (req.method === 'POST' || req.method === 'DELETE') {
+    // 风控：管理写限流（同 IP 30 次/分钟）+ 密钥失败冻结（同 IP 连续失败 5 次冻结 15 分钟）
+    const fz = await guard.freezeCheck(req);
+    if (!fz.ok) return guard.deny(res, fz.code);
+    const gw = await guard.limit(req, 'admin');
+    if (!gw.ok) return guard.deny(res, gw.code);
     if (!isAuthorized(req)) {
+      await guard.recordKeyFail(req);
       return jsonError(res, 401, '管理密钥无效');
     }
     if (!process.env.FEATURED_MANAGE_KEY) {

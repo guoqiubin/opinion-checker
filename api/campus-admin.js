@@ -10,6 +10,7 @@
 //     action=move            上移/下移排序（id + dir: up/down）
 // 密钥/凭据只存在于服务端环境变量，绝不进入前端代码。
 import crypto from 'crypto';
+import * as guard from './_guard.js';
 
 const TABLE = 'campus_qa';
 const ALLOWED_ACTIONS = ['list', 'create', 'update', 'delete', 'toggle_publish', 'move'];
@@ -53,7 +54,7 @@ function normCategory(value) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Manage-Key');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Manage-Key, X-Device-Id');
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -64,7 +65,13 @@ export default async function handler(req, res) {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
     return jsonError(res, 500, '服务端未配置 Supabase 环境变量');
   }
+  // 风控：管理写限流（同 IP 30 次/分钟）+ 密钥失败冻结（同 IP 连续失败 5 次冻结 15 分钟）
+  const fz = await guard.freezeCheck(req);
+  if (!fz.ok) return guard.deny(res, fz.code);
+  const gl = await guard.limit(req, 'admin');
+  if (!gl.ok) return guard.deny(res, gl.code);
   if (!isAuthorized(req)) {
+    await guard.recordKeyFail(req);
     return jsonError(res, 401, '管理密钥无效');
   }
   if (!process.env.FEATURED_MANAGE_KEY) {

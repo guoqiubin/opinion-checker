@@ -1,6 +1,7 @@
 // Vercel Serverless Function: /api/translate
 // 职责：答辩助手「中译英」翻译接口（中文 → 正式英文学术/答辩表达）
 // 密钥只存在于服务端环境变量，绝不进入前端代码。
+import * as guard from './_guard.js';
 
 const TRANSLATE_SYSTEM_PROMPT =
   '你是一位学术答辩翻译助手。用户会输入中文句子，请将其翻译为正式、地道的英文学术/答辩表达。' +
@@ -58,7 +59,7 @@ function callLLM(systemPrompt, userContent, tryJson) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Device-Id');
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -80,6 +81,10 @@ export default async function handler(req, res) {
     res.status(400).json({ ok: false, error: '内容过长，请控制在 600 字以内' });
     return;
   }
+
+  // 风控：AI 成本型限流（同身份 12 次/分钟、120 次/小时 + 全站日熔断）
+  var g = await guard.limit(req, 'ai');
+  if (!g.ok) return guard.deny(res, g.code);
 
   var apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {

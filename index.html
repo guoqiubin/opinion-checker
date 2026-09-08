@@ -1823,8 +1823,58 @@
     });
   }
 
+  // ==================== v2.5 风控：匿名设备 ID + 统一 fetch 封装 ====================
+  // 生成持久化的匿名设备ID（localStorage，随机字符串，不采集任何个人信息）
+  var deviceId = '';
+  function ensureDeviceId() {
+    if (deviceId) return deviceId;
+    try {
+      deviceId = localStorage.getItem('opinion_device_id') || '';
+    } catch (e) { deviceId = ''; }
+    if (!deviceId) {
+      deviceId = 'd' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      try { localStorage.setItem('opinion_device_id', deviceId); } catch (e) {}
+    }
+    return deviceId;
+  }
+  function origFetch() {
+    return fetch.apply(null, arguments);
+  }
+  // 统一出口：自动附加 X-Device-Id；429 时抛出可展示的友好错误（供各调用点 catch 显示）
+  function apiFetch(url, opts) {
+    var o = opts || {};
+    o.headers = o.headers || {};
+    try {
+      if (typeof o.headers.set === 'function') {
+        if (!o.headers.has('X-Device-Id')) o.headers.set('X-Device-Id', ensureDeviceId());
+      } else {
+        o.headers['X-Device-Id'] = ensureDeviceId();
+      }
+    } catch (e) {}
+    return origFetch(url, o).then(function (resp) {
+      if (resp.status === 429) {
+        return resp.clone().json().catch(function () { return {}; }).then(function (body) {
+          var msg = (body && (body.message || body.error)) || '操作太频繁，请稍后再试';
+          var err = new Error(msg);
+          err.status = 429;
+          throw err;
+        });
+      }
+      return resp;
+    });
+  }
+
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.5',
+      date: '2026-09-08',
+      changes: [
+        { type: 'shield', text: '全站接入网页风控：接口限流（AI 生成类每分钟 12 次 / 每小时 120 次，管理操作每分钟 30 次）防止刷接口与暴力请求' },
+        { type: 'shield', text: '管理接口密钥保护升级：连续输错密钥将临时冻结访问；匿名设备指纹仅用于接口计数，不采集任何个人信息' },
+        { type: 'shield', text: '遇限流提示「操作太频繁，请稍后再试」，稍等片刻即可继续使用' }
+      ]
+    },
     {
       version: 'v2.4',
       date: '2026-09-07',
@@ -2162,7 +2212,7 @@
     distillBtn.disabled = true;
     showStatus('loading', 'AI 正在提炼核心观点……');
     try {
-      var resp = await fetch('/api/distill', {
+      var resp = await apiFetch('/api/distill', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text })
@@ -2203,7 +2253,7 @@
 
     showStatus('loading', 'AI 正在理解语义并检索学术文献' + (reqLang === 'zh' ? '（中文文献）' : '') + '……');
     try {
-      var resp = await fetch('/api/check', {
+      var resp = await apiFetch('/api/check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text, lang: reqLang })
@@ -2382,7 +2432,7 @@
 
   function loadFeatured() {
     featuredListEl.innerHTML = '<div class="featured-loading">加载中…</div>';
-    fetch(FEATURED_API + '?limit=20')
+    apiFetch(FEATURED_API + '?limit=20')
       .then(function (r) { return r.json(); })
       .then(function (data) {
         var items = (data && data.items) || [];
@@ -2426,7 +2476,7 @@
       mode: lastData.mode || 'llm',
       lang: lastData.lang || 'en'
     };
-    fetch(FEATURED_API, {
+    apiFetch(FEATURED_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Manage-Key': key },
       body: JSON.stringify(body)
@@ -2445,7 +2495,7 @@
   function deleteFeatured(id) {
     var key = getStoredKey();
     if (!key) { openKeyModal('manage'); return; }
-    fetch(FEATURED_API + '?id=' + encodeURIComponent(id), {
+    apiFetch(FEATURED_API + '?id=' + encodeURIComponent(id), {
       method: 'DELETE',
       headers: { 'X-Manage-Key': key }
     }).then(function (r) {
@@ -2562,7 +2612,7 @@
     var btn = document.getElementById('defTranslateBtn');
     btn.disabled = true;
     btn.textContent = '翻译中…';
-    fetch(DEF_TRANSLATE_API, {
+    apiFetch(DEF_TRANSLATE_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: text })
@@ -2605,7 +2655,7 @@
 
   function submitDefFavorite(key) {
     if (!pendingFavorite) return;
-    fetch(DEF_FAV_API, {
+    apiFetch(DEF_FAV_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -2631,7 +2681,7 @@
       defStopSpeech();
     }
     defFavListEl.innerHTML = '<div class="featured-loading">加载中…</div>';
-    fetch(DEF_FAV_API + '?limit=20')
+    apiFetch(DEF_FAV_API + '?limit=20')
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (res) {
         if (!res.ok || !res.d) throw new Error((res.d && res.d.error) || '加载失败');
@@ -2674,7 +2724,7 @@
       openKeyModal('defmanage');
       return;
     }
-    fetch(DEF_FAV_API + '?id=' + encodeURIComponent(id), {
+    apiFetch(DEF_FAV_API + '?id=' + encodeURIComponent(id), {
       method: 'DELETE',
       headers: { 'X-Manage-Key': key }
     })
@@ -3259,7 +3309,7 @@
     stsAnalyzeBtn.disabled = true;
     STS_STATE.data = null;
 
-    fetch(STS_API, {
+    apiFetch(STS_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tool: STS_STATE.tool, module: STS_STATE.module, method: STS_STATE.method })
@@ -3649,7 +3699,7 @@
     if (!campusListEl) return;
     campusListEl.innerHTML = '<div class="campus-loading">加载中…</div>';
     campusCountEl.textContent = '';
-    fetch(CAMPUS_API)
+    apiFetch(CAMPUS_API)
       .then(function (r) { return r.json(); })
       .then(function (data) {
         var items = (data && Array.isArray(data.items)) ? data.items : [];
@@ -4030,7 +4080,7 @@
     dictAbortCtrl._t = setTimeout(function () {
       try { dictAbortCtrl.abort(); } catch (e) {}
     }, 30000);
-    fetch('/api/dict?term=' + encodeURIComponent(term), {
+    apiFetch('/api/dict?term=' + encodeURIComponent(term), {
       signal: dictAbortCtrl.signal,
       headers: { 'Accept': 'application/json' }
     }).then(function (resp) {

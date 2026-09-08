@@ -4,6 +4,7 @@
 //   + APA 数值结果 + 中/英双语解读（interpretation），供前端导出 Excel 与查看数据分析。
 // 密钥只存在于服务端环境变量，绝不进入前端代码。
 // 范式复刻：api/translate.js（CORS/OPTIONS/POST 校验/callLLM/extractJSON/503/502）。
+import * as guard from './_guard.js';
 
 // ---------------- 白名单：与前端 STS_MODULES 保持一致（8 大主场景全量细分） ----------------
 // 合法取值：tool ∈ { jamovi, spss }（spss 为预留，后端仍接受但前端不可达）
@@ -203,7 +204,7 @@ function normalizePayload(parsed, tool, module, method) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Device-Id');
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -226,6 +227,10 @@ export default async function handler(req, res) {
     res.status(400).json({ ok: false, error: '不支持的组合：tool=' + tool + ' module=' + module + ' method=' + method });
     return;
   }
+
+  // 风控：AI 成本型限流（同身份 12 次/分钟、120 次/小时 + 全站日熔断）
+  var g = await guard.limit(req, 'ai');
+  if (!g.ok) return guard.deny(res, g.code);
 
   var apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {

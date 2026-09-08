@@ -2,6 +2,7 @@
 // 职责：1) 调用 LLM 判断观点是否有理论支持（读取服务端环境变量 DEEPSEEK_API_KEY）
 //       2) 用提炼出的学术概念检索 Semantic Scholar / Crossref
 // 注意：API Key 只存在于服务端环境变量，绝不进入前端代码。
+import * as guard from './_guard.js';
 
 const JUDGE_SYSTEM_PROMPT =
   '你是一位严谨的学术评审助手。用户会给出一个观点（可能带有个人判断）。' +
@@ -393,7 +394,7 @@ async function searchAcademic(query, lang, concepts) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Device-Id');
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -421,6 +422,10 @@ export default async function handler(req, res) {
     lang = String((req.body && req.body.lang) || 'en').trim();
   } catch (e) {}
   if (lang !== 'zh') lang = 'en';
+
+  // 风控：AI 成本型限流（同身份 12 次/分钟、120 次/小时 + 全站日熔断）
+  var g = await guard.limit(req, 'ai');
+  if (!g.ok) return guard.deny(res, g.code);
 
   var apiKey = process.env.DEEPSEEK_API_KEY;
   var verdict = null;
