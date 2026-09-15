@@ -961,6 +961,18 @@
   .sts-data-preview { border-collapse: collapse; width: 100%; font-size: 12px; }
   .sts-data-preview th { position: sticky; top: 0; background: #F3E7CB; color: var(--brown-dark); padding: 6px 10px; text-align: left; font-weight: 700; border: 1px solid #e3cf9f; white-space: nowrap; z-index: 1; }
   .sts-data-preview td { padding: 5px 10px; border: 1px solid #ecdbb4; color: var(--brown-mid); white-space: nowrap; }
+  .sts-scatter-card { background: #FFF9EA; border: 1px solid #e3cf9f; border-radius: 12px; padding: 14px 16px; margin: 12px 0; box-shadow: 0 2px 6px rgba(120,90,30,.08); }
+  .sts-scatter-card h4 { color: var(--brown-dark); font-size: 15px; margin-bottom: 4px; }
+  .sts-scatter-meta { color: var(--comment); font-size: 12px; margin-bottom: 8px; }
+  .sts-scatter-wrap { width: 100%; overflow-x: auto; }
+  .sts-scatter-svg { display: block; width: 100%; min-width: 420px; height: auto; max-height: 430px; }
+  .sts-scatter-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .sts-scatter-stat { background: #F5E9CC; border: 1px solid #dcc894; border-radius: 8px; padding: 4px 10px; color: var(--brown-dark); font-size: 13px; }
+  .sts-scatter-tick { fill: #766d5d; font-size: 12px; }
+  .sts-scatter-axis { fill: #493c28; font-size: 13px; font-weight: 600; }
+  .sts-scatter-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; color: var(--brown-dark); font-size: 12px; }
+  .sts-scatter-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .sts-scatter-legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
   .sts-note { font-size: 12px; color: var(--comment); font-style: italic; margin-top: 8px; line-height: 1.6; }
 
   .sts-lang-switch { display: flex; gap: 6px; margin-bottom: 12px; }
@@ -1311,6 +1323,30 @@
     border-radius: 10px; padding: 10px 14px; margin-top: 14px;
     font-size: 12.5px; color: #7A5A22; line-height: 1.8;
   }
+  .job-guide-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .job-guide-tab { border: 1px solid #c9a75c; border-radius: 18px; padding: 7px 16px; background: #fbf4e3; color: var(--brown-dark); cursor: pointer; font: inherit; }
+  .job-guide-tab.active { background: linear-gradient(180deg, #e4b85d, #b57a17); color: #fff; box-shadow: 0 2px 5px rgba(120,80,20,.25); }
+  .job-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .job-guide-field label { display: block; color: var(--brown-dark); font-weight: 700; font-size: 13px; margin-bottom: 5px; }
+  .job-guide-field input, .job-guide-field textarea { width: 100%; box-sizing: border-box; border: 1px solid #d6bb7a; border-radius: 8px; background: #fffdf5; padding: 9px 10px; color: var(--brown-dark); font: inherit; }
+  .job-guide-field textarea { min-height: 76px; resize: vertical; }
+  .job-guide-actions { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+  .job-guide-primary { border: 1px solid #9a6812; border-radius: 8px; padding: 9px 18px; background: linear-gradient(180deg, #e5b654, #b97c18); color: #fff; font: inherit; cursor: pointer; }
+  .job-guide-primary:disabled { opacity: .6; cursor: wait; }
+  .job-guide-secondary { border: 1px solid #bda875; border-radius: 8px; padding: 9px 16px; background: #f6edd9; color: var(--brown-dark); font: inherit; cursor: pointer; }
+  .job-guide-result { margin-top: 14px; }
+  .job-guide-result h3 { color: var(--brown-dark); margin: 0 0 5px; }
+  .job-guide-meta { color: var(--comment); font-size: 12px; margin-bottom: 12px; }
+  .job-guide-section { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 9px; padding: 11px 13px; margin: 9px 0; }
+  .job-guide-section h4 { color: #91641c; font-size: 14px; margin: 0 0 7px; }
+  .job-guide-section p { white-space: pre-wrap; line-height: 1.75; margin: 0; color: var(--brown-dark); }
+  .job-guide-list { margin: 0; padding-left: 20px; color: var(--brown-dark); line-height: 1.75; }
+  .job-guide-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .job-guide-chip { background: #f4e5bd; border: 1px solid #dec28a; border-radius: 14px; padding: 4px 9px; color: #74521d; font-size: 12px; }
+  .job-guide-source { font-size: 12px; margin: 4px 0; }
+  .job-guide-source a { color: #89601b; }
+  .job-guide-aigc { color: #987d4f; font-size: 12px; font-style: italic; margin-top: 10px; }
+  @media (max-width: 560px) { .job-guide-grid { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .paper-design-grid { grid-template-columns: 1fr; }
     .paper-qa-title { font-size: 14px; }
@@ -1347,7 +1383,7 @@
     <button type="button" class="nav-tab" data-tool="source" title="信源查询：观点理论支持检测与分级信源">信源查询</button>
     <button type="button" class="nav-tab" data-tool="defense" title="答辩助手：中文答辩陈述一键译英并收藏精选">答辩助手</button>
     <button type="button" class="nav-tab" data-tool="dict" title="心理学词典：查询心理学与心理咨询专业概念">心理学词典</button>
-    <button type="button" class="nav-tab" data-tool="resume" title="智能简历（规划中，敬请期待）">智能简历</button>
+    <button type="button" class="nav-tab" data-tool="resume" title="简历助手：岗位科普">简历助手</button>
     <button type="button" class="nav-tab" data-tool="campus" title="校招助手：秋招 Q&A 问答">校招助手</button>
     <button type="button" class="nav-tab" data-tool="cscsrv" title="中留服助手（规划中，敬请期待）">中留服助手</button>
     <span class="nav-tab disabled" title="更多平级工具开发中，敬请期待">＋ 更多（预留）</span>
@@ -1675,20 +1711,29 @@
     </div>
   </section>
 
-  <!-- 1.5 智能简历视图：占位（开发中，敬请期待） -->
+  <!-- 1.5 简历助手视图：岗位科普 -->
   <section id="view-resume" class="app-view" data-view="resume" hidden>
     <div class="win">
       <div class="win-titlebar">
         <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-title">智能简历</span>
+        <span class="win-title">简历助手 · 岗位科普</span>
       </div>
       <div class="win-body">
-        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">智能简历开发中</span></div>
-        <div class="placeholder-card">
-          <div class="placeholder-icon">❏</div>
-          <h3>敬请期待</h3>
-          <p>面向简历制作与优化场景的智能辅助正在规划中，暂未开放。功能确定后将在本模块提供入口。</p>
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">输入岗位名称，快速了解岗位职责、能力要求与面试重点</span></div>
+        <div class="job-guide-tabs" aria-label="简历助手子功能">
+          <button type="button" class="job-guide-tab active">岗位科普</button>
+          <button type="button" class="job-guide-tab" disabled title="后续开放">简历优化（后续开放）</button>
         </div>
+        <div class="job-guide-grid">
+          <div class="job-guide-field"><label for="jobGuideTitle">岗位名称 <span style="color:#b04b36">（必填）</span></label><input id="jobGuideTitle" maxlength="80" placeholder="例如：用户研究员 / 数据分析师"></div>
+          <div class="job-guide-field"><label for="jobGuideCompany">公司名称（可选）</label><input id="jobGuideCompany" maxlength="100" placeholder="例如：字节跳动"></div>
+          <div class="job-guide-field"><label for="jobGuideCity">工作城市（可选）</label><input id="jobGuideCity" maxlength="60" placeholder="例如：北京"></div>
+          <div class="job-guide-field"><label for="jobGuideIndustry">行业方向（可选）</label><input id="jobGuideIndustry" maxlength="80" placeholder="例如：互联网 / 教育 / 医疗"></div>
+          <div class="job-guide-field" style="grid-column:1/-1"><label for="jobGuideUrl">招聘链接（可选，提供后更精准）</label><input id="jobGuideUrl" maxlength="500" placeholder="粘贴公司官网或招聘平台的岗位链接"></div>
+          <div class="job-guide-field" style="grid-column:1/-1"><label for="jobGuideDesc">岗位描述补充（可选）</label><textarea id="jobGuideDesc" maxlength="1200" placeholder="可粘贴招聘信息中的岗位职责或任职要求，AI 会优先按这段内容分析"></textarea></div>
+        </div>
+        <div class="job-guide-actions"><button type="button" id="jobGuideBtn" class="job-guide-primary">开始岗位科普</button><button type="button" id="jobGuideClear" class="job-guide-secondary">清空</button><span class="hint" style="margin:0">AI 生成内容仅供求职准备参考；具体要求以公司当前招聘页为准。</span></div>
+        <div id="jobGuideResult" class="job-guide-result"><div class="dict-empty">输入岗位名称后开始查询</div></div>
       </div>
     </div>
   </section>
@@ -1995,6 +2040,14 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.7',
+      date: '2026-09-15',
+      changes: [
+        { type: 'add', text: '「简历助手」新增「岗位科普」：输入岗位名称，可补充公司、城市、行业、招聘链接或岗位描述，AI 输出岗位职责、能力要求、工具、面试重点与发展路径' },
+        { type: 'shield', text: '岗位科普结果标注生成时间与参考性质；对实时招聘、薪资和公司具体要求不做无依据断言，提醒以官方招聘页为准' }
+      ]
+    },
     {
       version: 'v2.6',
       date: '2026-09-08',
@@ -3005,7 +3058,8 @@
       id: 'exploration', name: 'Exploration',
       groups: [{ type: 'other', methods: [
         { id: 'descriptives', label: 'Descriptives' },
-        { id: 'reliability', label: 'Reliability Analysis' }
+        { id: 'reliability', label: 'Reliability Analysis' },
+        { id: 'scatterplot', label: 'Scatterplot' }
       ]}]
     },
     {
@@ -3082,6 +3136,18 @@
 
   // ---- 英文操作步骤静态库（首版覆盖高频方法；key = tool.module.method） ----
   var STS_STEPS = {
+    'jamovi.exploration.scatterplot': {
+      title: 'Scatterplot in Jamovi',
+      intro: 'Visualise the relationship between two continuous variables, optionally separating points by a group.',
+      steps: [
+        { action: 'Open the Scatterplot analysis.', detail: 'Analyses → Exploration → Scatterplot.' },
+        { action: 'Assign the X-axis variable.', detail: 'Move the predictor or independent continuous variable to X-Axis.' },
+        { action: 'Assign the Y-axis variable.', detail: 'Move the outcome or dependent continuous variable to Y-Axis.' },
+        { action: 'Optionally add a group.', detail: 'Move a categorical variable to Group to colour points by category; use the plot to inspect direction, form, clusters, and outliers.' }
+      ],
+      tips: ['A scatterplot shows association, not causation. If you need a numerical test, use Regression → Correlation or Linear Regression.'],
+      sourceNote: 'Path based on the Jamovi interface shown; wording may vary slightly by version.'
+    },
     'jamovi.exploration.descriptives': {
       title: 'Descriptives in Jamovi',
       intro: 'Get descriptive statistics (n, M, SD, etc.) for one or more continuous variables.',
@@ -3516,6 +3582,7 @@
     var rows = (ds.data || []).slice(0, 8);
     var html = '<div class="sts-question-card"><h3>模拟数据集（导出后可导入 Jamovi 练习）</h3>';
     html += '<div class="sts-note">' + escapeHtml(ds.note || '模拟数据由 AI 生成，仅供统计练习。') + '</div>';
+    if (STS_STATE.method === 'scatterplot') html += renderStsScatterplot(ds);
     html += '<div class="sts-data-preview-wrap"><table class="sts-data-preview"><thead><tr>';
     headers.forEach(function (h) { html += '<th>' + escapeHtml(h) + '</th>'; });
     html += '</tr></thead><tbody>';
@@ -3532,6 +3599,100 @@
     html += '</div></div>';
     stsDatasetEl.innerHTML = html;
     stsDatasetEl.style.display = '';
+  }
+
+  function renderStsScatterplot(ds) {
+    var vars = ds.variables || [], data = ds.data || [];
+    function numericValue(value) {
+      if (typeof value === 'number') return isFinite(value) ? value : null;
+      if (typeof value === 'string' && value.trim() !== '') {
+        var parsed = Number(value);
+        return isFinite(parsed) ? parsed : null;
+      }
+      return null;
+    }
+    var numericIndexes = [];
+    vars.forEach(function (v, i) {
+      if (v.type === 'numeric' || v.scale === 'continuous') numericIndexes.push(i);
+    });
+    if (numericIndexes.length < 2) {
+      data.some(function (row) {
+        vars.forEach(function (_, i) {
+          if (numericIndexes.indexOf(i) === -1 && row && numericValue(row[i]) !== null) numericIndexes.push(i);
+        });
+        return numericIndexes.length >= 2;
+      });
+    }
+    if (numericIndexes.length < 2) {
+      return '<div class="sts-scatter-card"><h4>散点图预览</h4><div class="sts-scatter-meta">当前模拟数据中可用的连续变量不足，无法绘制散点图。</div></div>';
+    }
+    var xIndex = numericIndexes.filter(function (i) { return vars[i].role === 'independent'; })[0];
+    if (xIndex === undefined) xIndex = numericIndexes[0];
+    var yIndex = numericIndexes.filter(function (i) { return i !== xIndex && vars[i].role === 'dependent'; })[0];
+    if (yIndex === undefined) yIndex = numericIndexes.filter(function (i) { return i !== xIndex; })[0];
+    var groupIndex = vars.map(function (v, i) { return { v: v, i: i }; }).filter(function (item) {
+      return item.i !== xIndex && item.i !== yIndex && (item.v.type === 'categorical' || item.v.scale === 'nominal' || item.v.scale === 'ordinal');
+    }).map(function (item) { return item.i; })[0];
+    var points = [];
+    data.forEach(function (row) {
+      if (!row) return;
+      var x = numericValue(row[xIndex]), y = numericValue(row[yIndex]);
+      if (x === null || y === null) return;
+      points.push({ x: x, y: y, group: groupIndex === undefined ? '' : String(row[groupIndex] == null ? '' : row[groupIndex]) });
+    });
+    if (points.length < 2) {
+      return '<div class="sts-scatter-card"><h4>散点图预览</h4><div class="sts-scatter-meta">有效的 X/Y 数值行不足 2 行，无法绘制散点图。</div></div>';
+    }
+    var W = 760, H = 390, left = 66, right = 24, top = 24, bottom = 58;
+    var plotW = W - left - right, plotH = H - top - bottom;
+    var minX = Math.min.apply(null, points.map(function (p) { return p.x; }));
+    var maxX = Math.max.apply(null, points.map(function (p) { return p.x; }));
+    var minY = Math.min.apply(null, points.map(function (p) { return p.y; }));
+    var maxY = Math.max.apply(null, points.map(function (p) { return p.y; }));
+    if (minX === maxX) { minX -= 1; maxX += 1; }
+    if (minY === maxY) { minY -= 1; maxY += 1; }
+    var padX = (maxX - minX) * 0.06, padY = (maxY - minY) * 0.08;
+    minX -= padX; maxX += padX; minY -= padY; maxY += padY;
+    function sx(x) { return left + ((x - minX) / (maxX - minX)) * plotW; }
+    function sy(y) { return top + plotH - ((y - minY) / (maxY - minY)) * plotH; }
+    function nice(v) { return Number(v.toFixed(2)).toString(); }
+    var colors = ['#B77A17', '#4B83B5', '#598B63', '#B65E50', '#8067A8', '#4B9690'];
+    var groups = [];
+    points.forEach(function (p) { if (groups.indexOf(p.group) === -1) groups.push(p.group); });
+    var colorFor = function (g) { return colors[Math.max(0, groups.indexOf(g)) % colors.length]; };
+    var svg = '<svg class="sts-scatter-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + escapeHtml((vars[xIndex].label || vars[xIndex].name || 'X') + ' 与 ' + (vars[yIndex].label || vars[yIndex].name || 'Y') + ' 的散点图') + '">';
+    svg += '<title>散点图：' + escapeHtml(vars[xIndex].label || vars[xIndex].name || 'X') + ' × ' + escapeHtml(vars[yIndex].label || vars[yIndex].name || 'Y') + '</title>';
+    for (var t = 0; t <= 4; t++) {
+      var gx = left + plotW * t / 4, gy = top + plotH * t / 4;
+      var xv = minX + (maxX - minX) * t / 4, yv = maxY - (maxY - minY) * t / 4;
+      svg += '<line x1="' + gx + '" y1="' + top + '" x2="' + gx + '" y2="' + (top + plotH) + '" stroke="#e7dfcc" stroke-width="1"/>';
+      svg += '<line x1="' + left + '" y1="' + gy + '" x2="' + (left + plotW) + '" y2="' + gy + '" stroke="#e7dfcc" stroke-width="1"/>';
+      svg += '<text x="' + gx + '" y="' + (top + plotH + 20) + '" text-anchor="middle" class="sts-scatter-tick">' + escapeHtml(nice(xv)) + '</text>';
+      svg += '<text x="' + (left - 10) + '" y="' + (gy + 4) + '" text-anchor="end" class="sts-scatter-tick">' + escapeHtml(nice(yv)) + '</text>';
+    }
+    svg += '<line x1="' + left + '" y1="' + (top + plotH) + '" x2="' + (left + plotW) + '" y2="' + (top + plotH) + '" stroke="#75684e" stroke-width="1.5"/>';
+    svg += '<line x1="' + left + '" y1="' + top + '" x2="' + left + '" y2="' + (top + plotH) + '" stroke="#75684e" stroke-width="1.5"/>';
+    var meanX = points.reduce(function (s, p) { return s + p.x; }, 0) / points.length;
+    var meanY = points.reduce(function (s, p) { return s + p.y; }, 0) / points.length;
+    var covariance = 0, varianceX = 0, varianceY = 0;
+    points.forEach(function (p) { covariance += (p.x - meanX) * (p.y - meanY); varianceX += Math.pow(p.x - meanX, 2); varianceY += Math.pow(p.y - meanY, 2); });
+    var slope = varianceX ? covariance / varianceX : 0;
+    var r = varianceX && varianceY ? covariance / Math.sqrt(varianceX * varianceY) : 0;
+    var intercept = meanY - slope * meanX;
+    svg += '<line x1="' + sx(minX) + '" y1="' + sy(intercept + slope * minX) + '" x2="' + sx(maxX) + '" y2="' + sy(intercept + slope * maxX) + '" stroke="#6D5130" stroke-width="2" stroke-dasharray="7 5" opacity=".8"/>';
+    points.forEach(function (p) {
+      svg += '<circle cx="' + sx(p.x).toFixed(2) + '" cy="' + sy(p.y).toFixed(2) + '" r="5" fill="' + colorFor(p.group) + '" fill-opacity=".76" stroke="#fff" stroke-width="1"><title>' + escapeHtml((vars[xIndex].label || vars[xIndex].name) + ': ' + nice(p.x) + ', ' + (vars[yIndex].label || vars[yIndex].name) + ': ' + nice(p.y) + (p.group ? ', ' + (vars[groupIndex].label || vars[groupIndex].name) + ': ' + p.group : '')) + '</title></circle>';
+    });
+    svg += '<text x="' + (left + plotW / 2) + '" y="' + (H - 10) + '" text-anchor="middle" class="sts-scatter-axis">' + escapeHtml(vars[xIndex].label || vars[xIndex].name || 'X') + '</text>';
+    svg += '<text x="18" y="' + (top + plotH / 2) + '" text-anchor="middle" class="sts-scatter-axis" transform="rotate(-90 18 ' + (top + plotH / 2) + ')">' + escapeHtml(vars[yIndex].label || vars[yIndex].name || 'Y') + '</text>';
+    svg += '</svg>';
+    var result = '<section class="sts-scatter-card"><h4>散点图预览</h4><div class="sts-scatter-meta">X 轴：' + escapeHtml(vars[xIndex].label || vars[xIndex].name) + '；Y 轴：' + escapeHtml(vars[yIndex].label || vars[yIndex].name) + (groupIndex !== undefined ? '；分组：' + escapeHtml(vars[groupIndex].label || vars[groupIndex].name) : '') + '</div><div class="sts-scatter-wrap">' + svg + '</div>';
+    result += '<div class="sts-scatter-stats"><span class="sts-scatter-stat">有效样本 n = ' + points.length + '</span><span class="sts-scatter-stat">Pearson r = ' + r.toFixed(3) + '</span><span class="sts-scatter-stat">线性趋势 R² = ' + (r * r).toFixed(3) + '</span></div>';
+    if (groups.length > 1 || (groups.length === 1 && groups[0])) {
+      result += '<div class="sts-scatter-legend">' + groups.map(function (g) { return '<span><i style="background:' + colorFor(g) + '"></i>' + escapeHtml(g || '未分类') + '</span>'; }).join('') + '</div>';
+    }
+    result += '<div class="sts-scatter-meta">虚线为全样本线性趋势线；相关系数和 R² 根据当前模拟数据计算，仅作练习参考，不代表正式推断检验。</div></section>';
+    return result;
   }
 
   // ---- 内嵌轻量 xlsx 生成器（纯 JS 手工 zip+xml，零外链） ----
@@ -3901,6 +4062,69 @@
   }
 
   campusVisibleCheck();
+
+  // ==================== 简历助手 v2.7：岗位科普 ====================
+  var jobGuideTitleEl = document.getElementById('jobGuideTitle');
+  var jobGuideCompanyEl = document.getElementById('jobGuideCompany');
+  var jobGuideCityEl = document.getElementById('jobGuideCity');
+  var jobGuideIndustryEl = document.getElementById('jobGuideIndustry');
+  var jobGuideUrlEl = document.getElementById('jobGuideUrl');
+  var jobGuideDescEl = document.getElementById('jobGuideDesc');
+  var jobGuideBtnEl = document.getElementById('jobGuideBtn');
+  var jobGuideClearEl = document.getElementById('jobGuideClear');
+  var jobGuideResultEl = document.getElementById('jobGuideResult');
+  var jobGuideBusy = false;
+
+  function jobGuideList(items) {
+    if (!Array.isArray(items) || !items.length) return '<p>暂无可用信息，请结合具体招聘公告补充判断。</p>';
+    return '<ul class="job-guide-list">' + items.map(function (item) { return '<li>' + escapeHtml(item) + '</li>'; }).join('') + '</ul>';
+  }
+  function jobGuideChips(items) {
+    if (!Array.isArray(items) || !items.length) return '<p>暂无可用信息。</p>';
+    return '<div class="job-guide-chips">' + items.map(function (item) { return '<span class="job-guide-chip">' + escapeHtml(item) + '</span>'; }).join('') + '</div>';
+  }
+  function jobGuideSection(title, content) { return '<div class="job-guide-section"><h4>' + title + '</h4>' + content + '</div>'; }
+  function jobGuideRender(data) {
+    if (!data) { jobGuideResultEl.innerHTML = '<div class="paper-idea-error">未返回有效结果，请稍后重试。</div>'; return; }
+    var html = '<div class="job-guide-section"><h3>' + escapeHtml(data.jobTitle || jobGuideTitleEl.value.trim()) + '</h3>' + (data.headline ? '<p>' + escapeHtml(data.headline) + '</p>' : '') + '</div>';
+    html += '<div class="job-guide-meta">生成时间：' + escapeHtml(new Date(data.updatedAt || Date.now()).toLocaleString('zh-CN')) + ' · AI 生成内容，仅供求职准备参考</div>';
+    html += jobGuideSection('岗位概览', '<p>' + escapeHtml(data.overview || '暂无岗位概览。') + '</p>');
+    html += jobGuideSection('核心工作内容', jobGuideList(data.responsibilities));
+    html += jobGuideSection('常见能力要求', jobGuideChips(data.skills));
+    html += jobGuideSection('常用工具 / 技术', jobGuideChips(data.tools));
+    html += jobGuideSection('适合的专业与经历背景', '<p>' + escapeHtml(data.background || '暂无补充。') + '</p>');
+    html += jobGuideSection('面试准备重点', jobGuideList(data.interviewFocus));
+    html += jobGuideSection('可能的发展路径', '<p>' + escapeHtml(data.careerPath || '暂无补充。') + '</p>');
+    html += jobGuideSection('公司定制化补充', '<p>' + escapeHtml(data.companyInsight || '未提供公司名称，以上为通用岗位分析。') + '</p>');
+    html += jobGuideSection('行业与信息时效提示', '<p>' + escapeHtml(data.marketNote || '具体要求、薪资与招聘状态请以公司当前招聘页为准。') + '</p>');
+    if (Array.isArray(data.sources) && data.sources.length) {
+      html += jobGuideSection('建议核验来源', data.sources.map(function (source) {
+        var label = escapeHtml(source.label || '来源');
+        if (source.url) { try { var parsed = new URL(source.url); if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return '<div class="job-guide-source"><a href="' + escapeHtml(parsed.href) + '" target="_blank" rel="noopener noreferrer">' + label + '</a></div>'; } catch (e) {} }
+        return '<div class="job-guide-source">' + label + '</div>';
+      }).join(''));
+    }
+    html += '<div class="job-guide-aigc">提示：岗位名称和公司名称能帮助 AI 缩小分析范围；如果你提供招聘链接或岗位描述，结果会更贴近该职位，但仍不能替代公司官方招聘信息。</div>';
+    jobGuideResultEl.innerHTML = html;
+  }
+  function jobGuideRun() {
+    if (jobGuideBusy) return;
+    var jobTitle = jobGuideTitleEl.value.trim();
+    if (!jobTitle) { jobGuideResultEl.innerHTML = '<div class="paper-idea-error">请先输入岗位名称。</div>'; jobGuideTitleEl.focus(); return; }
+    jobGuideBusy = true; jobGuideBtnEl.disabled = true; jobGuideBtnEl.textContent = '正在生成…';
+    jobGuideResultEl.innerHTML = '<div class="dict-empty">AI 正在整理岗位信息，请稍候…</div>';
+    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ jobTitle: jobTitle, company: jobGuideCompanyEl.value.trim(), city: jobGuideCityEl.value.trim(), industry: jobGuideIndustryEl.value.trim(), jobUrl: jobGuideUrlEl.value.trim(), jobDescription: jobGuideDescEl.value.trim() }) })
+      .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
+      .then(function (json) { jobGuideRender(json && json.data); })
+      .catch(function (err) { jobGuideResultEl.innerHTML = '<div class="paper-idea-error">查询失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
+      .then(function () { jobGuideBusy = false; jobGuideBtnEl.disabled = false; jobGuideBtnEl.textContent = '开始岗位科普'; });
+  }
+  if (jobGuideBtnEl) jobGuideBtnEl.addEventListener('click', jobGuideRun);
+  if (jobGuideTitleEl) jobGuideTitleEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); jobGuideRun(); } });
+  if (jobGuideClearEl) jobGuideClearEl.addEventListener('click', function () {
+    [jobGuideTitleEl, jobGuideCompanyEl, jobGuideCityEl, jobGuideIndustryEl, jobGuideUrlEl, jobGuideDescEl].forEach(function (el) { if (el) el.value = ''; });
+    jobGuideResultEl.innerHTML = '<div class="dict-empty">输入岗位名称后开始查询</div>';
+  });
 
   // ==================== 心理学词典 v2.4：AI 实时查询 + 30 天缓存（dict 前缀独立命名空间） ====================
   var dictInput = document.getElementById('dictInput');

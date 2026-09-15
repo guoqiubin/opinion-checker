@@ -10,7 +10,7 @@ import * as guard from './_guard.js';
 // 合法取值：tool ∈ { jamovi, spss }（spss 为预留，后端仍接受但前端不可达）
 var STS_ALLOWED = {
   jamovi: {
-    exploration: ['descriptives', 'reliability'],
+    exploration: ['descriptives', 'reliability', 'scatterplot'],
     ttest: ['onesample', 'independent', 'paired', 'mannwhitney', 'wilcoxon'],
     anova: ['oneway', 'anova', 'rm', 'ancova', 'mancova', 'kruskal', 'friedman'],
     regression: ['correlation', 'linear', 'multiple', 'logistic'],
@@ -26,6 +26,7 @@ var STS_METHOD_EN = {
   // Exploration
   descriptives: 'Descriptives',
   reliability: 'Reliability Analysis',
+  scatterplot: 'Scatterplot',
   // T-Tests
   onesample: 'One Sample T-Test',
   independent: 'Independent Samples T-Test',
@@ -76,6 +77,11 @@ var STS_MODULE_EN = {
 function buildSystemPrompt(tool, module, method) {
   var methodEn = STS_METHOD_EN[method] || method;
   var moduleEn = STS_MODULE_EN[module] || module;
+  var scatterplotRules = method === 'scatterplot' ? [
+    '散点图专属要求：question.variables 必须包含恰好两个连续数值变量，其中一个 role=independent 作为 X 轴，另一个 role=dependent 作为 Y 轴；可以额外包含一个可选的分类分组变量（role=independent、type=categorical、scale=nominal，name 使用 group，levels 至少 2 个）。',
+    '散点图数据至少生成 30 行，两个连续变量每行必须是有效数字，分组变量（如有）必须严格使用 levels 中的类别。数据应呈现可辨识但非完美的正或负线性关系，可选分组之间允许有不同点云；不要生成全部相同的值。',
+    '散点图的 interpretation 应以描述性措辞解释方向、强度、点云/离群观察；可给出 Pearson r、线性趋势 R² 的示意值，但不得输出显著性检验 p 值，也不得声称仅凭图形已完成显著性检验或因果推断。apaResult 也需明确这些统计数字仅为示意。'
+  ] : [];
   return [
     '你是一位面向心理学硕博生的统计学出题助手，负责生成结构化的模拟研究题与配套模拟数据集，用于统计软件（Jamovi）操作练习。',
     '要求：',
@@ -85,10 +91,12 @@ function buildSystemPrompt(tool, module, method) {
     '3. 工具与场景必须与请求一致：tool=' + tool + '，module=' + moduleEn + '，method=' + methodEn + '。expectedMethod 必须填写该细分方法的正式英文名（即 method 对应的标准统计检验名），不允许替换为其他检验。',
     '4. 变量规范：分组/条件变量名用 group 或 condition（type=categorical、scale=nominal、含 levels 数组）；连续因变量自拟心理学构念名（type=numeric、scale=continuous）；协变量用 covariate。变量数按方法合理设置（t 检验 2 个、单因素方差分析 2 个、重复测量 3+ 个、回归/因子/SEM 适当增多）。',
     '5. 数据集：生成 20-60 行（sampleSize 与 data 行数一致）模拟数据。data 每行为一维数组，元素顺序与 dataset.variables 顺序完全一致；分类列用 levels 中的字符串，数值列用数字。数据分布需与 apaResult 的显著方向大体自洽（如 t 检验显著则两组均值差异方向与 p 值一致），示意即可，不要求精确复算。',
-    '6. apaResult 使用标准 APA 格式：按方法选用统计量（t / F / r / \u03C7\u00B2 / z / \u03B2 / factor loading 等），写清自由度、p 值（保留三位小数、去前导零，如 p = .003）与效应量（Cohen\'s d / \u03B7p\u00B2 / Cramer\'s V / R\u00B2 / \u03C9\u00B2 等按方法选用）。',
+    '6. apaResult 使用标准 APA 格式：按方法选用统计量（t / F / r / \u03C7\u00B2 / z / \u03B2 / factor loading 等），写清自由度、p 值（保留三位小数、去前导零，如 p = .003）与效应量（Cohen\'s d / \u03B7p\u00B2 / Cramer\'s V / R\u00B2 / \u03C9\u00B2 等按方法选用）；若方法为 Scatterplot，则仅报告描述性 r 与 R²，不编造自由度或 p 值。',
     '7. interpretation 中英文均需输出：summary 学术语气；apa 为可直接复用的报告句式；practical 为实操提示。不得省略任一段。',
     '8. 所有文本字段禁止使用换行符之外的转义字符问题；JSON 必须是合法可解析的 JSON。'
-  ].join('\n');
+  ].concat(scatterplotRules).concat([
+    '9. 若本次方法是 Scatterplot，按以上散点图专属要求组织变量、数据和解读。'
+  ]).join('\n');
 }
 
 function extractJSON(text) {
