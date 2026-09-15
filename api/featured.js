@@ -7,7 +7,9 @@
 import crypto from 'crypto';
 import * as guard from './_guard.js';
 
-const TABLE = 'featured_views';
+function isDefenseFavorite(req) {
+  return String((req.query && req.query.kind) || '') === 'def-fav';
+}
 
 function supabaseBase() {
   return process.env.SUPABASE_URL.replace(/\/+$/, '');
@@ -54,6 +56,8 @@ export default async function handler(req, res) {
 
   const base = supabaseBase();
   const headers = supabaseHeaders();
+  const defenseFavorite = isDefenseFavorite(req);
+  const table = defenseFavorite ? 'defense_favorites' : 'featured_views';
 
   // GET：公开读取精选列表
   if (req.method === 'GET') {
@@ -62,8 +66,11 @@ export default async function handler(req, res) {
     if (!gr.ok) return guard.deny(res, gr.code);
     const limit = Math.min(parseInt(req.query.limit || '20', 10) || 20, 50);
     const offset = Math.max(parseInt(req.query.offset || '0', 10) || 0, 0);
-    const url = base + '/rest/v1/' + TABLE +
-      '?select=id,statement,source_text,verdict,results,mode,lang,pinned,created_at' +
+    const select = defenseFavorite
+      ? 'id,zh,en,notes,created_at'
+      : 'id,statement,source_text,verdict,results,mode,lang,pinned,created_at';
+    const url = base + '/rest/v1/' + table +
+      '?select=' + select +
       '&status=eq.published&order=created_at.desc&limit=' + limit + '&offset=' + offset;
     try {
       const resp = await fetch(url, {
@@ -72,7 +79,7 @@ export default async function handler(req, res) {
       if (!resp.ok) throw new Error('DB_HTTP_' + resp.status);
       const rows = await resp.json();
       // 兼容历史数据：verdict/results 列可能以 JSON 字符串存储，统一规范化为对象/数组
-      rows.forEach(function (row) {
+      if (!defenseFavorite) rows.forEach(function (row) {
         if (typeof row.verdict === 'string') {
           try { row.verdict = JSON.parse(row.verdict); } catch (e) { row.verdict = null; }
         }
@@ -108,7 +115,7 @@ export default async function handler(req, res) {
       const id = String(req.query.id || '');
       if (!id) return jsonError(res, 400, '缺少 id 参数');
       try {
-        const resp = await fetch(base + '/rest/v1/' + TABLE + '?id=eq.' + encodeURIComponent(id), {
+        const resp = await fetch(base + '/rest/v1/' + table + '?id=eq.' + encodeURIComponent(id), {
           method: 'DELETE',
           headers: headers
         });
@@ -121,21 +128,31 @@ export default async function handler(req, res) {
 
     // POST：提交精选
     const body = req.body || {};
-    const statement = String(body.statement || '').trim();
-    if (!statement) return jsonError(res, 400, 'statement 不能为空');
-    if (statement.length > 600) return jsonError(res, 400, '观点过长，请控制在 600 字以内');
-
-    const record = {
-      statement: statement,
-      source_text: body.source_text ? String(body.source_text).slice(0, 2000) : null,
-      verdict: body.verdict || null,
-      results: body.results || null,
-      mode: body.mode || 'llm',
-      lang: body.lang === 'zh' ? 'zh' : 'en',
-      pinned: !!body.pinned
-    };
+    let record;
+    if (defenseFavorite) {
+      const zh = String(body.zh || '').trim();
+      const en = String(body.en || '').trim();
+      if (!zh) return jsonError(res, 400, 'zh 不能为空');
+      if (!en) return jsonError(res, 400, 'en 不能为空');
+      if (zh.length > 600) return jsonError(res, 400, '中文过长，请控制在 600 字以内');
+      if (en.length > 3000) return jsonError(res, 400, '译文过长，请控制在 3000 字以内');
+      record = { zh: zh, en: en, notes: body.notes ? String(body.notes).slice(0, 500) : null };
+    } else {
+      const statement = String(body.statement || '').trim();
+      if (!statement) return jsonError(res, 400, 'statement 不能为空');
+      if (statement.length > 600) return jsonError(res, 400, '观点过长，请控制在 600 字以内');
+      record = {
+        statement: statement,
+        source_text: body.source_text ? String(body.source_text).slice(0, 2000) : null,
+        verdict: body.verdict || null,
+        results: body.results || null,
+        mode: body.mode || 'llm',
+        lang: body.lang === 'zh' ? 'zh' : 'en',
+        pinned: !!body.pinned
+      };
+    }
     try {
-      const resp = await fetch(base + '/rest/v1/' + TABLE, {
+      const resp = await fetch(base + '/rest/v1/' + table, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(record)

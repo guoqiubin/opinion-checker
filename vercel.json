@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/def-fav", "destination": "/api/featured?kind=def-fav" }
+  ]
+}
