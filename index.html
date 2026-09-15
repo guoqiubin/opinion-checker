@@ -4111,6 +4111,10 @@
     if (jobGuideBusy) return;
     var jobTitle = jobGuideTitleEl.value.trim();
     if (!jobTitle) { jobGuideResultEl.innerHTML = '<div class="paper-idea-error">请先输入岗位名称。</div>'; jobGuideTitleEl.focus(); return; }
+    if (location.protocol === 'file:') {
+      jobGuideResultEl.innerHTML = '<div class="paper-idea-error">当前页面是本地文件，无法调用 AI 后端。请通过线上网址打开后再查询。</div>';
+      return;
+    }
     jobGuideBusy = true; jobGuideBtnEl.disabled = true; jobGuideBtnEl.textContent = '正在生成…';
     jobGuideResultEl.innerHTML = '<div class="dict-empty">AI 正在整理岗位信息，请稍候…</div>';
     apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ jobTitle: jobTitle, company: jobGuideCompanyEl.value.trim(), city: jobGuideCityEl.value.trim(), industry: jobGuideIndustryEl.value.trim(), jobUrl: jobGuideUrlEl.value.trim(), jobDescription: jobGuideDescEl.value.trim() }) })
