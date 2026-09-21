@@ -1358,6 +1358,12 @@
   .interview-star-card { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 8px; padding: 10px; line-height: 1.65; }
   .interview-star-card strong { display: block; color: #91641c; margin-bottom: 3px; }
   .interview-placeholder { color: #b04b36; font-weight: 700; }
+  .interview-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 14px; }
+  .interview-tab { border: 1px solid #c9a75c; border-radius: 18px; padding: 7px 16px; background: #fbf4e3; color: var(--brown-dark); cursor: pointer; font: inherit; }
+  .interview-tab.active { background: linear-gradient(180deg, #e4b85d, #b57a17); color: #fff; box-shadow: 0 2px 5px rgba(120,80,20,.25); }
+  .interview-structure { display: grid; gap: 8px; }
+  .interview-structure-card { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 8px; padding: 10px 12px; line-height: 1.65; }
+  .interview-structure-card strong { color: #91641c; display: block; margin-bottom: 3px; }
   @media (max-width: 560px) { .interview-star { grid-template-columns: 1fr; } }
   @media (max-width: 560px) { .job-guide-grid { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
@@ -1761,6 +1767,11 @@
       </div>
       <div class="win-body interview-form">
         <div class="cmd-label"><span class="dollar">§</span> <span class="fname">把日常语言转化为策略运营岗位的专业面试表达</span></div>
+        <div class="interview-tabs" aria-label="面试助手子功能">
+          <button type="button" id="interviewModeExpress" class="interview-tab active">表达提炼</button>
+          <button type="button" id="interviewModeSim" class="interview-tab">模拟面试</button>
+        </div>
+        <div id="interviewExpressPanel">
         <div class="job-guide-field interview-role">
           <label for="interviewRole">岗位</label>
           <select id="interviewRole"><option value="策略运营">策略运营</option></select>
@@ -1778,6 +1789,21 @@
         <div class="hint" style="margin-top:10px">AI 会先检查 STAR 信息是否完整；缺少背景、目标或结果时，会先给你一轮回执。强制继续后，无法确认的内容会用「XX」标记。</div>
         <div id="interviewReceipt" class="interview-receipt" hidden></div>
         <div id="interviewOutput" class="interview-output"><div class="dict-empty">输入一段日常语言后开始提炼</div></div>
+        </div>
+        <div id="interviewSimPanel" hidden>
+          <div class="cmd-label"><span class="dollar">§</span> <span class="fname">输入已有面试问题，生成策略运营岗位答题思路</span></div>
+          <div class="job-guide-field">
+            <label for="interviewQuestion">面试问题 <span style="color:#b04b36">（必填）</span></label>
+            <textarea id="interviewQuestion" class="interview-input" maxlength="1000" placeholder="例如：儿童品类用户规模很大，为什么就意味着有教育产品商业化机会？（举例说明）"></textarea>
+            <div class="interview-counter"><span id="interviewQuestionCount">0</span>/1000</div>
+          </div>
+          <div class="job-guide-actions">
+            <button type="button" id="interviewSimBtn" class="job-guide-primary">生成</button>
+            <button type="button" id="interviewSimClearBtn" class="job-guide-secondary">清空</button>
+          </div>
+          <div class="hint" style="margin-top:10px">当前岗位：策略运营。这里只生成已有问题的答题思路，不自动生成新的面试题目。</div>
+          <div id="interviewSimOutput" class="interview-output"><div class="dict-empty">输入面试问题后开始生成</div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -2090,6 +2116,7 @@
       date: '2026-09-21',
       changes: [
         { type: 'add', text: '新增一级功能「面试助手」：选择策略运营岗位，将 1000 字以内的日常语言提炼为问题识别、STAR 拆解、专业表达与面试口语版' },
+        { type: 'add', text: '面试助手新增「模拟面试」：输入已有面试问题，结合策略运营岗位生成题目理解、考察重点、结构化答题模板、示范回答、指标与常见误区' },
         { type: 'shield', text: '信息不完整时先给出回执；用户强制继续后，无法确认的内容使用「XX」占位，不虚构数据和结果' }
       ]
     },
@@ -4243,6 +4270,62 @@
     interviewInputEl.value = ''; interviewCountEl.textContent = '0'; interviewReceiptEl.hidden = true; interviewReceiptEl.innerHTML = ''; interviewForceBtnEl.hidden = true;
     interviewOutputEl.innerHTML = '<div class="dict-empty">输入一段日常语言后开始提炼</div>';
   });
+
+  // 模拟面试：已有问题 → 策略运营岗位答题思路（不生成新题）
+  var interviewExpressPanelEl = document.getElementById('interviewExpressPanel');
+  var interviewSimPanelEl = document.getElementById('interviewSimPanel');
+  var interviewModeExpressEl = document.getElementById('interviewModeExpress');
+  var interviewModeSimEl = document.getElementById('interviewModeSim');
+  var interviewQuestionEl = document.getElementById('interviewQuestion');
+  var interviewQuestionCountEl = document.getElementById('interviewQuestionCount');
+  var interviewSimBtnEl = document.getElementById('interviewSimBtn');
+  var interviewSimClearBtnEl = document.getElementById('interviewSimClearBtn');
+  var interviewSimOutputEl = document.getElementById('interviewSimOutput');
+  var interviewSimBusy = false;
+
+  function interviewSimList(items) {
+    if (!Array.isArray(items) || !items.length) return '<p>暂无补充信息。</p>';
+    return '<ul class="job-guide-list">' + items.map(function (item) { return '<li>' + interviewText(item) + '</li>'; }).join('') + '</ul>';
+  }
+  function interviewSimRender(data) {
+    if (!data) { interviewSimOutputEl.innerHTML = '<div class="paper-idea-error">未返回有效结果，请稍后重试。</div>'; return; }
+    var html = '<div class="job-guide-section"><h3>策略运营 · 模拟面试答题思路</h3><div class="job-guide-meta">生成时间：' + interviewText(new Date(data.updatedAt || Date.now()).toLocaleString('zh-CN')) + ' · 不自动生成面试题目</div></div>';
+    html += '<div class="job-guide-section"><h4>题目理解</h4><p>' + (interviewText(data.questionUnderstanding) || '暂无解析') + '</p></div>';
+    html += '<div class="job-guide-section"><h4>策略运营考察重点</h4>' + interviewSimList(data.strategyFocus) + '</div>';
+    html += '<div class="job-guide-section"><h4>结构化答题模板</h4><div class="interview-structure">';
+    (Array.isArray(data.answerStructure) ? data.answerStructure : []).forEach(function (item) {
+      html += '<div class="interview-structure-card"><strong>' + interviewText(item.step) + '</strong><div>' + interviewText(item.purpose) + '</div><div>模板：' + interviewText(item.template) + '</div></div>';
+    });
+    html += '</div></div>';
+    html += '<div class="job-guide-section"><h4>示范回答</h4><p>' + (interviewText(data.sampleAnswer) || '暂无示范回答') + '</p></div>';
+    html += '<div class="job-guide-section"><h4>建议关注的指标</h4>' + interviewSimList(data.keyMetrics) + '</div>';
+    html += '<div class="job-guide-section"><h4>常见误区</h4>' + interviewSimList(data.pitfalls) + '</div>';
+    html += '<div class="job-guide-aigc">提示：示范回答用于理解答题逻辑，不代表你的真实经历；涉及个人项目、数据和结果的地方，请替换成真实信息。</div>';
+    interviewSimOutputEl.innerHTML = html;
+  }
+  function interviewSimRun() {
+    if (interviewSimBusy) return;
+    var question = interviewQuestionEl.value.trim();
+    if (!question) { interviewSimOutputEl.innerHTML = '<div class="paper-idea-error">请先输入面试问题。</div>'; interviewQuestionEl.focus(); return; }
+    if (location.protocol === 'file:') { interviewSimOutputEl.innerHTML = '<div class="paper-idea-error">当前页面是本地文件，无法调用 AI 后端。请通过线上网址打开后再生成。</div>'; return; }
+    interviewSimBusy = true; interviewSimBtnEl.disabled = true; interviewSimBtnEl.textContent = '正在生成…';
+    interviewSimOutputEl.innerHTML = '<div class="dict-empty">AI 正在结合策略运营岗位分析问题，请稍候…</div>';
+    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'interview-simulate', role: '策略运营', question: question }) })
+      .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
+      .then(function (json) { interviewSimRender(json && json.data); })
+      .catch(function (err) { interviewSimOutputEl.innerHTML = '<div class="paper-idea-error">生成失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
+      .then(function () { interviewSimBusy = false; interviewSimBtnEl.disabled = false; interviewSimBtnEl.textContent = '生成'; });
+  }
+  function interviewSwitch(mode) {
+    var sim = mode === 'sim';
+    interviewExpressPanelEl.hidden = sim; interviewSimPanelEl.hidden = !sim;
+    interviewModeExpressEl.classList.toggle('active', !sim); interviewModeSimEl.classList.toggle('active', sim);
+  }
+  if (interviewModeExpressEl) interviewModeExpressEl.addEventListener('click', function () { interviewSwitch('express'); });
+  if (interviewModeSimEl) interviewModeSimEl.addEventListener('click', function () { interviewSwitch('sim'); });
+  if (interviewQuestionEl) interviewQuestionEl.addEventListener('input', function () { interviewQuestionCountEl.textContent = String(interviewQuestionEl.value.length); });
+  if (interviewSimBtnEl) interviewSimBtnEl.addEventListener('click', interviewSimRun);
+  if (interviewSimClearBtnEl) interviewSimClearBtnEl.addEventListener('click', function () { interviewQuestionEl.value = ''; interviewQuestionCountEl.textContent = '0'; interviewSimOutputEl.innerHTML = '<div class="dict-empty">输入面试问题后开始生成</div>'; });
 
   // ==================== 心理学词典 v2.4：AI 实时查询 + 30 天缓存（dict 前缀独立命名空间） ====================
   var dictInput = document.getElementById('dictInput');
