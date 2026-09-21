@@ -1349,7 +1349,7 @@
   .interview-form { max-width: 860px; }
   .interview-role { max-width: 320px; }
   .interview-role select, .interview-input { width: 100%; box-sizing: border-box; border: 1px solid #d6bb7a; border-radius: 8px; background: #fffdf5; padding: 10px 12px; color: var(--brown-dark); font: inherit; }
-  .interview-input { min-height: 150px; resize: vertical; line-height: 1.75; }
+  .interview-input { min-height: 220px; resize: vertical; line-height: 1.75; }
   .interview-counter { color: var(--comment); font-size: 12px; text-align: right; margin-top: 4px; }
   .interview-receipt { background: #fff7e5; border: 1px solid #e1bc69; border-radius: 9px; padding: 12px 14px; margin-top: 14px; color: var(--brown-dark); line-height: 1.7; }
   .interview-receipt strong { color: #9b6412; }
@@ -1766,9 +1766,9 @@
           <select id="interviewRole"><option value="策略运营">策略运营</option></select>
         </div>
         <div class="job-guide-field" style="margin-top:12px">
-          <label for="interviewInput">日常语言 <span style="color:#b04b36">（必填，200字以内）</span></label>
-          <textarea id="interviewInput" class="interview-input" maxlength="200" placeholder="例如：就是每天发社群，发完社群就写日报"></textarea>
-          <div class="interview-counter"><span id="interviewCount">0</span>/200</div>
+          <label for="interviewInput">日常语言 <span style="color:#b04b36">（必填，1000字以内）</span></label>
+          <textarea id="interviewInput" class="interview-input" maxlength="1000" placeholder="例如：就是每天发社群，发完社群就写日报"></textarea>
+          <div class="interview-counter"><span id="interviewCount">0</span>/1000</div>
         </div>
         <div class="job-guide-actions">
           <button type="button" id="interviewExtractBtn" class="job-guide-primary">提炼</button>
@@ -2089,7 +2089,7 @@
       version: 'v2.8',
       date: '2026-09-21',
       changes: [
-        { type: 'add', text: '新增一级功能「面试助手」：选择策略运营岗位，将 200 字以内的日常语言提炼为问题识别、STAR 拆解、专业表达与面试口语版' },
+        { type: 'add', text: '新增一级功能「面试助手」：选择策略运营岗位，将 1000 字以内的日常语言提炼为问题识别、STAR 拆解、专业表达与面试口语版' },
         { type: 'shield', text: '信息不完整时先给出回执；用户强制继续后，无法确认的内容使用「XX」占位，不虚构数据和结果' }
       ]
     },

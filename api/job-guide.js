@@ -77,7 +77,7 @@ export default async function handler(req, res) {
   var body = req.body || {};
   if (body.mode === 'interview') {
     var role = cleanText(body.role, 60);
-    var dailyLanguage = cleanText(body.dailyLanguage, 200);
+    var dailyLanguage = cleanText(body.dailyLanguage, 1000);
     var force = body.force === true;
     if (role !== '策略运营') { res.status(400).json({ ok: false, error: '当前仅支持策略运营岗位' }); return; }
     if (!dailyLanguage) { res.status(400).json({ ok: false, error: '请先输入日常语言' }); return; }
