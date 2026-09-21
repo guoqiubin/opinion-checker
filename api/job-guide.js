@@ -17,6 +17,21 @@ const INTERVIEW_SIM_PROMPT =
   '你是一位策略运营岗位面试教练。用户会输入一个已经存在的面试问题，你不能生成新的面试题目，而要解释这个问题在策略运营岗位上考察什么，并给出可执行的结构化答题思路。当前岗位固定为“策略运营”，答案要体现用户洞察、业务目标、市场/用户规模与商业化之间的逻辑、验证方法、指标意识和风险边界；但不要把通用示例伪装成用户真实经历。对于需要用户个人经历或数据的位置，用“XX”占位。只输出一个 JSON 对象，结构固定：' +
   '{"questionUnderstanding":"题目在问什么","strategyFocus":["策略运营考察点1"],"answerStructure":[{"step":"第一步","purpose":"本步目的","template":"可直接套用的表达模板"}],"sampleAnswer":"结合题目给出的儿童品类商业化场景的示范回答，不能虚构用户经历","keyMetrics":["建议关注的指标"],"pitfalls":["常见误区"]}。answerStructure 输出 3-5 步，strategyFocus、keyMetrics、pitfalls 各输出 3-6 项。';
 
+const COMPANY_SEARCH_PROMPT =
+  '你是招聘信息整理助手。请基于输入的公开搜索证据，筛选深圳正在招聘或近期公开发布招聘信息的企业。只允许使用证据中出现的企业，不得凭空补充公司、招聘状态或网址；无法确认的字段必须写“待核验”。企业类型允许民营、外资、合资、港资，排除事业单位、央国企和国企。只输出 JSON：' +
+  '{"items":[{"company":"公司名称","companyType":"民营/外资/合资/港资","internetCompany":true,"roles":["运营"],"recruitingStatus":"公开招聘信息/待核验","recruitingSite":"官方招聘网址或空","sourceLabel":"来源说明","sourceUrl":"证据网址或空","lastCheckedAt":"查询时间"}]}.最多输出20条，结果按证据可靠性排序。';
+
+const COMPANY_SEEDS = [
+  { company: '腾讯', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://join.qq.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://join.qq.com/' },
+  { company: '字节跳动', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://jobs.bytedance.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://jobs.bytedance.com/' },
+  { company: '华为', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://career.huawei.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://career.huawei.com/' },
+  { company: '大疆创新', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://we.dji.com/zh-CN/careers', sourceLabel: '公司招聘官网', sourceUrl: 'https://we.dji.com/zh-CN/careers' },
+  { company: '顺丰科技', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://hr.sf-express.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://hr.sf-express.com/' },
+  { company: '招商银行', companyType: '民营', internetCompany: false, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://career.cmbchina.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://career.cmbchina.com/' },
+  { company: '平安科技', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://jobs.pingan.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://jobs.pingan.com/' },
+  { company: '麦当劳中国', companyType: '外资', internetCompany: false, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://www.mcdonalds.com.cn/careers', sourceLabel: '公司招聘官网', sourceUrl: 'https://www.mcdonalds.com.cn/careers' }
+];
+
 function extractJSON(text) {
   try { return JSON.parse(text); } catch (e) {}
   var m = text.match(/\{[\s\S]*\}/);
@@ -44,6 +59,47 @@ function cleanSources(value) {
     if (url && !/^https?:\/\//i.test(url)) url = '';
     return { label: label || '建议核验来源', url: url };
   }).filter(Boolean).slice(0, 5);
+}
+
+function cleanCompanyItems(value, updatedAt) {
+  if (!Array.isArray(value)) return [];
+  return value.map(function (item) {
+    if (!item || typeof item !== 'object') return null;
+    var company = cleanText(item.company, 100);
+    if (!company) return null;
+    var sourceUrl = cleanText(item.sourceUrl, 500);
+    var recruitingSite = cleanText(item.recruitingSite, 500);
+    if (sourceUrl && !/^https?:\/\//i.test(sourceUrl)) sourceUrl = '';
+    if (recruitingSite && !/^https?:\/\//i.test(recruitingSite)) recruitingSite = '';
+    return {
+      company: company,
+      companyType: ['民营', '外资', '合资', '港资'].indexOf(cleanText(item.companyType, 20)) >= 0 ? cleanText(item.companyType, 20) : '待核验',
+      internetCompany: item.internetCompany === true,
+      roles: cleanList(item.roles, 5, 40),
+      recruitingStatus: cleanText(item.recruitingStatus, 80) || '待核验',
+      recruitingSite: recruitingSite,
+      sourceLabel: cleanText(item.sourceLabel, 80) || '公开招聘信息',
+      sourceUrl: sourceUrl,
+      lastCheckedAt: updatedAt
+    };
+  }).filter(Boolean).slice(0, 20);
+}
+
+async function publicSearchEvidence(query) {
+  var url = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query);
+  try {
+    var resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OpinionChecker/1.0)' }, signal: AbortSignal.timeout(8000) });
+    if (!resp.ok) return [];
+    var html = await resp.text();
+    var out = [], re = /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]+class="result__snippet"[^>]*>([\s\S]*?)<\/a>/gi, m;
+    while ((m = re.exec(html)) && out.length < 12) {
+      var title = m[2].replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+      var snippet = m[3].replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+      var link = m[1];
+      if (/^https?:\/\//i.test(link)) out.push({ title: title.slice(0, 180), snippet: snippet.slice(0, 500), url: link.slice(0, 500) });
+    }
+    return out;
+  } catch (e) { return []; }
 }
 
 function callLLM(systemPrompt, userContent) {
@@ -79,6 +135,33 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).json({ ok: false, error: 'Method Not Allowed' }); return; }
 
   var body = req.body || {};
+  if (body.mode === 'company-search') {
+    var companyCity = cleanText(body.city, 30);
+    var companyTrack = cleanText(body.track, 30);
+    var companyKeyword = cleanText(body.keyword, 40);
+    if (companyCity !== '深圳') { res.status(400).json({ ok: false, error: '当前仅开放深圳' }); return; }
+    if (companyTrack !== '校招') { res.status(400).json({ ok: false, error: '当前公司库仅支持校招流程' }); return; }
+    if (companyKeyword && ['运营', '人力资源'].indexOf(companyKeyword) < 0) { res.status(400).json({ ok: false, error: '当前关键词仅支持运营或人力资源' }); return; }
+    var companyGuard = await guard.limit(req, 'ai');
+    if (!companyGuard.ok) return guard.deny(res, companyGuard.code);
+    var companyTime = new Date().toISOString();
+    var searchQuery = '深圳 校招 ' + (companyKeyword || '运营 人力资源') + ' 招聘 公司 官网';
+    var evidence = await publicSearchEvidence(searchQuery);
+    var items = [];
+    if (evidence.length && process.env.DEEPSEEK_API_KEY) {
+      try {
+        var companyParsed = extractJSON(await callLLM(COMPANY_SEARCH_PROMPT, '城市：深圳\n招聘流程：校招\n岗位关键词：' + (companyKeyword || '不限') + '\n查询时间：' + companyTime + '\n公开搜索证据：\n' + JSON.stringify(evidence)));
+        items = cleanCompanyItems(companyParsed && companyParsed.items, companyTime);
+      } catch (e) { items = []; }
+    }
+    if (!items.length) {
+      items = COMPANY_SEEDS.filter(function (item) { return !companyKeyword || item.roles.indexOf(companyKeyword) >= 0; }).map(function (item) {
+        return Object.assign({}, item, { lastCheckedAt: companyTime, recruitingStatus: '候选企业，需打开来源核验当前职位' });
+      }).slice(0, 20);
+    }
+    res.status(200).json({ ok: true, data: { city: '深圳', track: '校招', keyword: companyKeyword || '不限', items: items, lastCheckedAt: companyTime, liveEvidence: evidence.length > 0, resultNote: evidence.length ? '结果结合公开搜索证据整理；请打开招聘官网核验职位是否仍在招。' : '当前未取得稳定的实时公开搜索结果，以下为参考候选企业；请打开招聘官网核验。' } });
+    return;
+  }
   if (body.mode === 'interview') {
     var role = cleanText(body.role, 60);
     var dailyLanguage = cleanText(body.dailyLanguage, 1000);

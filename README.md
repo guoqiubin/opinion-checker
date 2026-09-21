@@ -33,6 +33,7 @@ AIGC:
 - 中英精选墙：站长将满意的中英双译收藏展示，双语对照供访客学习参考
 - 简历助手（v2.7）：岗位科普支持输入岗位名称，并可补充公司、城市、行业、招聘链接或岗位描述；AI 输出岗位概览、职责、能力要求、工具、面试重点与发展路径，标注生成时间并提示以官方招聘页为准
 - 面试助手（v1.0）：选择策略运营岗位，将 1000 字以内的日常语言先做信息完整性回执，再按 STAR 法则输出问题识别、STAR 拆解、专业表达与面试口语版；强制继续时，缺失信息使用「XX」占位，不虚构数据和结果；子功能「模拟面试」可对已有面试问题生成岗位关联的答题思路、结构化模板与示范回答，不自动生成新题
+- 招聘助手（v1.0）：原“校招助手”升级为招聘助手，当前开放校招助手与深圳公司库，社招助手前端展示为开发中；公司库支持岗位关键词“运营 / 人力资源”、最多20条候选企业、外资/合资/港资与互联网标签、招聘官网链接、信息更新时间及超过7天的“可能已过期”提示。收藏和已投递可同时存在，并保存在当前浏览器本地；最近查询结果也会在刷新后保留
 - 统计学工具（v2.3）：8 大主场景（Exploration / T-Tests / ANOVA / Regression / Frequencies / Factor / Chi² Tools / SEM）共 30 个高频方法，新增散点图分析与预览；支持条件筛选 → 生成题目 → 中英双语数据分析与英文操作步骤、一键导出 Excel（前端内嵌 xlsx 生成器，零外链）
 - 拟物（Skeuomorphism）风格 UI：皮革 / 金属质感、3D 凸起按钮、高光反射
 - 更新公告栏：内置版本历史记录
@@ -54,7 +55,7 @@ opinion-checker/
 │   ├── distill.js      # Vercel Serverless 函数：AI 观点提炼
 │   ├── translate.js    # Vercel Serverless 函数：答辩助手 AI 中译英
 │   ├── stats-gen.js    # Vercel Serverless 函数：统计学工具题目生成（DeepSeek）
-│   ├── job-guide.js    # Vercel Serverless 函数：简历助手岗位科普 + 面试助手（DeepSeek）
+│   ├── job-guide.js    # Vercel Serverless 函数：岗位科普 + 面试助手 + 公司库查询
 │   ├── featured.js     # Vercel Serverless 函数：精选观点墙读写（Supabase）
 │   └── _guard.js       # 公共风控模块（不作为业务路由）
 ├── package.json        # 项目配置与脚本
@@ -156,6 +157,17 @@ vercel dev    # 本地启动，访问 http://localhost:3000
 
 - 未配置 `DEEPSEEK_API_KEY` 时自动降级为关键词检索模式（mode=keyword），准确率较低
 - 学术检索链路：OpenAlex 失败时自动降级 Semantic Scholar，再降级 Crossref
+
+`POST /api/job-guide` 的公司库模式
+
+```json
+{ "mode": "company-search", "city": "深圳", "track": "校招", "keyword": "运营" }
+```
+
+- 公司招聘官网优先，公开搜索证据补充；当前仅开放深圳、校招、运营 / 人力资源关键词
+- 返回最多20条候选企业，包含企业类型、互联网标签、招聘官网、来源与 `lastCheckedAt`
+- 当前未配置独立招聘搜索服务时会降级为参考候选池，页面会明确提示“需打开招聘官网核验”，不会把模型推测当成实时招聘事实
+- 前端使用浏览器本地存储保存查询历史、收藏和已投递状态；收藏与已投递互不排斥
 
 `POST /api/translate`（答辩助手中译英，≤600 字）
 

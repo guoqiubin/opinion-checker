@@ -1366,6 +1366,33 @@
   .interview-structure-card strong { color: #91641c; display: block; margin-bottom: 3px; }
   @media (max-width: 560px) { .interview-star { grid-template-columns: 1fr; } }
   @media (max-width: 560px) { .job-guide-grid { grid-template-columns: 1fr; } }
+
+  /* ==================== 招聘助手 v1.0：校招公司库 ==================== */
+  .recruitment-tabs, .company-filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .recruitment-tab, .company-filter-tab { border: 1px solid #c9a75c; border-radius: 18px; padding: 7px 16px; background: #fbf4e3; color: var(--brown-dark); cursor: pointer; font: inherit; }
+  .recruitment-tab.active, .company-filter-tab.active { background: linear-gradient(180deg, #e4b85d, #b57a17); color: #fff; box-shadow: 0 2px 5px rgba(120,80,20,.25); }
+  .recruitment-tab:disabled { opacity: .62; cursor: not-allowed; }
+  .company-filter { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 10px; padding: 13px; margin-bottom: 14px; }
+  .company-filter-grid { display: grid; grid-template-columns: 180px 1fr auto; gap: 10px; align-items: end; }
+  .company-filter label { display: block; color: var(--brown-dark); font-weight: 700; font-size: 13px; margin-bottom: 5px; }
+  .company-filter select { width: 100%; box-sizing: border-box; border: 1px solid #d6bb7a; border-radius: 8px; background: #fffdf5; padding: 9px 10px; color: var(--brown-dark); font: inherit; }
+  .company-note { color: var(--comment); font-size: 12px; line-height: 1.7; margin: 8px 0 0; }
+  .company-result-meta { color: var(--comment); font-size: 12px; margin: 8px 0 12px; }
+  .company-card { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 10px; padding: 13px; margin: 9px 0; box-shadow: 0 2px 6px rgba(120,90,30,.07); }
+  .company-card-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .company-name { color: var(--brown-dark); font-size: 16px; font-weight: 700; }
+  .company-tag { background: #f4e5bd; border: 1px solid #dec28a; border-radius: 12px; padding: 3px 8px; color: #74521d; font-size: 11px; }
+  .company-tag.internet { background: #e8f1df; border-color: #b8d39e; color: #47713b; }
+  .company-tag.stale { background: #fff0dc; border-color: #e2b879; color: #9a5c1d; }
+  .company-card-meta { color: var(--comment); font-size: 12px; margin: 7px 0; line-height: 1.7; }
+  .company-card-actions { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+  .company-action { border: 1px solid #bda875; border-radius: 7px; padding: 5px 10px; background: #f6edd9; color: var(--brown-dark); font: inherit; cursor: pointer; font-size: 12px; }
+  .company-action.active { background: #e3c16e; border-color: #a87e31; color: #4a3200; }
+  .company-action.site { text-decoration: none; }
+  .company-history { border-top: 1px dashed #d8c18f; margin-top: 16px; padding-top: 10px; }
+  .company-history-title { color: var(--brown-dark); font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  .company-history-item { display: inline-block; margin: 3px 6px 3px 0; border: 1px solid #dcc894; border-radius: 12px; padding: 3px 8px; color: var(--comment); font-size: 11px; cursor: pointer; background: #fffdf5; }
+  @media (max-width: 650px) { .company-filter-grid { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .paper-design-grid { grid-template-columns: 1fr; }
     .paper-qa-title { font-size: 14px; }
@@ -1404,7 +1431,7 @@
     <button type="button" class="nav-tab" data-tool="dict" title="心理学词典：查询心理学与心理咨询专业概念">心理学词典</button>
     <button type="button" class="nav-tab" data-tool="resume" title="简历助手：岗位科普">简历助手</button>
     <button type="button" class="nav-tab" data-tool="interview" title="面试助手：日常语言转岗位专业表达">面试助手</button>
-    <button type="button" class="nav-tab" data-tool="campus" title="校招助手：秋招 Q&A 问答">校招助手</button>
+    <button type="button" class="nav-tab" data-tool="campus" title="招聘助手：校招公司库与秋招问答">招聘助手</button>
     <button type="button" class="nav-tab" data-tool="cscsrv" title="中留服助手（规划中，敬请期待）">中留服助手</button>
     <span class="nav-tab disabled" title="更多平级工具开发中，敬请期待">＋ 更多（预留）</span>
   </nav>
@@ -1808,18 +1835,40 @@
     </div>
   </section>
 
-  <!-- 1.6 校招助手视图：秋招问答 Q&A 信息流（v2.3，分类 Tab + 单开手风琴） -->
+  <!-- 1.6 招聘助手视图：校招助手与公司库 -->
   <section id="view-campus" class="app-view" data-view="campus" hidden>
     <div class="win">
       <div class="win-titlebar">
         <span class="win-dots"><i></i><i></i><i></i></span>
-        <span class="win-title">校招助手 · 秋招问答</span>
+        <span class="win-title">招聘助手 · 校招助手</span>
       </div>
       <div class="win-body">
-        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">秋招常见问题速查，点击问题展开答案（内容由站长持续更新）</span></div>
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">校招流程工具集合：秋招问答与深圳公司库</span></div>
+        <div class="recruitment-tabs" id="recruitmentTabs" aria-label="招聘助手类型">
+          <button type="button" class="recruitment-tab active" data-recruitment-track="campus">校招助手</button>
+          <button type="button" class="recruitment-tab" data-recruitment-track="social" disabled title="社招助手开发中">社招助手（开发中）</button>
+        </div>
+        <div class="company-filter-tabs" id="companyFilterTabs" aria-label="校招助手子功能">
+          <button type="button" class="company-filter-tab active" data-campus-panel="qa">秋招问答</button>
+          <button type="button" class="company-filter-tab" data-campus-panel="companies">公司库</button>
+        </div>
+        <div id="campusQaPanel">
         <div class="campus-tabs" id="campusTabs"></div>
         <div id="campusList"><div class="campus-loading">加载中…</div></div>
         <div class="campus-count" id="campusCount"></div>
+        </div>
+        <div id="campusCompanyPanel" hidden>
+          <div class="company-filter">
+            <div class="company-filter-grid">
+              <div><label for="companyCity">城市</label><select id="companyCity"><option value="深圳">深圳</option></select></div>
+              <div><label for="companyKeyword">岗位关键词（可选）</label><select id="companyKeyword"><option value="">不限（运营 / 人力资源）</option><option value="运营">运营</option><option value="人力资源">人力资源</option></select></div>
+              <button type="button" id="companySearchBtn" class="job-guide-primary">筛选</button>
+            </div>
+            <p class="company-note">公司招聘官网优先，公开招聘平台补充；结果最多20条。信息超过7天会提示“可能已过期”，请以官方招聘页为准。</p>
+          </div>
+          <div id="companyResult"><div class="dict-empty">选择条件后点击“筛选”</div></div>
+          <div class="company-history" id="companyHistory" hidden></div>
+        </div>
       </div>
     </div>
   </section>
@@ -1871,7 +1920,7 @@
     { id: 'dict', hash: '#/tools/dict', label: '心理学词典' },
     { id: 'resume',  hash: '#/tools/resume',  label: '智能简历' },
     { id: 'interview', hash: '#/tools/interview', label: '面试助手' },
-    { id: 'campus',  hash: '#/tools/campus',  label: '校招助手' },
+    { id: 'campus',  hash: '#/tools/campus',  label: '招聘助手' },
     { id: 'cscsrv',  hash: '#/tools/cscsrv',  label: '中留服助手' }
   ];
   var DEFAULT_TOOL = 'source';
@@ -2111,6 +2160,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.9',
+      date: '2026-09-21',
+      changes: [
+        { type: 'add', text: '「校招助手」升级为「招聘助手」：新增校招子功能「公司库」，社招助手前端展示为开发中' },
+        { type: 'add', text: '公司库支持深圳、运营 / 人力资源关键词、最多20条候选企业、招聘官网链接及互联网公司标签' },
+        { type: 'shield', text: '显示信息更新时间，超过7天提示可能已过期；查询历史、收藏与已投递状态保存在当前浏览器本地，收藏和已投递可同时存在' }
+      ]
+    },
     {
       version: 'v2.8',
       date: '2026-09-21',
@@ -4142,6 +4200,76 @@
   }
 
   campusVisibleCheck();
+
+  // ==================== 招聘助手 v1.0：深圳校招公司库 + 本地历史 ====================
+  var companyFilterTabsEl = document.getElementById('companyFilterTabs');
+  var campusQaPanelEl = document.getElementById('campusQaPanel');
+  var campusCompanyPanelEl = document.getElementById('campusCompanyPanel');
+  var companyCityEl = document.getElementById('companyCity');
+  var companyKeywordEl = document.getElementById('companyKeyword');
+  var companySearchBtnEl = document.getElementById('companySearchBtn');
+  var companyResultEl = document.getElementById('companyResult');
+  var companyHistoryEl = document.getElementById('companyHistory');
+  var COMPANY_HISTORY_KEY = 'recruitment_company_history_v1';
+  var COMPANY_STATUS_KEY = 'recruitment_company_status_v1';
+  var companyBusy = false;
+  function companyRead(key, fallback) { try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (e) { return fallback; } }
+  function companyWrite(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+  function companyStatuses() { return companyRead(COMPANY_STATUS_KEY, {}); }
+  function companyStatusKey(item) { return '校招|' + (item.company || '') + '|' + (item.roles || []).join(','); }
+  function companyIsStale(checkedAt) { var t = Date.parse(checkedAt || ''); return !t || Date.now() - t > 7 * 24 * 3600 * 1000; }
+  function companySafeUrl(url) { try { var parsed = new URL(url); return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : ''; } catch (e) { return ''; } }
+  function companyRender(data) {
+    if (!data || !Array.isArray(data.items) || !data.items.length) { companyResultEl.innerHTML = '<div class="dict-empty">暂未找到符合条件的候选企业，请更换关键词后重试。</div>'; return; }
+    var statuses = companyStatuses();
+    var html = '<div class="company-result-meta">深圳 · 校招 · ' + escapeHtml(data.keyword || '不限') + ' · 共 ' + data.items.length + ' 条 · 信息更新时间：' + escapeHtml(new Date(data.lastCheckedAt || Date.now()).toLocaleString('zh-CN')) + '</div>';
+    html += '<div class="company-note" style="margin-bottom:10px">' + escapeHtml(data.resultNote || '请打开招聘官网核验当前职位。') + '</div>';
+    data.items.forEach(function (item) {
+      var key = companyStatusKey(item), status = statuses[key] || {}, stale = companyIsStale(item.lastCheckedAt);
+      var site = companySafeUrl(item.recruitingSite), source = companySafeUrl(item.sourceUrl);
+      html += '<article class="company-card" data-company-key="' + escapeHtml(key) + '"><div class="company-card-head"><span class="company-name">' + escapeHtml(item.company || '未命名企业') + '</span>';
+      if (item.companyType) html += '<span class="company-tag">' + escapeHtml(item.companyType) + '</span>';
+      if (item.internetCompany) html += '<span class="company-tag internet">互联网公司</span>';
+      if (stale) html += '<span class="company-tag stale">可能已过期</span>';
+      html += '</div><div class="company-card-meta">岗位方向：' + escapeHtml((item.roles || []).join('、') || '待核验') + ' · 招聘状态：' + escapeHtml(item.recruitingStatus || '待核验') + '<br>信息来源：' + escapeHtml(item.sourceLabel || '公开招聘信息') + '</div><div class="company-card-actions">';
+      html += '<button type="button" class="company-action company-favorite' + (status.favorite ? ' active' : '') + '" data-company-action="favorite">' + (status.favorite ? '已收藏' : '收藏') + '</button>';
+      html += '<button type="button" class="company-action company-applied' + (status.applied ? ' active' : '') + '" data-company-action="applied">已投递</button>';
+      if (site) html += '<a class="company-action site" href="' + escapeHtml(site) + '" target="_blank" rel="noopener noreferrer">招聘官网</a>';
+      else if (source) html += '<a class="company-action site" href="' + escapeHtml(source) + '" target="_blank" rel="noopener noreferrer">查看来源</a>';
+      html += '</div></article>';
+    });
+    companyResultEl.innerHTML = html;
+  }
+  function companySaveHistory(data) {
+    var history = companyRead(COMPANY_HISTORY_KEY, []);
+    history.unshift({ city: data.city, track: data.track, keyword: data.keyword, lastCheckedAt: data.lastCheckedAt, resultNote: data.resultNote, items: data.items });
+    companyWrite(COMPANY_HISTORY_KEY, history.slice(0, 10)); companyRenderHistory();
+  }
+  function companyRenderHistory() {
+    if (!companyHistoryEl) return;
+    var history = companyRead(COMPANY_HISTORY_KEY, []);
+    if (!history.length) { companyHistoryEl.hidden = true; return; }
+    companyHistoryEl.hidden = false;
+    companyHistoryEl.innerHTML = '<div class="company-history-title">本机最近查询（刷新后仍保留）</div>' + history.slice(0, 6).map(function (item, index) { return '<button type="button" class="company-history-item" data-company-history-index="' + index + '">' + escapeHtml(item.city || '深圳') + ' · ' + escapeHtml(item.keyword || '不限') + ' · ' + escapeHtml(new Date(item.lastCheckedAt || Date.now()).toLocaleDateString('zh-CN')) + '</button>'; }).join('');
+  }
+  function companySearch() {
+    if (companyBusy) return;
+    companyBusy = true; companySearchBtnEl.disabled = true; companySearchBtnEl.textContent = '筛选中…'; companyResultEl.innerHTML = '<div class="dict-empty">正在整理公开招聘信息，请稍候…</div>';
+    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'company-search', city: companyCityEl.value, track: '校招', keyword: companyKeywordEl.value }) })
+      .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
+      .then(function (json) { if (!json || !json.data) throw new Error('未返回有效结果'); companyRender(json.data); companySaveHistory(json.data); })
+      .catch(function (err) { companyResultEl.innerHTML = '<div class="paper-idea-error">筛选失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
+      .then(function () { companyBusy = false; companySearchBtnEl.disabled = false; companySearchBtnEl.textContent = '筛选'; });
+  }
+  function companySwitchPanel(panel) {
+    var companies = panel === 'companies'; campusQaPanelEl.hidden = companies; campusCompanyPanelEl.hidden = !companies;
+    companyFilterTabsEl.querySelectorAll('[data-campus-panel]').forEach(function (btn) { btn.classList.toggle('active', btn.getAttribute('data-campus-panel') === panel); });
+    if (companies) companyRenderHistory();
+  }
+  if (companySearchBtnEl) companySearchBtnEl.addEventListener('click', companySearch);
+  if (companyFilterTabsEl) companyFilterTabsEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-campus-panel]'); if (btn) companySwitchPanel(btn.getAttribute('data-campus-panel')); });
+  if (companyResultEl) companyResultEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-company-action]'); if (!btn) return; var card = btn.closest('[data-company-key]'); if (!card) return; var key = card.getAttribute('data-company-key'), statuses = companyStatuses(), status = statuses[key] || {}, action = btn.getAttribute('data-company-action'); status[action] = !status[action]; statuses[key] = status; companyWrite(COMPANY_STATUS_KEY, statuses); btn.classList.toggle('active', status[action]); if (action === 'favorite') btn.textContent = status[action] ? '已收藏' : '收藏'; });
+  if (companyHistoryEl) companyHistoryEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-company-history-index]'); if (!btn) return; var history = companyRead(COMPANY_HISTORY_KEY, []), item = history[Number(btn.getAttribute('data-company-history-index'))]; if (item) companyRender(item); });
 
   // ==================== 简历助手 v2.7：岗位科普 ====================
   var jobGuideTitleEl = document.getElementById('jobGuideTitle');
