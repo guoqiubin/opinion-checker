@@ -1366,6 +1366,21 @@
   .interview-structure-card strong { color: #91641c; display: block; margin-bottom: 3px; }
   @media (max-width: 560px) { .interview-star { grid-template-columns: 1fr; } }
   @media (max-width: 560px) { .job-guide-grid { grid-template-columns: 1fr; } }
+  .resume-personalize { margin-top: 16px; border-top: 1px solid #d8c18f; padding-top: 14px; }
+  .resume-upload-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 9px 0; }
+  .resume-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .resume-file-label { display: inline-block; border: 1px solid #bda875; border-radius: 8px; padding: 9px 16px; background: #f6edd9; color: var(--brown-dark); font: inherit; cursor: pointer; }
+  .resume-file-name { color: var(--comment); font-size: 12px; }
+  .resume-parse-status { color: var(--comment); font-size: 12px; line-height: 1.7; }
+  .resume-match-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .resume-edit-card { background: #fffdf5; border: 1px solid #ead7ac; border-radius: 8px; padding: 10px 12px; margin: 8px 0; line-height: 1.7; color: var(--brown-dark); }
+  .resume-edit-card strong { color: #91641c; }
+  .resume-priority { display: inline-block; margin-left: 6px; border-radius: 10px; padding: 1px 7px; font-size: 11px; background: #f4e5bd; color: #74521d; }
+  .resume-section-title { color: #91641c; font-size: 14px; margin: 14px 0 6px; }
+  .resume-reference { background: #fffdf5; border: 1px solid #d6bb7a; border-radius: 9px; padding: 13px; line-height: 1.75; }
+  .resume-reference h5 { color: var(--brown-dark); font-size: 15px; margin: 12px 0 4px; border-bottom: 1px solid #ead7ac; padding-bottom: 3px; }
+  .resume-reference h5:first-child { margin-top: 0; }
+  @media (max-width: 560px) { .resume-match-grid { grid-template-columns: 1fr; } }
 
   /* ==================== 招聘助手 v1.0：校招公司库 ==================== */
   .recruitment-tabs, .company-filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -1781,6 +1796,23 @@
         </div>
         <div class="job-guide-actions"><button type="button" id="jobGuideBtn" class="job-guide-primary">开始岗位科普</button><button type="button" id="jobGuideClear" class="job-guide-secondary">清空</button><span class="hint" style="margin:0">AI 生成内容仅供求职准备参考；具体要求以公司当前招聘页为准。</span></div>
         <div id="jobGuideResult" class="job-guide-result"><div class="dict-empty">输入岗位名称后开始查询</div></div>
+        <div class="resume-personalize">
+          <div class="job-guide-section">
+            <h4>个性化简历方案</h4>
+            <p>先粘贴目标岗位 JD，再上传你的通用版简历。第一版支持可复制文字的 PDF、DOCX；扫描版 PDF 暂不支持。</p>
+          </div>
+          <div class="resume-upload-row">
+            <label for="resumeFile" class="resume-file-label">附件上传</label>
+            <input id="resumeFile" class="resume-file-input" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <span id="resumeFileName" class="resume-file-name">未选择文件</span>
+            <button type="button" id="resumeParseBtn" class="job-guide-secondary" disabled>解析简历</button>
+          </div>
+          <div id="resumeParseStatus" class="resume-parse-status">文件只在当前浏览器本地解析，原始文件不会上传。</div>
+          <div class="job-guide-actions">
+            <button type="button" id="resumePersonalizeBtn" class="job-guide-primary" disabled>生成个性化简历方案</button>
+          </div>
+          <div id="resumePersonalizeResult" class="job-guide-result"><div class="dict-empty">解析简历并准备好目标 JD 后开始生成</div></div>
+        </div>
       </div>
     </div>
   </section>
@@ -1907,6 +1939,9 @@
   </div>
 </div>
 
+<!-- 简历解析仅在浏览器本地进行：PDF.js 解析文字版 PDF，Mammoth 解析 DOCX；原始文件不会上传 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
 <script>
 (function () {
   'use strict';
@@ -2160,6 +2195,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.10',
+      date: '2026-09-21',
+      changes: [
+        { type: 'add', text: '「简历助手」岗位科普后新增个性化简历方案：上传可复制文字的 PDF / DOCX 通用简历，结合目标 JD 输出优势、缺口与修改建议' },
+        { type: 'add', text: '新增按 STAR 法则生成的目标岗位参考简历，保留基本信息、教育背景、经历、项目与技能等模块' },
+        { type: 'shield', text: '原始简历只在浏览器本地解析，不上传文件；扫描版 PDF 第一版暂不支持，缺失数据使用 XX 占位，不编造经历' }
+      ]
+    },
     {
       version: 'v2.9',
       date: '2026-09-21',
@@ -4337,6 +4381,81 @@
     [jobGuideTitleEl, jobGuideCompanyEl, jobGuideCityEl, jobGuideIndustryEl, jobGuideUrlEl, jobGuideDescEl].forEach(function (el) { if (el) el.value = ''; });
     jobGuideResultEl.innerHTML = '<div class="dict-empty">输入岗位名称后开始查询</div>';
   });
+
+  // ==================== 简历助手 v2.10：本地解析 + 个性化简历 ====================
+  var resumeFileEl = document.getElementById('resumeFile');
+  var resumeFileNameEl = document.getElementById('resumeFileName');
+  var resumeParseBtnEl = document.getElementById('resumeParseBtn');
+  var resumeParseStatusEl = document.getElementById('resumeParseStatus');
+  var resumePersonalizeBtnEl = document.getElementById('resumePersonalizeBtn');
+  var resumePersonalizeResultEl = document.getElementById('resumePersonalizeResult');
+  var resumeFile = null;
+  var resumeText = '';
+  var resumeBusy = false;
+  var RESUME_HISTORY_KEY = 'resume_personalize_history_v1';
+  function resumeReadHistory() { try { var raw = localStorage.getItem(RESUME_HISTORY_KEY); return raw ? JSON.parse(raw) : []; } catch (e) { return []; } }
+  function resumeWriteHistory(item) { try { var list = resumeReadHistory(); list.unshift(item); localStorage.setItem(RESUME_HISTORY_KEY, JSON.stringify(list.slice(0, 5))); } catch (e) {} }
+  function resumeCanGenerate() { return !!(resumeText && jobGuideTitleEl && jobGuideTitleEl.value.trim() && jobGuideDescEl && jobGuideDescEl.value.trim()); }
+  function resumeUpdateButtons() { if (resumePersonalizeBtnEl) resumePersonalizeBtnEl.disabled = !resumeCanGenerate() || resumeBusy; }
+  function resumePlain(value) { return escapeHtml(value || '').replace(/\n/g, '<br>'); }
+  function resumeList(items, empty) { if (!Array.isArray(items) || !items.length) return '<p>' + escapeHtml(empty || '暂无信息') + '</p>'; return '<ul class="job-guide-list">' + items.map(function (item) { return '<li>' + resumePlain(item) + '</li>'; }).join('') + '</ul>'; }
+  function resumeRender(data) {
+    if (!data) { resumePersonalizeResultEl.innerHTML = '<div class="paper-idea-error">未返回有效结果，请稍后重试。</div>'; return; }
+    var html = '<div class="job-guide-section"><h3>' + escapeHtml(data.jobTitle || '') + (data.company ? ' · ' + escapeHtml(data.company) : '') + '</h3><div class="job-guide-meta">生成时间：' + escapeHtml(new Date(data.updatedAt || Date.now()).toLocaleString('zh-CN')) + ' · 参考内容仅基于已提供材料</div><p>' + resumePlain(data.matchSummary || '暂无总体匹配判断') + '</p></div>';
+    html += '<div class="resume-match-grid"><div class="job-guide-section"><h4>已有优势</h4>' + resumeList(data.strengths, '暂无明显优势') + '</div><div class="job-guide-section"><h4>需要补强</h4>' + resumeList(data.gaps, '暂无明显缺口') + '</div></div>';
+    html += '<div class="job-guide-section"><h4>针对 JD 的修改建议</h4>';
+    (Array.isArray(data.edits) ? data.edits : []).forEach(function (item) { html += '<div class="resume-edit-card"><strong>' + resumePlain(item.section) + '</strong>' + (item.priority ? '<span class="resume-priority">优先级：' + resumePlain(item.priority) + '</span>' : '') + '<br><b>JD要求：</b>' + resumePlain(item.jdRequirement) + '<br><b>简历证据：</b>' + resumePlain(item.resumeEvidence) + '<br><b>建议：</b>' + resumePlain(item.advice) + '</div>'; });
+    html += '</div><div class="job-guide-section"><h4>需要你补充的信息</h4>' + resumeList(data.missingInfo, '暂无补充信息') + '</div>';
+    var ref = data.tailoredResume || {};
+    html += '<div class="job-guide-section"><h4>参考简历（请核对后使用）</h4><div class="resume-reference">';
+    html += '<h5>基本信息</h5><div>' + resumePlain(ref.basicInfo || '请沿用原简历个人信息') + '</div><h5>教育背景</h5><div>' + resumePlain(ref.education || '请沿用原简历教育背景') + '</div>';
+    if (Array.isArray(ref.experience) && ref.experience.length) { html += '<h5>经历</h5>'; ref.experience.forEach(function (item) { html += '<p><strong>' + resumePlain(item.title) + '</strong><br>' + resumePlain(item.content) + '</p>'; }); }
+    if (Array.isArray(ref.projects) && ref.projects.length) { html += '<h5>项目经历</h5>'; ref.projects.forEach(function (item) { html += '<p><strong>' + resumePlain(item.title) + '</strong><br>' + resumePlain(item.content) + '</p>'; }); }
+    html += '<h5>技能与语言能力</h5>' + resumeList(ref.skills, '请根据真实情况补充') + '<h5>自我评价</h5><div>' + resumePlain(ref.selfEvaluation || '暂无参考自我评价') + '</div></div></div>';
+    html += '<div class="job-guide-aigc">' + resumePlain(data.caution || '请逐项核对参考内容，不要直接使用未经证实的数字、经历或能力。') + '</div>';
+    resumePersonalizeResultEl.innerHTML = html;
+  }
+  async function resumeExtractPdf(file) {
+    if (!window.pdfjsLib) throw new Error('PDF 解析组件加载失败，请刷新页面重试');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    var buffer = await file.arrayBuffer(), doc = await window.pdfjsLib.getDocument({ data: buffer }).promise, pages = [];
+    for (var i = 1; i <= doc.numPages; i++) { var page = await doc.getPage(i), content = await page.getTextContent(); pages.push(content.items.map(function (item) { return item.str; }).join(' ')); }
+    var text = pages.join('\n').replace(/[ \t]+/g, ' ').trim();
+    if (text.length < 30) throw new Error('未识别到可复制文字；扫描版 PDF 第一版暂不支持');
+    return text;
+  }
+  async function resumeExtractDocx(file) {
+    if (!window.mammoth) throw new Error('DOCX 解析组件加载失败，请刷新页面重试');
+    var result = await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+    var text = String(result.value || '').replace(/[ \t]+/g, ' ').trim();
+    if (text.length < 30) throw new Error('DOCX 中没有识别到足够文字，请检查文件内容');
+    return text;
+  }
+  if (resumeFileEl) resumeFileEl.addEventListener('change', function () {
+    resumeFile = resumeFileEl.files && resumeFileEl.files[0]; resumeText = '';
+    resumeFileNameEl.textContent = resumeFile ? resumeFile.name : '未选择文件';
+    resumeParseBtnEl.disabled = !resumeFile; resumePersonalizeResultEl.innerHTML = '<div class="dict-empty">点击“解析简历”提取文字</div>'; resumeUpdateButtons();
+  });
+  if (resumeParseBtnEl) resumeParseBtnEl.addEventListener('click', async function () {
+    if (!resumeFile || resumeBusy) return;
+    resumeBusy = true; resumeParseBtnEl.disabled = true; resumeParseStatusEl.textContent = '正在浏览器本地解析，原始文件不会上传…';
+    try { var lower = resumeFile.name.toLowerCase(); resumeText = lower.endsWith('.pdf') ? await resumeExtractPdf(resumeFile) : lower.endsWith('.docx') ? await resumeExtractDocx(resumeFile) : ''; if (!resumeText) throw new Error('仅支持 PDF 或 DOCX 文件'); resumeParseStatusEl.textContent = '解析完成：已提取约 ' + resumeText.length + ' 个字符。请确认 JD 已粘贴后生成方案。'; }
+    catch (err) { resumeText = ''; resumeParseStatusEl.textContent = '解析失败：' + (err.message || '请检查文件格式'); }
+    resumeBusy = false; resumeParseBtnEl.disabled = !resumeFile; resumeUpdateButtons();
+  });
+  if (resumePersonalizeBtnEl) resumePersonalizeBtnEl.addEventListener('click', function () {
+    if (resumeBusy) return;
+    if (!resumeCanGenerate()) { resumePersonalizeResultEl.innerHTML = '<div class="paper-idea-error">请先填写目标岗位名称、粘贴目标 JD，并成功解析通用版简历。</div>'; return; }
+    if (location.protocol === 'file:') { resumePersonalizeResultEl.innerHTML = '<div class="paper-idea-error">当前页面是本地文件，无法调用 AI 后端。请通过线上网址打开后再生成。</div>'; return; }
+    resumeBusy = true; resumePersonalizeBtnEl.disabled = true; resumePersonalizeBtnEl.textContent = '正在匹配与改写…'; resumePersonalizeResultEl.innerHTML = '<div class="dict-empty">AI 正在对比 JD 与简历，并按 STAR 法则整理参考版本，请稍候…</div>';
+    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'resume-personalize', jobTitle: jobGuideTitleEl.value.trim(), company: jobGuideCompanyEl.value.trim(), jobDescription: jobGuideDescEl.value.trim(), resumeText: resumeText }) })
+      .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
+      .then(function (json) { resumeRender(json && json.data); if (json && json.data) resumeWriteHistory({ jobTitle: jobGuideTitleEl.value.trim(), company: jobGuideCompanyEl.value.trim(), data: json.data }); })
+      .catch(function (err) { resumePersonalizeResultEl.innerHTML = '<div class="paper-idea-error">生成失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
+      .then(function () { resumeBusy = false; resumePersonalizeBtnEl.textContent = '生成个性化简历方案'; resumeUpdateButtons(); });
+  });
+  [jobGuideTitleEl, jobGuideDescEl].forEach(function (el) { if (el) el.addEventListener('input', resumeUpdateButtons); });
+  (function resumeRestoreLatest() { var history = resumeReadHistory(); if (history.length && history[0].data) resumeRender(history[0].data); })();
 
   // ==================== 面试助手 v1.0：日常语言转策略运营专业表达 ====================
   var interviewRoleEl = document.getElementById('interviewRole');

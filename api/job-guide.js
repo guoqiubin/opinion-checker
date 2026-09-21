@@ -21,6 +21,10 @@ const COMPANY_SEARCH_PROMPT =
   '你是招聘信息整理助手。请基于输入的公开搜索证据，筛选深圳正在招聘或近期公开发布招聘信息的企业。只允许使用证据中出现的企业，不得凭空补充公司、招聘状态或网址；无法确认的字段必须写“待核验”。企业类型允许民营、外资、合资、港资，排除事业单位、央国企和国企。只输出 JSON：' +
   '{"items":[{"company":"公司名称","companyType":"民营/外资/合资/港资","internetCompany":true,"roles":["运营"],"recruitingStatus":"公开招聘信息/待核验","recruitingSite":"官方招聘网址或空","sourceLabel":"来源说明","sourceUrl":"证据网址或空","lastCheckedAt":"查询时间"}]}.最多输出20条，结果按证据可靠性排序。';
 
+const RESUME_PERSONALIZE_PROMPT =
+  '你是一位资深招聘顾问和简历编辑。请根据目标岗位、公司、用户粘贴的目标JD和用户上传后在浏览器本地解析出的通用简历文本，完成简历匹配分析和参考简历改写。你只能使用简历中已有的事实，不能编造公司、项目、数字、职责或结果；缺少信息统一使用“XX”占位，并列出需要用户补充的内容。必须重点识别JD中的硬性要求、语言能力、海外经历、行业经验、工具技能和结果指标。所有经历改写优先使用STAR法则，突出情境、任务、行动、结果。只输出一个 JSON 对象，结构固定：' +
+  '{"matchSummary":"总体匹配判断","strengths":["已有优势"],"gaps":["缺口"],"edits":[{"section":"模块名称","jdRequirement":"JD要求","resumeEvidence":"简历中的证据或未发现","advice":"具体修改建议","priority":"高/中/低"}],"missingInfo":["需要用户补充的信息"],"tailoredResume":{"basicInfo":"基本信息（不擅自改动个人信息）","education":"教育背景","experience":[{"title":"经历标题","content":"STAR法则改写后的参考内容"}],"projects":[{"title":"项目标题","content":"STAR法则改写后的参考内容"}],"skills":["技能或语言能力"],"selfEvaluation":"针对目标岗位的参考自我评价"},"caution":"真实性与核验提示","updatedAt":"服务端传入时间"}.其中 strengths、gaps、missingInfo 各3-6项；edits 5-10项；experience、projects只在原简历存在相关内容时输出，不得凭空补齐。';
+
 const COMPANY_SEEDS = [
   { company: '腾讯', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://join.qq.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://join.qq.com/' },
   { company: '字节跳动', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://jobs.bytedance.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://jobs.bytedance.com/' },
@@ -102,7 +106,7 @@ async function publicSearchEvidence(query) {
   } catch (e) { return []; }
 }
 
-function callLLM(systemPrompt, userContent) {
+function callLLM(systemPrompt, userContent, maxTokens) {
   var apiUrl = process.env.LLM_API_URL || 'https://api.deepseek.com/v1/chat/completions';
   var apiKey = process.env.DEEPSEEK_API_KEY;
   var model = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
@@ -113,7 +117,7 @@ function callLLM(systemPrompt, userContent) {
       model: model,
       messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userContent }],
       temperature: 0.3,
-      max_tokens: 2600,
+      max_tokens: maxTokens || 2600,
       response_format: { type: 'json_object' }
     }),
     signal: AbortSignal.timeout(30000)
@@ -160,6 +164,52 @@ export default async function handler(req, res) {
       }).slice(0, 20);
     }
     res.status(200).json({ ok: true, data: { city: '深圳', track: '校招', keyword: companyKeyword || '不限', items: items, lastCheckedAt: companyTime, liveEvidence: evidence.length > 0, resultNote: evidence.length ? '结果结合公开搜索证据整理；请打开招聘官网核验职位是否仍在招。' : '当前未取得稳定的实时公开搜索结果，以下为参考候选企业；请打开招聘官网核验。' } });
+    return;
+  }
+  if (body.mode === 'resume-personalize') {
+    var resumeTitle = cleanText(body.jobTitle, 80);
+    var resumeCompany = cleanText(body.company, 100);
+    var resumeJobDescription = cleanText(body.jobDescription, 6000);
+    var resumeText = cleanText(body.resumeText, 14000);
+    if (!resumeTitle) { res.status(400).json({ ok: false, error: '请先填写目标岗位名称' }); return; }
+    if (!resumeJobDescription) { res.status(400).json({ ok: false, error: '请先粘贴目标岗位 JD，AI 才能进行针对性匹配' }); return; }
+    if (!resumeText) { res.status(400).json({ ok: false, error: '请先解析通用版简历' }); return; }
+    var resumeGuard = await guard.limit(req, 'ai');
+    if (!resumeGuard.ok) return guard.deny(res, resumeGuard.code);
+    if (!process.env.DEEPSEEK_API_KEY) { res.status(503).json({ ok: false, error: '服务端未配置简历分析模型，请联系站长启用' }); return; }
+    var resumeTime = new Date().toISOString();
+    var resumeInput = '查询时间（UTC）：' + resumeTime + '\n目标岗位：' + resumeTitle + '\n目标公司：' + (resumeCompany || '未提供') + '\n目标JD：\n' + resumeJobDescription + '\n用户通用简历文本：\n' + resumeText;
+    try {
+      var resumeParsed = extractJSON(await callLLM(RESUME_PERSONALIZE_PROMPT, resumeInput, 5000));
+      if (!resumeParsed) throw new Error('模型输出无法解析为 JSON');
+      var tailored = resumeParsed.tailoredResume || {};
+      var cleanExperience = Array.isArray(tailored.experience) ? tailored.experience.map(function (item) { return { title: cleanText(item && item.title, 160), content: cleanText(item && item.content, 1200) }; }).filter(function (item) { return item.title || item.content; }).slice(0, 8) : [];
+      var cleanProjects = Array.isArray(tailored.projects) ? tailored.projects.map(function (item) { return { title: cleanText(item && item.title, 160), content: cleanText(item && item.content, 1200) }; }).filter(function (item) { return item.title || item.content; }).slice(0, 8) : [];
+      var resumeData = {
+        jobTitle: resumeTitle,
+        company: resumeCompany,
+        matchSummary: cleanText(resumeParsed.matchSummary, 1000),
+        strengths: cleanList(resumeParsed.strengths, 6, 220),
+        gaps: cleanList(resumeParsed.gaps, 6, 220),
+        edits: Array.isArray(resumeParsed.edits) ? resumeParsed.edits.map(function (item) { return { section: cleanText(item && item.section, 80), jdRequirement: cleanText(item && item.jdRequirement, 260), resumeEvidence: cleanText(item && item.resumeEvidence, 300), advice: cleanText(item && item.advice, 500), priority: cleanText(item && item.priority, 10) }; }).filter(function (item) { return item.section || item.advice; }).slice(0, 10) : [],
+        missingInfo: cleanList(resumeParsed.missingInfo, 8, 220),
+        tailoredResume: {
+          basicInfo: cleanText(tailored.basicInfo, 800),
+          education: cleanText(tailored.education, 1200),
+          experience: cleanExperience,
+          projects: cleanProjects,
+          skills: cleanList(tailored.skills, 12, 160),
+          selfEvaluation: cleanText(tailored.selfEvaluation, 1000)
+        },
+        caution: cleanText(resumeParsed.caution, 800),
+        updatedAt: resumeTime
+      };
+      res.status(200).json({ ok: true, data: resumeData });
+    } catch (err) {
+      var resumeMsg = String(err && (err.name || err.message) || err);
+      if (/AbortError|aborted|Timeout/i.test(resumeMsg)) { res.status(504).json({ ok: false, error: '简历分析超时，请稍后重试' }); return; }
+      res.status(502).json({ ok: false, error: '简历分析服务暂不可用：' + String(err.message || err) + '，请稍后重试' });
+    }
     return;
   }
   if (body.mode === 'interview') {
