@@ -1346,6 +1346,19 @@
   .job-guide-source { font-size: 12px; margin: 4px 0; }
   .job-guide-source a { color: #89601b; }
   .job-guide-aigc { color: #987d4f; font-size: 12px; font-style: italic; margin-top: 10px; }
+  .interview-form { max-width: 860px; }
+  .interview-role { max-width: 320px; }
+  .interview-role select, .interview-input { width: 100%; box-sizing: border-box; border: 1px solid #d6bb7a; border-radius: 8px; background: #fffdf5; padding: 10px 12px; color: var(--brown-dark); font: inherit; }
+  .interview-input { min-height: 150px; resize: vertical; line-height: 1.75; }
+  .interview-counter { color: var(--comment); font-size: 12px; text-align: right; margin-top: 4px; }
+  .interview-receipt { background: #fff7e5; border: 1px solid #e1bc69; border-radius: 9px; padding: 12px 14px; margin-top: 14px; color: var(--brown-dark); line-height: 1.7; }
+  .interview-receipt strong { color: #9b6412; }
+  .interview-output { margin-top: 14px; }
+  .interview-star { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .interview-star-card { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 8px; padding: 10px; line-height: 1.65; }
+  .interview-star-card strong { display: block; color: #91641c; margin-bottom: 3px; }
+  .interview-placeholder { color: #b04b36; font-weight: 700; }
+  @media (max-width: 560px) { .interview-star { grid-template-columns: 1fr; } }
   @media (max-width: 560px) { .job-guide-grid { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
     .paper-design-grid { grid-template-columns: 1fr; }
@@ -1384,6 +1397,7 @@
     <button type="button" class="nav-tab" data-tool="defense" title="答辩助手：中文答辩陈述一键译英并收藏精选">答辩助手</button>
     <button type="button" class="nav-tab" data-tool="dict" title="心理学词典：查询心理学与心理咨询专业概念">心理学词典</button>
     <button type="button" class="nav-tab" data-tool="resume" title="简历助手：岗位科普">简历助手</button>
+    <button type="button" class="nav-tab" data-tool="interview" title="面试助手：日常语言转岗位专业表达">面试助手</button>
     <button type="button" class="nav-tab" data-tool="campus" title="校招助手：秋招 Q&A 问答">校招助手</button>
     <button type="button" class="nav-tab" data-tool="cscsrv" title="中留服助手（规划中，敬请期待）">中留服助手</button>
     <span class="nav-tab disabled" title="更多平级工具开发中，敬请期待">＋ 更多（预留）</span>
@@ -1738,6 +1752,36 @@
     </div>
   </section>
 
+  <!-- 1.6 面试助手视图：日常语言转策略运营专业表达 -->
+  <section id="view-interview" class="app-view" data-view="interview" hidden>
+    <div class="win">
+      <div class="win-titlebar">
+        <span class="win-dots"><i></i><i></i><i></i></span>
+        <span class="win-title">面试助手 · 专业表达提炼</span>
+      </div>
+      <div class="win-body interview-form">
+        <div class="cmd-label"><span class="dollar">§</span> <span class="fname">把日常语言转化为策略运营岗位的专业面试表达</span></div>
+        <div class="job-guide-field interview-role">
+          <label for="interviewRole">岗位</label>
+          <select id="interviewRole"><option value="策略运营">策略运营</option></select>
+        </div>
+        <div class="job-guide-field" style="margin-top:12px">
+          <label for="interviewInput">日常语言 <span style="color:#b04b36">（必填，200字以内）</span></label>
+          <textarea id="interviewInput" class="interview-input" maxlength="200" placeholder="例如：就是每天发社群，发完社群就写日报"></textarea>
+          <div class="interview-counter"><span id="interviewCount">0</span>/200</div>
+        </div>
+        <div class="job-guide-actions">
+          <button type="button" id="interviewExtractBtn" class="job-guide-primary">提炼</button>
+          <button type="button" id="interviewForceBtn" class="job-guide-secondary" hidden>信息不全，使用 XX 补全并继续</button>
+          <button type="button" id="interviewClearBtn" class="job-guide-secondary">清空</button>
+        </div>
+        <div class="hint" style="margin-top:10px">AI 会先检查 STAR 信息是否完整；缺少背景、目标或结果时，会先给你一轮回执。强制继续后，无法确认的内容会用「XX」标记。</div>
+        <div id="interviewReceipt" class="interview-receipt" hidden></div>
+        <div id="interviewOutput" class="interview-output"><div class="dict-empty">输入一段日常语言后开始提炼</div></div>
+      </div>
+    </div>
+  </section>
+
   <!-- 1.6 校招助手视图：秋招问答 Q&A 信息流（v2.3，分类 Tab + 单开手风琴） -->
   <section id="view-campus" class="app-view" data-view="campus" hidden>
     <div class="win">
@@ -1800,6 +1844,7 @@
     { id: 'defense', hash: '#/tools/defense', label: '答辩助手' },
     { id: 'dict', hash: '#/tools/dict', label: '心理学词典' },
     { id: 'resume',  hash: '#/tools/resume',  label: '智能简历' },
+    { id: 'interview', hash: '#/tools/interview', label: '面试助手' },
     { id: 'campus',  hash: '#/tools/campus',  label: '校招助手' },
     { id: 'cscsrv',  hash: '#/tools/cscsrv',  label: '中留服助手' }
   ];
@@ -2040,6 +2085,14 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.8',
+      date: '2026-09-21',
+      changes: [
+        { type: 'add', text: '新增一级功能「面试助手」：选择策略运营岗位，将 200 字以内的日常语言提炼为问题识别、STAR 拆解、专业表达与面试口语版' },
+        { type: 'shield', text: '信息不完整时先给出回执；用户强制继续后，无法确认的内容使用「XX」占位，不虚构数据和结果' }
+      ]
+    },
     {
       version: 'v2.7',
       date: '2026-09-15',
@@ -4128,6 +4181,67 @@
   if (jobGuideClearEl) jobGuideClearEl.addEventListener('click', function () {
     [jobGuideTitleEl, jobGuideCompanyEl, jobGuideCityEl, jobGuideIndustryEl, jobGuideUrlEl, jobGuideDescEl].forEach(function (el) { if (el) el.value = ''; });
     jobGuideResultEl.innerHTML = '<div class="dict-empty">输入岗位名称后开始查询</div>';
+  });
+
+  // ==================== 面试助手 v1.0：日常语言转策略运营专业表达 ====================
+  var interviewRoleEl = document.getElementById('interviewRole');
+  var interviewInputEl = document.getElementById('interviewInput');
+  var interviewCountEl = document.getElementById('interviewCount');
+  var interviewExtractBtnEl = document.getElementById('interviewExtractBtn');
+  var interviewForceBtnEl = document.getElementById('interviewForceBtn');
+  var interviewClearBtnEl = document.getElementById('interviewClearBtn');
+  var interviewReceiptEl = document.getElementById('interviewReceipt');
+  var interviewOutputEl = document.getElementById('interviewOutput');
+  var interviewBusy = false;
+
+  function interviewText(value) {
+    return escapeHtml(value || '').replace(/XX/g, '<span class="interview-placeholder">XX</span>');
+  }
+  function interviewCard(label, value) {
+    return '<div class="interview-star-card"><strong>' + label + '</strong><span>' + (interviewText(value) || '暂无信息') + '</span></div>';
+  }
+  function interviewRender(data) {
+    if (!data) { interviewOutputEl.innerHTML = '<div class="paper-idea-error">未返回有效结果，请稍后重试。</div>'; return; }
+    if (data.receipt) {
+      var missing = Array.isArray(data.missing) && data.missing.length ? '缺少：' + data.missing.map(interviewText).join('、') : '';
+      interviewReceiptEl.innerHTML = '<strong>回执：</strong>' + interviewText(data.receipt) + (missing ? '<br><strong>' + missing + '</strong>' : '');
+      interviewReceiptEl.hidden = false;
+    }
+    if (data.status !== 'ready' && !data.professionalExpression) {
+      interviewOutputEl.innerHTML = '<div class="dict-empty">补充信息后可再次提炼；也可以点击“信息不全，使用 XX 补全并继续”。</div>';
+      interviewForceBtnEl.hidden = false;
+      return;
+    }
+    interviewForceBtnEl.hidden = true;
+    var star = data.star || {};
+    var html = '<div class="job-guide-section"><h3>策略运营 · 面试表达提炼</h3><div class="job-guide-meta">生成时间：' + interviewText(new Date(data.updatedAt || Date.now()).toLocaleString('zh-CN')) + (data.usedPlaceholders ? ' · 缺失信息已用 XX 标记' : '') + '</div></div>';
+    html += '<div class="job-guide-section"><h4>问题识别</h4><p>' + (interviewText(data.problemRecognition) || '暂无识别结果') + '</p></div>';
+    html += '<div class="job-guide-section"><h4>STAR 拆解</h4><div class="interview-star">' + interviewCard('S｜背景 / 情境', star.s) + interviewCard('T｜目标 / 任务', star.t) + interviewCard('A｜行动', star.a) + interviewCard('R｜结果', star.r) + '</div></div>';
+    html += '<div class="job-guide-section"><h4>专业表达</h4><p>' + (interviewText(data.professionalExpression) || '暂无结果') + '</p></div>';
+    html += '<div class="job-guide-section"><h4>面试口语版</h4><p>' + (interviewText(data.interviewVersion) || '暂无结果') + '</p></div>';
+    interviewOutputEl.innerHTML = html;
+  }
+  function interviewRun(force) {
+    if (interviewBusy) return;
+    var dailyLanguage = interviewInputEl.value.trim();
+    if (!dailyLanguage) { interviewOutputEl.innerHTML = '<div class="paper-idea-error">请先输入一段日常语言。</div>'; interviewInputEl.focus(); return; }
+    if (location.protocol === 'file:') { interviewOutputEl.innerHTML = '<div class="paper-idea-error">当前页面是本地文件，无法调用 AI 后端。请通过线上网址打开后再提炼。</div>'; return; }
+    interviewBusy = true;
+    interviewExtractBtnEl.disabled = true; interviewForceBtnEl.disabled = true;
+    interviewExtractBtnEl.textContent = force ? '正在补全…' : '正在检查…';
+    interviewOutputEl.innerHTML = '<div class="dict-empty">AI 正在检查并整理表达，请稍候…</div>';
+    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'interview', role: interviewRoleEl.value, dailyLanguage: dailyLanguage, force: !!force }) })
+      .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
+      .then(function (json) { interviewRender(json && json.data); })
+      .catch(function (err) { interviewOutputEl.innerHTML = '<div class="paper-idea-error">提炼失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
+      .then(function () { interviewBusy = false; interviewExtractBtnEl.disabled = false; interviewForceBtnEl.disabled = false; interviewExtractBtnEl.textContent = '提炼'; });
+  }
+  if (interviewInputEl) interviewInputEl.addEventListener('input', function () { interviewCountEl.textContent = String(interviewInputEl.value.length); });
+  if (interviewExtractBtnEl) interviewExtractBtnEl.addEventListener('click', function () { interviewRun(false); });
+  if (interviewForceBtnEl) interviewForceBtnEl.addEventListener('click', function () { interviewRun(true); });
+  if (interviewClearBtnEl) interviewClearBtnEl.addEventListener('click', function () {
+    interviewInputEl.value = ''; interviewCountEl.textContent = '0'; interviewReceiptEl.hidden = true; interviewReceiptEl.innerHTML = ''; interviewForceBtnEl.hidden = true;
+    interviewOutputEl.innerHTML = '<div class="dict-empty">输入一段日常语言后开始提炼</div>';
   });
 
   // ==================== 心理学词典 v2.4：AI 实时查询 + 30 天缓存（dict 前缀独立命名空间） ====================
