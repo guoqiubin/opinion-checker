@@ -136,7 +136,7 @@
     font-weight: 700;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(69,58,40,.2), inset 0 1px 0 rgba(255,255,255,.8);
-    transition: all .12s;
+    transition: transform 180ms var(--motion-ease, ease), box-shadow 180ms var(--motion-ease, ease), background 180ms var(--motion-ease, ease), color 180ms var(--motion-ease, ease);
   }
   .notice-toggle:hover { color: var(--brown-dark); background: linear-gradient(180deg, #F8F2E6, #E5DBC4); }
   .notice-toggle:active { box-shadow: inset 0 2px 4px rgba(0,0,0,.22); transform: translateY(1px); }
@@ -637,6 +637,9 @@
     pointer-events: none;
   }
   .app-view { position: relative; }
+  @keyframes appViewFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  .app-view.motion-view-in { animation: appViewFadeIn 280ms var(--motion-ease, ease) both; }
+  @media (prefers-reduced-motion: reduce) { .app-view.motion-view-in { animation: none; } }
 
   /* 占位视图 */
   .placeholder-card { text-align: center; padding: 30px 18px 14px; }
@@ -2023,7 +2026,14 @@
       var sec = document.getElementById('view-' + t.id);
       var tab = topNav.querySelector('.nav-tab[data-tool="' + t.id + '"]');
       var on = t.id === id;
-      if (sec) sec.hidden = !on;
+      if (sec) {
+        sec.hidden = !on;
+        if (on) {
+          sec.classList.remove('motion-view-in');
+          void sec.offsetWidth;
+          sec.classList.add('motion-view-in');
+        }
+      }
       if (tab) tab.classList.toggle('active', on);
     });
     document.title = meta.label + ' · 心理学硕博小助手';
@@ -2240,6 +2250,14 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.13',
+      date: '2026-09-28',
+      changes: [
+        { type: 'add', text: '动态交互规则推广至页面切换与顶部导航：页面轻微淡入、导航按压反馈与数据核验翻卡保持同一套高级克制风格' },
+        { type: 'shield', text: '动画样式与业务逻辑分离，并兼容系统减弱动态效果设置' }
+      ]
+    },
     {
       version: 'v2.12',
       date: '2026-09-28',
