@@ -1369,6 +1369,16 @@
   .data-quiz-file-label { display: inline-block; border: 1px solid #bda875; border-radius: 8px; padding: 9px 16px; background: #f6edd9; color: var(--brown-dark); font: inherit; cursor: pointer; }
   .data-quiz-file-name, .data-quiz-status { color: var(--comment); font-size: 12px; line-height: 1.7; }
   .data-quiz-card { background: #fffaf0; border: 1px solid #d6bb7a; border-radius: 12px; padding: 16px; margin-top: 14px; box-shadow: 0 3px 9px rgba(120,90,30,.10); }
+  /* 全局动态规范：克制、高级、可集中调整；业务组件只引用 motion-* 类，不绑定动画细节 */
+  :root { --motion-duration: 420ms; --motion-ease: cubic-bezier(.22,.72,.28,1); --motion-shadow: 0 12px 28px rgba(100,75,30,.18); }
+  .motion-press { transition: transform var(--motion-duration) var(--motion-ease), box-shadow var(--motion-duration) var(--motion-ease), filter var(--motion-duration) var(--motion-ease); }
+  .motion-press:hover { transform: translateY(-1px); box-shadow: var(--motion-shadow); }
+  .motion-press:active { transform: translateY(1px) scale(.99); }
+  @keyframes dataQuizCardTurnIn { from { opacity: 0; transform: perspective(900px) rotateY(-72deg) translateX(26px) scale(.96); filter: brightness(.92); } 62% { opacity: 1; transform: perspective(900px) rotateY(8deg) translateX(-2px) scale(1.005); filter: brightness(1.02); } to { opacity: 1; transform: perspective(900px) rotateY(0) translateX(0) scale(1); filter: brightness(1); } }
+  .data-quiz-card.motion-card-turn { animation: dataQuizCardTurnIn var(--motion-duration) var(--motion-ease) both; transform-origin: 50% 50%; }
+  .data-quiz-card .data-quiz-blank, .data-quiz-card .job-guide-primary, .data-quiz-card .job-guide-secondary { transition: transform 180ms var(--motion-ease), box-shadow 180ms var(--motion-ease), background-color 180ms var(--motion-ease); }
+  .data-quiz-card .data-quiz-blank:hover, .data-quiz-card .job-guide-primary:hover, .data-quiz-card .job-guide-secondary:hover { transform: translateY(-1px); }
+  @media (prefers-reduced-motion: reduce) { .motion-press, .data-quiz-card.motion-card-turn, .data-quiz-card .data-quiz-blank, .data-quiz-card .job-guide-primary, .data-quiz-card .job-guide-secondary { animation: none; transition: none; } }
   .data-quiz-progress { color: var(--comment); font-size: 12px; margin-bottom: 10px; }
   .data-quiz-question { color: var(--brown-dark); font-size: 16px; line-height: 1.8; margin-bottom: 12px; }
   .data-quiz-blank { border: 1px dashed #a87e31; border-radius: 6px; background: #fff3cf; color: #97631a; padding: 2px 8px; font: inherit; cursor: pointer; }
@@ -2230,6 +2240,14 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.12',
+      date: '2026-09-28',
+      changes: [
+        { type: 'add', text: '建立全局动态交互规范：统一动画时长、缓动、阴影与按压反馈，并支持系统减弱动画设置' },
+        { type: 'add', text: '「数据核验」首个动态试点：点击下一题时，新题卡片以克制的 3D 翻入效果出现，保持扑克牌式答题体验' }
+      ]
+    },
     {
       version: 'v2.11',
       date: '2026-09-28',
@@ -4630,7 +4648,7 @@
   var dataQuizStartBtnEl = document.getElementById('dataQuizStartBtn');
   var dataQuizOutputEl = document.getElementById('dataQuizOutput');
   var dataQuizRoleEl = document.getElementById('dataQuizRole');
-  var dataQuizFile = null, dataQuizText = '', dataQuizItems = [], dataQuizIndex = 0, dataQuizRevealed = false, dataQuizSubmitted = false, dataQuizBusy = false;
+  var dataQuizFile = null, dataQuizText = '', dataQuizItems = [], dataQuizIndex = 0, dataQuizRevealed = false, dataQuizSubmitted = false, dataQuizBusy = false, dataQuizAnimateNext = false;
   var DATA_QUIZ_HISTORY_KEY = 'interview_data_quiz_history_v1';
   function dataQuizReadHistory() { try { var raw = localStorage.getItem(DATA_QUIZ_HISTORY_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
   function dataQuizWriteHistory(items) { try { localStorage.setItem(DATA_QUIZ_HISTORY_KEY, JSON.stringify({ role: dataQuizRoleEl.value, items: items, updatedAt: new Date().toISOString() })); } catch (e) {} }
@@ -4646,13 +4664,14 @@
     if (dataQuizIndex >= dataQuizItems.length) { dataQuizOutputEl.innerHTML = '<div class="data-quiz-finish"><strong>本轮数据核验完成</strong><br>共复习 ' + dataQuizItems.length + ' 项简历数据。建议面试前再次练习，确保每个数字都能解释来源、行动和结果。<br><button type="button" class="job-guide-secondary" data-data-quiz-restart style="margin-top:10px">重新开始</button></div>'; return; }
     var item = dataQuizItems[dataQuizIndex];
     var question = escapeHtml(item.question || '').replace(/____/g, '<button type="button" class="data-quiz-blank' + (dataQuizRevealed ? ' revealed' : '') + '" data-data-quiz-reveal>' + (dataQuizRevealed ? escapeHtml(item.answer) : '点击查看答案') + '</button>');
-    var html = '<div class="data-quiz-card"><div class="data-quiz-progress">第 ' + (dataQuizIndex + 1) + ' / ' + dataQuizItems.length + ' 题 · ' + escapeHtml(item.dataType || '简历数据') + '</div><div class="data-quiz-question">' + question + '</div>';
+    var html = '<div class="data-quiz-card' + (dataQuizAnimateNext ? ' motion-card-turn' : '') + '"><div class="data-quiz-progress">第 ' + (dataQuizIndex + 1) + ' / ' + dataQuizItems.length + ' 题 · ' + escapeHtml(item.dataType || '简历数据') + '</div><div class="data-quiz-question">' + question + '</div>';
     html += '<label for="dataQuizAnswer" class="job-guide-field"><span style="display:block;color:var(--brown-dark);font-weight:700;font-size:13px;margin-bottom:5px">你的答案</span><input id="dataQuizAnswer" class="data-quiz-input" placeholder="输入你记得的数字或完整表达"' + (dataQuizSubmitted ? ' disabled' : '') + '></label>';
     if (dataQuizRevealed) html += '<div class="data-quiz-answer"><strong>参考答案：</strong>' + escapeHtml(item.answer) + '</div>';
     if (!dataQuizSubmitted) html += '<div class="job-guide-actions"><button type="button" class="job-guide-primary" data-data-quiz-submit>提交答案</button>' + (dataQuizRevealed ? '' : '<span class="hint">也可以先点击题目空白查看答案</span>') + '</div>';
     if (dataQuizSubmitted) { var answerValue = document.getElementById('dataQuizAnswer') ? document.getElementById('dataQuizAnswer').value : ''; var correct = dataQuizIsCorrect(answerValue, item.answer); html += '<div class="data-quiz-feedback ' + (correct ? 'correct' : 'wrong') + '"><strong>' + (correct ? '回答正确' : '需要复习') + '</strong><br>' + (correct ? '数字记忆正确。' : '这次没有完整答对，请记住参考答案。') + '<br><strong>复习：</strong>' + escapeHtml(item.review || item.context || '请回到原简历复习这段经历。') + '</div><div class="job-guide-actions"><button type="button" class="job-guide-primary" data-data-quiz-next>' + (dataQuizIndex + 1 >= dataQuizItems.length ? '完成核验' : '下一题') + '</button></div>'; }
     html += '<div class="company-note" style="margin-top:10px">原文依据：' + escapeHtml(item.sourceQuote || item.context || '请结合原简历核对') + '</div></div>';
     dataQuizOutputEl.innerHTML = html;
+    dataQuizAnimateNext = false;
   }
   async function dataQuizParseFile() {
     if (!dataQuizFile || dataQuizBusy) return;
@@ -4668,7 +4687,7 @@
     dataQuizBusy = true; dataQuizStartBtnEl.disabled = true; dataQuizStartBtnEl.textContent = '正在识别数字…'; dataQuizOutputEl.innerHTML = '<div class="dict-empty">AI 正在识别简历中的数字数据并生成记忆题，请稍候…</div>';
     apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'resume-data-quiz', role: dataQuizRoleEl.value, resumeText: dataQuizText }) })
       .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
-      .then(function (json) { dataQuizItems = json && json.data && Array.isArray(json.data.items) ? json.data.items : []; dataQuizIndex = 0; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizWriteHistory(dataQuizItems); dataQuizRenderCurrent(); })
+      .then(function (json) { dataQuizItems = json && json.data && Array.isArray(json.data.items) ? json.data.items : []; dataQuizIndex = 0; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizAnimateNext = true; dataQuizWriteHistory(dataQuizItems); dataQuizRenderCurrent(); })
       .catch(function (err) { dataQuizOutputEl.innerHTML = '<div class="paper-idea-error">生成失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
       .then(function () { dataQuizBusy = false; dataQuizStartBtnEl.disabled = !dataQuizText; dataQuizStartBtnEl.textContent = '生成数据核验题'; });
   }
@@ -4678,8 +4697,8 @@
   if (dataQuizOutputEl) dataQuizOutputEl.addEventListener('click', function (e) {
     if (e.target.closest('[data-data-quiz-reveal]')) { dataQuizRevealed = true; dataQuizRenderCurrent(); return; }
     if (e.target.closest('[data-data-quiz-submit]')) { dataQuizSubmitted = true; dataQuizRenderCurrent(); return; }
-    if (e.target.closest('[data-data-quiz-next]')) { dataQuizIndex += 1; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizRenderCurrent(); return; }
-    if (e.target.closest('[data-data-quiz-restart]')) { dataQuizIndex = 0; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizRenderCurrent(); }
+    if (e.target.closest('[data-data-quiz-next]')) { dataQuizIndex += 1; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizAnimateNext = true; dataQuizRenderCurrent(); return; }
+    if (e.target.closest('[data-data-quiz-restart]')) { dataQuizIndex = 0; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizAnimateNext = true; dataQuizRenderCurrent(); }
   });
   (function dataQuizRestoreLatest() { var saved = dataQuizReadHistory(); if (saved && Array.isArray(saved.items) && saved.items.length) { dataQuizItems = saved.items; dataQuizOutputEl.innerHTML = '<div class="company-note">已恢复本机最近一次数据核验题库。</div>'; } })();
 
