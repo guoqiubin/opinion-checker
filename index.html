@@ -1364,6 +1364,21 @@
   .interview-structure { display: grid; gap: 8px; }
   .interview-structure-card { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 8px; padding: 10px 12px; line-height: 1.65; }
   .interview-structure-card strong { color: #91641c; display: block; margin-bottom: 3px; }
+  .data-quiz-upload { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 10px 0; }
+  .data-quiz-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .data-quiz-file-label { display: inline-block; border: 1px solid #bda875; border-radius: 8px; padding: 9px 16px; background: #f6edd9; color: var(--brown-dark); font: inherit; cursor: pointer; }
+  .data-quiz-file-name, .data-quiz-status { color: var(--comment); font-size: 12px; line-height: 1.7; }
+  .data-quiz-card { background: #fffaf0; border: 1px solid #d6bb7a; border-radius: 12px; padding: 16px; margin-top: 14px; box-shadow: 0 3px 9px rgba(120,90,30,.10); }
+  .data-quiz-progress { color: var(--comment); font-size: 12px; margin-bottom: 10px; }
+  .data-quiz-question { color: var(--brown-dark); font-size: 16px; line-height: 1.8; margin-bottom: 12px; }
+  .data-quiz-blank { border: 1px dashed #a87e31; border-radius: 6px; background: #fff3cf; color: #97631a; padding: 2px 8px; font: inherit; cursor: pointer; }
+  .data-quiz-blank.revealed { background: #e8f1df; border-color: #9bbd82; color: #47713b; }
+  .data-quiz-answer { background: #fff7e5; border-left: 3px solid var(--gold-deep); border-radius: 0 8px 8px 0; padding: 9px 12px; margin: 10px 0; color: var(--brown-dark); line-height: 1.7; }
+  .data-quiz-input { width: 100%; box-sizing: border-box; border: 1px solid #d6bb7a; border-radius: 8px; background: #fffdf5; padding: 10px 12px; color: var(--brown-dark); font: inherit; }
+  .data-quiz-feedback { border-radius: 8px; padding: 10px 12px; margin-top: 10px; line-height: 1.7; }
+  .data-quiz-feedback.correct { background: #e8f1df; border: 1px solid #b8d39e; color: #47713b; }
+  .data-quiz-feedback.wrong { background: #fff0e8; border: 1px solid #e7b3a2; color: #9a4030; }
+  .data-quiz-finish { background: #fff7e5; border: 1px solid #e1bc69; border-radius: 9px; padding: 16px; margin-top: 14px; color: var(--brown-dark); line-height: 1.8; }
   @media (max-width: 560px) { .interview-star { grid-template-columns: 1fr; } }
   @media (max-width: 560px) { .job-guide-grid { grid-template-columns: 1fr; } }
   .resume-personalize { margin-top: 16px; border-top: 1px solid #d8c18f; padding-top: 14px; }
@@ -1829,6 +1844,7 @@
         <div class="interview-tabs" aria-label="面试助手子功能">
           <button type="button" id="interviewModeExpress" class="interview-tab active">表达提炼</button>
           <button type="button" id="interviewModeSim" class="interview-tab">模拟面试</button>
+          <button type="button" id="interviewModeData" class="interview-tab">数据核验</button>
         </div>
         <div id="interviewExpressPanel">
         <div class="job-guide-field interview-role">
@@ -1862,6 +1878,25 @@
           </div>
           <div class="hint" style="margin-top:10px">当前岗位：策略运营。这里只生成已有问题的答题思路，不自动生成新的面试题目。</div>
           <div id="interviewSimOutput" class="interview-output"><div class="dict-empty">输入面试问题后开始生成</div></div>
+        </div>
+        <div id="interviewDataPanel" hidden>
+          <div class="cmd-label"><span class="dollar">§</span> <span class="fname">从简历数字中生成一次一题的数据记忆卡</span></div>
+          <div class="job-guide-field interview-role">
+            <label for="dataQuizRole">岗位</label>
+            <select id="dataQuizRole"><option value="策略运营">策略运营</option></select>
+          </div>
+          <div class="data-quiz-upload">
+            <label for="dataQuizFile" class="data-quiz-file-label">附件上传</label>
+            <input id="dataQuizFile" class="data-quiz-file-input" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <span id="dataQuizFileName" class="data-quiz-file-name">未选择文件</span>
+            <button type="button" id="dataQuizParseBtn" class="job-guide-secondary" disabled>解析简历</button>
+          </div>
+          <div id="dataQuizStatus" class="data-quiz-status">仅支持可复制文字的 PDF、DOCX；扫描版 PDF 暂不支持。原始文件只在浏览器本地解析。</div>
+          <div class="job-guide-actions">
+            <button type="button" id="dataQuizStartBtn" class="job-guide-primary" disabled>生成数据核验题</button>
+          </div>
+          <div class="hint" style="margin-top:10px">每次只出现一题。点击题目中的空白可查看答案；提交后无论对错都会显示相关复习内容。</div>
+          <div id="dataQuizOutput" class="interview-output"><div class="dict-empty">上传并解析简历后开始数据核验</div></div>
         </div>
       </div>
     </div>
@@ -2195,6 +2230,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.11',
+      date: '2026-09-28',
+      changes: [
+        { type: 'add', text: '「面试助手」新增「数据核验」：上传可复制文字的 PDF / DOCX 简历，AI 自动提取简历中的明确数字数据' },
+        { type: 'add', text: '数据核验采用一次一题的填空卡片，点击空白查看答案，提交后显示对错、答案与复习内容，支持逐题完成和重新开始' },
+        { type: 'shield', text: '原始简历只在浏览器本地解析；扫描版 PDF 暂不支持；数字题目要求以简历原文为依据，不凭空编造数据' }
+      ]
+    },
     {
       version: 'v2.10',
       date: '2026-09-21',
@@ -4521,8 +4565,10 @@
   // 模拟面试：已有问题 → 策略运营岗位答题思路（不生成新题）
   var interviewExpressPanelEl = document.getElementById('interviewExpressPanel');
   var interviewSimPanelEl = document.getElementById('interviewSimPanel');
+  var interviewDataPanelEl = document.getElementById('interviewDataPanel');
   var interviewModeExpressEl = document.getElementById('interviewModeExpress');
   var interviewModeSimEl = document.getElementById('interviewModeSim');
+  var interviewModeDataEl = document.getElementById('interviewModeData');
   var interviewQuestionEl = document.getElementById('interviewQuestion');
   var interviewQuestionCountEl = document.getElementById('interviewQuestionCount');
   var interviewSimBtnEl = document.getElementById('interviewSimBtn');
@@ -4565,14 +4611,77 @@
   }
   function interviewSwitch(mode) {
     var sim = mode === 'sim';
-    interviewExpressPanelEl.hidden = sim; interviewSimPanelEl.hidden = !sim;
-    interviewModeExpressEl.classList.toggle('active', !sim); interviewModeSimEl.classList.toggle('active', sim);
+    var data = mode === 'data';
+    interviewExpressPanelEl.hidden = sim || data; interviewSimPanelEl.hidden = !sim; interviewDataPanelEl.hidden = !data;
+    interviewModeExpressEl.classList.toggle('active', !sim && !data); interviewModeSimEl.classList.toggle('active', sim); interviewModeDataEl.classList.toggle('active', data);
   }
   if (interviewModeExpressEl) interviewModeExpressEl.addEventListener('click', function () { interviewSwitch('express'); });
   if (interviewModeSimEl) interviewModeSimEl.addEventListener('click', function () { interviewSwitch('sim'); });
+  if (interviewModeDataEl) interviewModeDataEl.addEventListener('click', function () { interviewSwitch('data'); });
   if (interviewQuestionEl) interviewQuestionEl.addEventListener('input', function () { interviewQuestionCountEl.textContent = String(interviewQuestionEl.value.length); });
   if (interviewSimBtnEl) interviewSimBtnEl.addEventListener('click', interviewSimRun);
   if (interviewSimClearBtnEl) interviewSimClearBtnEl.addEventListener('click', function () { interviewQuestionEl.value = ''; interviewQuestionCountEl.textContent = '0'; interviewSimOutputEl.innerHTML = '<div class="dict-empty">输入面试问题后开始生成</div>'; });
+
+  // 数据核验：本地解析简历 → AI 提取明确数字 → 一次一题的记忆卡
+  var dataQuizFileEl = document.getElementById('dataQuizFile');
+  var dataQuizFileNameEl = document.getElementById('dataQuizFileName');
+  var dataQuizParseBtnEl = document.getElementById('dataQuizParseBtn');
+  var dataQuizStatusEl = document.getElementById('dataQuizStatus');
+  var dataQuizStartBtnEl = document.getElementById('dataQuizStartBtn');
+  var dataQuizOutputEl = document.getElementById('dataQuizOutput');
+  var dataQuizRoleEl = document.getElementById('dataQuizRole');
+  var dataQuizFile = null, dataQuizText = '', dataQuizItems = [], dataQuizIndex = 0, dataQuizRevealed = false, dataQuizSubmitted = false, dataQuizBusy = false;
+  var DATA_QUIZ_HISTORY_KEY = 'interview_data_quiz_history_v1';
+  function dataQuizReadHistory() { try { var raw = localStorage.getItem(DATA_QUIZ_HISTORY_KEY); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+  function dataQuizWriteHistory(items) { try { localStorage.setItem(DATA_QUIZ_HISTORY_KEY, JSON.stringify({ role: dataQuizRoleEl.value, items: items, updatedAt: new Date().toISOString() })); } catch (e) {} }
+  function dataQuizUpdateButtons() { if (dataQuizStartBtnEl) dataQuizStartBtnEl.disabled = !dataQuizText || dataQuizBusy; }
+  function dataQuizExtractNumberTokens(value) { return String(value || '').match(/\d+(?:\.\d+)?\s*%?/g) || []; }
+  function dataQuizIsCorrect(userAnswer, expected) {
+    var expectedNums = dataQuizExtractNumberTokens(expected), answerNums = dataQuizExtractNumberTokens(userAnswer);
+    if (expectedNums.length) return expectedNums.every(function (n) { return answerNums.indexOf(n.replace(/\s/g, '')) >= 0 || String(userAnswer).replace(/\s/g, '').indexOf(n.replace(/\s/g, '')) >= 0; });
+    return String(userAnswer || '').trim().toLowerCase() === String(expected || '').trim().toLowerCase();
+  }
+  function dataQuizRenderCurrent() {
+    if (!dataQuizItems.length) { dataQuizOutputEl.innerHTML = '<div class="data-quiz-finish">简历中暂未识别到足够明确的数字数据。请检查简历是否为可复制文字版本，或补充包含结果指标的经历。</div>'; return; }
+    if (dataQuizIndex >= dataQuizItems.length) { dataQuizOutputEl.innerHTML = '<div class="data-quiz-finish"><strong>本轮数据核验完成</strong><br>共复习 ' + dataQuizItems.length + ' 项简历数据。建议面试前再次练习，确保每个数字都能解释来源、行动和结果。<br><button type="button" class="job-guide-secondary" data-data-quiz-restart style="margin-top:10px">重新开始</button></div>'; return; }
+    var item = dataQuizItems[dataQuizIndex];
+    var question = escapeHtml(item.question || '').replace(/____/g, '<button type="button" class="data-quiz-blank' + (dataQuizRevealed ? ' revealed' : '') + '" data-data-quiz-reveal>' + (dataQuizRevealed ? escapeHtml(item.answer) : '点击查看答案') + '</button>');
+    var html = '<div class="data-quiz-card"><div class="data-quiz-progress">第 ' + (dataQuizIndex + 1) + ' / ' + dataQuizItems.length + ' 题 · ' + escapeHtml(item.dataType || '简历数据') + '</div><div class="data-quiz-question">' + question + '</div>';
+    html += '<label for="dataQuizAnswer" class="job-guide-field"><span style="display:block;color:var(--brown-dark);font-weight:700;font-size:13px;margin-bottom:5px">你的答案</span><input id="dataQuizAnswer" class="data-quiz-input" placeholder="输入你记得的数字或完整表达"' + (dataQuizSubmitted ? ' disabled' : '') + '></label>';
+    if (dataQuizRevealed) html += '<div class="data-quiz-answer"><strong>参考答案：</strong>' + escapeHtml(item.answer) + '</div>';
+    if (!dataQuizSubmitted) html += '<div class="job-guide-actions"><button type="button" class="job-guide-primary" data-data-quiz-submit>提交答案</button>' + (dataQuizRevealed ? '' : '<span class="hint">也可以先点击题目空白查看答案</span>') + '</div>';
+    if (dataQuizSubmitted) { var answerValue = document.getElementById('dataQuizAnswer') ? document.getElementById('dataQuizAnswer').value : ''; var correct = dataQuizIsCorrect(answerValue, item.answer); html += '<div class="data-quiz-feedback ' + (correct ? 'correct' : 'wrong') + '"><strong>' + (correct ? '回答正确' : '需要复习') + '</strong><br>' + (correct ? '数字记忆正确。' : '这次没有完整答对，请记住参考答案。') + '<br><strong>复习：</strong>' + escapeHtml(item.review || item.context || '请回到原简历复习这段经历。') + '</div><div class="job-guide-actions"><button type="button" class="job-guide-primary" data-data-quiz-next>' + (dataQuizIndex + 1 >= dataQuizItems.length ? '完成核验' : '下一题') + '</button></div>'; }
+    html += '<div class="company-note" style="margin-top:10px">原文依据：' + escapeHtml(item.sourceQuote || item.context || '请结合原简历核对') + '</div></div>';
+    dataQuizOutputEl.innerHTML = html;
+  }
+  async function dataQuizParseFile() {
+    if (!dataQuizFile || dataQuizBusy) return;
+    dataQuizBusy = true; dataQuizParseBtnEl.disabled = true; dataQuizStatusEl.textContent = '正在浏览器本地解析，原始文件不会上传…';
+    try { var lower = dataQuizFile.name.toLowerCase(); dataQuizText = lower.endsWith('.pdf') ? await resumeExtractPdf(dataQuizFile) : lower.endsWith('.docx') ? await resumeExtractDocx(dataQuizFile) : ''; if (!dataQuizText) throw new Error('仅支持 PDF 或 DOCX 文件'); dataQuizStatusEl.textContent = '解析完成：已提取约 ' + dataQuizText.length + ' 个字符。可以生成数据核验题。'; }
+    catch (err) { dataQuizText = ''; dataQuizStatusEl.textContent = '解析失败：' + (err.message || '请检查文件格式'); }
+    dataQuizBusy = false; dataQuizParseBtnEl.disabled = !dataQuizFile; dataQuizUpdateButtons();
+  }
+  function dataQuizStart() {
+    if (dataQuizBusy) return;
+    if (!dataQuizText) { dataQuizOutputEl.innerHTML = '<div class="paper-idea-error">请先选择并解析简历。</div>'; return; }
+    if (location.protocol === 'file:') { dataQuizOutputEl.innerHTML = '<div class="paper-idea-error">当前页面是本地文件，无法调用 AI 后端。请通过线上网址打开后再生成。</div>'; return; }
+    dataQuizBusy = true; dataQuizStartBtnEl.disabled = true; dataQuizStartBtnEl.textContent = '正在识别数字…'; dataQuizOutputEl.innerHTML = '<div class="dict-empty">AI 正在识别简历中的数字数据并生成记忆题，请稍候…</div>';
+    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'resume-data-quiz', role: dataQuizRoleEl.value, resumeText: dataQuizText }) })
+      .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
+      .then(function (json) { dataQuizItems = json && json.data && Array.isArray(json.data.items) ? json.data.items : []; dataQuizIndex = 0; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizWriteHistory(dataQuizItems); dataQuizRenderCurrent(); })
+      .catch(function (err) { dataQuizOutputEl.innerHTML = '<div class="paper-idea-error">生成失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
+      .then(function () { dataQuizBusy = false; dataQuizStartBtnEl.disabled = !dataQuizText; dataQuizStartBtnEl.textContent = '生成数据核验题'; });
+  }
+  if (dataQuizFileEl) dataQuizFileEl.addEventListener('change', function () { dataQuizFile = dataQuizFileEl.files && dataQuizFileEl.files[0]; dataQuizText = ''; dataQuizFileNameEl.textContent = dataQuizFile ? dataQuizFile.name : '未选择文件'; dataQuizParseBtnEl.disabled = !dataQuizFile; dataQuizOutputEl.innerHTML = '<div class="dict-empty">点击“解析简历”提取文字</div>'; dataQuizUpdateButtons(); });
+  if (dataQuizParseBtnEl) dataQuizParseBtnEl.addEventListener('click', dataQuizParseFile);
+  if (dataQuizStartBtnEl) dataQuizStartBtnEl.addEventListener('click', dataQuizStart);
+  if (dataQuizOutputEl) dataQuizOutputEl.addEventListener('click', function (e) {
+    if (e.target.closest('[data-data-quiz-reveal]')) { dataQuizRevealed = true; dataQuizRenderCurrent(); return; }
+    if (e.target.closest('[data-data-quiz-submit]')) { dataQuizSubmitted = true; dataQuizRenderCurrent(); return; }
+    if (e.target.closest('[data-data-quiz-next]')) { dataQuizIndex += 1; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizRenderCurrent(); return; }
+    if (e.target.closest('[data-data-quiz-restart]')) { dataQuizIndex = 0; dataQuizRevealed = false; dataQuizSubmitted = false; dataQuizRenderCurrent(); }
+  });
+  (function dataQuizRestoreLatest() { var saved = dataQuizReadHistory(); if (saved && Array.isArray(saved.items) && saved.items.length) { dataQuizItems = saved.items; dataQuizOutputEl.innerHTML = '<div class="company-note">已恢复本机最近一次数据核验题库。</div>'; } })();
 
   // ==================== 心理学词典 v2.4：AI 实时查询 + 30 天缓存（dict 前缀独立命名空间） ====================
   var dictInput = document.getElementById('dictInput');

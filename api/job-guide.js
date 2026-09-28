@@ -25,6 +25,10 @@ const RESUME_PERSONALIZE_PROMPT =
   '你是一位资深招聘顾问和简历编辑。请根据目标岗位、公司、用户粘贴的目标JD和用户上传后在浏览器本地解析出的通用简历文本，完成简历匹配分析和参考简历改写。你只能使用简历中已有的事实，不能编造公司、项目、数字、职责或结果；缺少信息统一使用“XX”占位，并列出需要用户补充的内容。必须重点识别JD中的硬性要求、语言能力、海外经历、行业经验、工具技能和结果指标。所有经历改写优先使用STAR法则，突出情境、任务、行动、结果。只输出一个 JSON 对象，结构固定：' +
   '{"matchSummary":"总体匹配判断","strengths":["已有优势"],"gaps":["缺口"],"edits":[{"section":"模块名称","jdRequirement":"JD要求","resumeEvidence":"简历中的证据或未发现","advice":"具体修改建议","priority":"高/中/低"}],"missingInfo":["需要用户补充的信息"],"tailoredResume":{"basicInfo":"基本信息（不擅自改动个人信息）","education":"教育背景","experience":[{"title":"经历标题","content":"STAR法则改写后的参考内容"}],"projects":[{"title":"项目标题","content":"STAR法则改写后的参考内容"}],"skills":["技能或语言能力"],"selfEvaluation":"针对目标岗位的参考自我评价"},"caution":"真实性与核验提示","updatedAt":"服务端传入时间"}.其中 strengths、gaps、missingInfo 各3-6项；edits 5-10项；experience、projects只在原简历存在相关内容时输出，不得凭空补齐。';
 
+const RESUME_DATA_QUIZ_PROMPT =
+  '你是一位帮助求职者记忆简历数据的面试教练。请从用户提供的简历文本中，只提取明确出现的数字、比例、人数、金额、时间、排名、次数、规模、增长结果等事实数据，并结合原文上下文生成数据核验填空题。不得推断或编造任何数字；无法确认的数据不要输出。每道题必须能由简历原文核对，答案保留原文中的完整表达。题目一次一题使用，问题中用“____”作为空白。每题提供复习内容，复习内容要解释该数据对应的经历、行动和结果。只输出 JSON：' +
+  '{"items":[{"question":"在某项目中，你通过什么行动将用户增长到____？","answer":"2万人","context":"原简历相关经历的上下文","review":"复习：该项目的目标、行动与结果分别是什么？","dataType":"用户规模","sourceQuote":"简历原文中包含该数字的短句"}]}.最多20题，按面试重要性排序。';
+
 const COMPANY_SEEDS = [
   { company: '腾讯', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://join.qq.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://join.qq.com/' },
   { company: '字节跳动', companyType: '民营', internetCompany: true, roles: ['运营', '人力资源'], recruitingStatus: '请核验当前职位', recruitingSite: 'https://jobs.bytedance.com/', sourceLabel: '公司招聘官网', sourceUrl: 'https://jobs.bytedance.com/' },
@@ -209,6 +213,34 @@ export default async function handler(req, res) {
       var resumeMsg = String(err && (err.name || err.message) || err);
       if (/AbortError|aborted|Timeout/i.test(resumeMsg)) { res.status(504).json({ ok: false, error: '简历分析超时，请稍后重试' }); return; }
       res.status(502).json({ ok: false, error: '简历分析服务暂不可用：' + String(err.message || err) + '，请稍后重试' });
+    }
+    return;
+  }
+  if (body.mode === 'resume-data-quiz') {
+    var quizRole = cleanText(body.role, 60);
+    var quizResumeText = cleanText(body.resumeText, 14000);
+    if (!quizResumeText) { res.status(400).json({ ok: false, error: '请先解析简历' }); return; }
+    var quizGuard = await guard.limit(req, 'ai');
+    if (!quizGuard.ok) return guard.deny(res, quizGuard.code);
+    if (!process.env.DEEPSEEK_API_KEY) { res.status(503).json({ ok: false, error: '服务端未配置数据核验模型，请联系站长启用' }); return; }
+    var quizTime = new Date().toISOString();
+    try {
+      var quizParsed = extractJSON(await callLLM(RESUME_DATA_QUIZ_PROMPT, '目标岗位：' + (quizRole || '未提供') + '\n查询时间（UTC）：' + quizTime + '\n简历文本：\n' + quizResumeText, 5000));
+      var quizItems = Array.isArray(quizParsed && quizParsed.items) ? quizParsed.items.map(function (item) {
+        return {
+          question: cleanText(item && item.question, 360),
+          answer: cleanText(item && item.answer, 180),
+          context: cleanText(item && item.context, 600),
+          review: cleanText(item && item.review, 600),
+          dataType: cleanText(item && item.dataType, 80),
+          sourceQuote: cleanText(item && item.sourceQuote, 360)
+        };
+      }).filter(function (item) { return item.question && item.answer; }).slice(0, 20) : [];
+      res.status(200).json({ ok: true, data: { role: quizRole || '未指定岗位', items: quizItems, total: quizItems.length, updatedAt: quizTime, note: quizItems.length ? '题目均来自简历中明确出现的数据，请结合原简历复核。' : '简历中暂未识别到足够明确的数字数据。' } });
+    } catch (err) {
+      var quizMsg = String(err && (err.name || err.message) || err);
+      if (/AbortError|aborted|Timeout/i.test(quizMsg)) { res.status(504).json({ ok: false, error: '数据核验题生成超时，请稍后重试' }); return; }
+      res.status(502).json({ ok: false, error: '数据核验服务暂不可用：' + String(err.message || err) + '，请稍后重试' });
     }
     return;
   }
