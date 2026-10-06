@@ -1416,9 +1416,22 @@
   .recruitment-tab.active, .company-filter-tab.active { background: linear-gradient(180deg, #e4b85d, #b57a17); color: #fff; box-shadow: 0 2px 5px rgba(120,80,20,.25); }
   .recruitment-tab:disabled { opacity: .62; cursor: not-allowed; }
   .company-filter { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 10px; padding: 13px; margin-bottom: 14px; }
-  .company-filter-grid { display: grid; grid-template-columns: 180px 1fr auto; gap: 10px; align-items: end; }
+  .company-filter-grid { display: grid; grid-template-columns: 150px 150px minmax(180px, 1fr) auto; gap: 10px; align-items: end; }
   .company-filter label { display: block; color: var(--brown-dark); font-weight: 700; font-size: 13px; margin-bottom: 5px; }
   .company-filter select { width: 100%; box-sizing: border-box; border: 1px solid #d6bb7a; border-radius: 8px; background: #fffdf5; padding: 9px 10px; color: var(--brown-dark); font: inherit; }
+  .company-filter-more { margin-top: 12px; border-top: 1px dashed #d8c18f; padding-top: 10px; }
+  .company-filter-more summary { cursor: pointer; color: #91641c; font-weight: 700; }
+  .company-filter-groups { display: grid; gap: 9px; margin-top: 10px; }
+  .company-filter-group { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+  .company-filter-group-title { min-width: 58px; color: var(--brown-dark); font-weight: 700; font-size: 12px; }
+  .company-filter-chip { border: 1px solid #d6bb7a; border-radius: 14px; padding: 4px 9px; background: #fffdf5; color: var(--brown-dark); cursor: pointer; font: inherit; font-size: 12px; }
+  .company-filter-chip.active { background: #d39b2d; color: #fff; border-color: #a87517; }
+  .company-filter-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 9px; }
+  .company-filter-reset { border: 0; background: transparent; color: #91641c; cursor: pointer; font: inherit; font-size: 12px; }
+  .company-result-tabs { display: flex; gap: 8px; margin: 8px 0 10px; }
+  .company-result-tab { border: 1px solid #c9a75c; border-radius: 16px; padding: 6px 13px; background: #fbf4e3; color: var(--brown-dark); cursor: pointer; font: inherit; }
+  .company-result-tab.active { background: #c28b22; color: #fff; }
+  .company-card-details { color: var(--comment); font-size: 12px; line-height: 1.8; margin-top: 5px; }
   .company-note { color: var(--comment); font-size: 12px; line-height: 1.7; margin: 8px 0 0; }
   .company-result-meta { color: var(--comment); font-size: 12px; margin: 8px 0 12px; }
   .company-card { background: #fffaf0; border: 1px solid #ead7ac; border-radius: 10px; padding: 13px; margin: 9px 0; box-shadow: 0 2px 6px rgba(120,90,30,.07); }
@@ -1941,11 +1954,23 @@
           <div class="company-filter">
             <div class="company-filter-grid">
               <div><label for="companyCity">城市</label><select id="companyCity"><option value="深圳">深圳</option></select></div>
+              <div><label for="companyDistrict">区域（可选）</label><select id="companyDistrict"><option value="不限区域">不限区域</option></select></div>
               <div><label for="companyKeyword">岗位关键词（可选）</label><select id="companyKeyword"><option value="">不限（运营 / 人力资源）</option><option value="运营">运营</option><option value="人力资源">人力资源</option></select></div>
               <button type="button" id="companySearchBtn" class="job-guide-primary">筛选</button>
             </div>
-            <p class="company-note">公司招聘官网优先，公开招聘平台补充；结果最多20条。信息超过7天会提示“可能已过期”，请以官方招聘页为准。</p>
+            <details class="company-filter-more">
+              <summary>更多筛选（同组多选取其一，不同组同时生效）</summary>
+              <div class="company-filter-groups">
+                <div class="company-filter-group" data-company-filter-group="sizes"><span class="company-filter-group-title">公司规模</span><button type="button" class="company-filter-chip" data-company-filter="sizes" data-value="20人以下">20人以下</button><button type="button" class="company-filter-chip" data-company-filter="sizes" data-value="20-99人">20-99人</button><button type="button" class="company-filter-chip" data-company-filter="sizes" data-value="100-499人">100-499人</button><button type="button" class="company-filter-chip" data-company-filter="sizes" data-value="500-999人">500-999人</button><button type="button" class="company-filter-chip" data-company-filter="sizes" data-value="1000-9999人">1000-9999人</button><button type="button" class="company-filter-chip" data-company-filter="sizes" data-value="10000人以上">10000人以上</button><button type="button" class="company-filter-chip" data-company-filter="sizes" data-value="未披露">未披露</button></div>
+                <div class="company-filter-group" data-company-filter-group="financing"><span class="company-filter-group-title">融资状态</span><button type="button" class="company-filter-chip" data-company-filter="financing" data-value="未融资">未融资</button><button type="button" class="company-filter-chip" data-company-filter="financing" data-value="天使轮">天使轮</button><button type="button" class="company-filter-chip" data-company-filter="financing" data-value="A轮">A轮</button><button type="button" class="company-filter-chip" data-company-filter="financing" data-value="B轮">B轮</button><button type="button" class="company-filter-chip" data-company-filter="financing" data-value="C轮及以后">C轮及以后</button><button type="button" class="company-filter-chip" data-company-filter="financing" data-value="已上市">已上市</button><button type="button" class="company-filter-chip" data-company-filter="financing" data-value="未披露">未披露</button></div>
+                <div class="company-filter-group" data-company-filter-group="industries"><span class="company-filter-group-title">所属行业</span><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="互联网/科技">互联网/科技</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="电商">电商</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="教育">教育</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="医疗健康">医疗健康</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="金融">金融</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="消费品">消费品</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="游戏">游戏</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="物流">物流</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="硬件/制造">硬件/制造</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="企业服务">企业服务</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="内容/媒体">内容/媒体</button><button type="button" class="company-filter-chip" data-company-filter="industries" data-value="未披露">未披露</button></div>
+                <div class="company-filter-group" data-company-filter-group="companyTypes"><span class="company-filter-group-title">企业类型</span><button type="button" class="company-filter-chip" data-company-filter="companyTypes" data-value="民营">民营</button><button type="button" class="company-filter-chip" data-company-filter="companyTypes" data-value="外资">外资</button><button type="button" class="company-filter-chip" data-company-filter="companyTypes" data-value="合资">合资</button><button type="button" class="company-filter-chip" data-company-filter="companyTypes" data-value="港资">港资</button></div>
+              </div>
+              <div class="company-filter-actions"><span id="companyFilterSummary" class="company-note">未选择更多条件</span><button type="button" id="companyFilterReset" class="company-filter-reset">清空更多筛选</button></div>
+            </details>
+            <p class="company-note">只展示有官方证据确认当前校招中的企业；公司招聘官网优先，信息超过7天会提示“可能已过期”。结果最多20条。</p>
           </div>
+          <div class="company-result-tabs" id="companyResultTabs"><button type="button" class="company-result-tab active" data-company-view="candidates">候选公司</button><button type="button" class="company-result-tab" data-company-view="applied">已投递公司</button></div>
           <div id="companyResult"><div class="dict-empty">选择条件后点击“筛选”</div></div>
           <div class="company-history" id="companyHistory" hidden></div>
         </div>
@@ -2250,6 +2275,15 @@
 
   // ==================== 更新公告 ====================
   var VERSIONS = [
+    {
+      version: 'v2.14',
+      date: '2026-10-06',
+      changes: [
+        { type: 'add', text: '公司库严格切换为“当前校招证据优先”：仅展示官方招聘官网、官方公告或官方认证招聘主页明确确认的校招企业，社招/历史校招/状态不明企业自动过滤' },
+        { type: 'add', text: '公司库新增深圳区域、公司规模、融资状态、所属行业和企业类型筛选；筛选组内多选取其一，不同筛选组同时生效' },
+        { type: 'add', text: '新增“已投递公司”列表：点击已投递后，公司从候选列表移入已投递列表；收藏与已投递可同时存在，数据保存在当前浏览器' }
+      ]
+    },
     {
       version: 'v2.13',
       date: '2026-09-28',
@@ -4330,34 +4364,64 @@
   var campusQaPanelEl = document.getElementById('campusQaPanel');
   var campusCompanyPanelEl = document.getElementById('campusCompanyPanel');
   var companyCityEl = document.getElementById('companyCity');
+  var companyDistrictEl = document.getElementById('companyDistrict');
   var companyKeywordEl = document.getElementById('companyKeyword');
   var companySearchBtnEl = document.getElementById('companySearchBtn');
   var companyResultEl = document.getElementById('companyResult');
   var companyHistoryEl = document.getElementById('companyHistory');
+  var companyResultTabsEl = document.getElementById('companyResultTabs');
+  var companyFilterSummaryEl = document.getElementById('companyFilterSummary');
+  var companyFilterResetEl = document.getElementById('companyFilterReset');
   var COMPANY_HISTORY_KEY = 'recruitment_company_history_v1';
   var COMPANY_STATUS_KEY = 'recruitment_company_status_v1';
+  var COMPANY_APPLIED_KEY = 'recruitment_company_applied_v1';
+  var COMPANY_CITY_CONFIG = { 深圳: ['不限区域', '南山区', '福田区', '罗湖区', '宝安区', '龙岗区', '龙华区', '盐田区', '坪山区', '光明区', '大鹏新区'] };
+  var companyView = 'candidates';
+  var companyCurrentData = null;
   var companyBusy = false;
   function companyRead(key, fallback) { try { var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (e) { return fallback; } }
   function companyWrite(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
   function companyStatuses() { return companyRead(COMPANY_STATUS_KEY, {}); }
-  function companyStatusKey(item) { return '校招|' + (item.company || '') + '|' + (item.roles || []).join(','); }
+  function companyApplied() { return companyRead(COMPANY_APPLIED_KEY, {}); }
+  function companyStatusKey(item) { return '校招|' + String(item.company || '').replace(/\s+/g, '').toLowerCase(); }
   function companyIsStale(checkedAt) { var t = Date.parse(checkedAt || ''); return !t || Date.now() - t > 7 * 24 * 3600 * 1000; }
   function companySafeUrl(url) { try { var parsed = new URL(url); return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : ''; } catch (e) { return ''; } }
+  function companySelectedFilters() {
+    var out = { sizes: [], financing: [], industries: [], companyTypes: [] };
+    document.querySelectorAll('[data-company-filter].active').forEach(function (btn) { var group = btn.getAttribute('data-company-filter'); if (out[group]) out[group].push(btn.getAttribute('data-value')); });
+    return out;
+  }
+  function companyUpdateFilterSummary() {
+    var filters = companySelectedFilters(), count = Object.keys(filters).reduce(function (sum, key) { return sum + filters[key].length; }, 0);
+    if (companyFilterSummaryEl) companyFilterSummaryEl.textContent = count ? '已选择 ' + count + ' 项更多条件' : '未选择更多条件';
+  }
+  function companySetDistrictOptions() {
+    if (!companyDistrictEl) return;
+    var options = COMPANY_CITY_CONFIG[companyCityEl.value] || ['不限区域'];
+    companyDistrictEl.innerHTML = options.map(function (item) { return '<option value="' + escapeHtml(item) + '">' + escapeHtml(item) + '</option>'; }).join('');
+  }
   function companyRender(data) {
-    if (!data || !Array.isArray(data.items) || !data.items.length) { companyResultEl.innerHTML = '<div class="dict-empty">暂未找到符合条件的候选企业，请更换关键词后重试。</div>'; return; }
+    companyCurrentData = data || null;
+    var allItems = data && Array.isArray(data.items) ? data.items : [];
+    var applied = companyApplied(), statuses = companyStatuses();
+    var items = companyView === 'applied' ? Object.keys(applied).map(function (key) { return applied[key].item; }).filter(Boolean) : allItems.filter(function (item) { return !applied[companyStatusKey(item)]; });
+    var scope = companyView === 'applied' ? '已投递公司' : '候选公司';
+    var meta = data ? '<div class="company-result-meta">深圳 · 校招 · ' + escapeHtml(data.district || '不限区域') + ' · ' + escapeHtml(data.keyword || '不限') + ' · ' + scope + ' · 共 ' + items.length + ' 条 · 信息更新时间：' + escapeHtml(new Date(data.lastCheckedAt || Date.now()).toLocaleString('zh-CN')) + '</div>' : '';
+    if (!items.length) { companyResultEl.innerHTML = meta + '<div class="dict-empty">' + (companyView === 'applied' ? '还没有标记为已投递的公司。' : (data ? '暂未找到符合条件且已确认当前校招的企业。' : '选择条件后点击“筛选”。')) + '</div>'; return; }
+    var html = meta;
+    if (data && companyView === 'candidates') html += '<div class="company-note" style="margin-bottom:10px">' + escapeHtml(data.resultNote || '仅展示有官方证据确认当前校招中的企业。') + '</div>';
     var statuses = companyStatuses();
-    var html = '<div class="company-result-meta">深圳 · 校招 · ' + escapeHtml(data.keyword || '不限') + ' · 共 ' + data.items.length + ' 条 · 信息更新时间：' + escapeHtml(new Date(data.lastCheckedAt || Date.now()).toLocaleString('zh-CN')) + '</div>';
-    html += '<div class="company-note" style="margin-bottom:10px">' + escapeHtml(data.resultNote || '请打开招聘官网核验当前职位。') + '</div>';
-    data.items.forEach(function (item) {
+    items.forEach(function (item) {
       var key = companyStatusKey(item), status = statuses[key] || {}, stale = companyIsStale(item.lastCheckedAt);
-      var site = companySafeUrl(item.recruitingSite), source = companySafeUrl(item.sourceUrl);
+      var site = companySafeUrl(item.recruitingSite || item.campusUrl), source = companySafeUrl(item.campusEvidenceUrl || item.sourceUrl);
       html += '<article class="company-card" data-company-key="' + escapeHtml(key) + '"><div class="company-card-head"><span class="company-name">' + escapeHtml(item.company || '未命名企业') + '</span>';
       if (item.companyType) html += '<span class="company-tag">' + escapeHtml(item.companyType) + '</span>';
       if (item.internetCompany) html += '<span class="company-tag internet">互联网公司</span>';
+      html += '<span class="company-tag">当前校招中</span>';
       if (stale) html += '<span class="company-tag stale">可能已过期</span>';
-      html += '</div><div class="company-card-meta">岗位方向：' + escapeHtml((item.roles || []).join('、') || '待核验') + ' · 招聘状态：' + escapeHtml(item.recruitingStatus || '待核验') + '<br>信息来源：' + escapeHtml(item.sourceLabel || '公开招聘信息') + '</div><div class="company-card-actions">';
+      html += '</div><div class="company-card-meta">岗位方向：' + escapeHtml((item.roles || []).join('、') || '待核验') + ' · 招聘状态：' + escapeHtml(item.recruitingStatus || '待核验') + '<br>信息来源：' + escapeHtml(item.sourceLabel || '官方校招页面') + '</div><div class="company-card-details">区域：' + escapeHtml(item.district || '未披露') + ' · 规模：' + escapeHtml(item.companySize || '未披露') + ' · 融资：' + escapeHtml(item.financing || '未披露') + '<br>行业：' + escapeHtml(item.industry || '未披露') + ' · 校招批次：' + escapeHtml(item.campusSeason || '当前批次') + '</div><div class="company-card-actions">';
       html += '<button type="button" class="company-action company-favorite' + (status.favorite ? ' active' : '') + '" data-company-action="favorite">' + (status.favorite ? '已收藏' : '收藏') + '</button>';
-      html += '<button type="button" class="company-action company-applied' + (status.applied ? ' active' : '') + '" data-company-action="applied">已投递</button>';
+      html += '<button type="button" class="company-action company-applied' + (status.applied ? ' active' : '') + '" data-company-action="applied">' + (companyView === 'applied' ? '取消已投递' : '已投递') + '</button>';
       if (site) html += '<a class="company-action site" href="' + escapeHtml(site) + '" target="_blank" rel="noopener noreferrer">招聘官网</a>';
       else if (source) html += '<a class="company-action site" href="' + escapeHtml(source) + '" target="_blank" rel="noopener noreferrer">查看来源</a>';
       html += '</div></article>';
@@ -4366,7 +4430,7 @@
   }
   function companySaveHistory(data) {
     var history = companyRead(COMPANY_HISTORY_KEY, []);
-    history.unshift({ city: data.city, track: data.track, keyword: data.keyword, lastCheckedAt: data.lastCheckedAt, resultNote: data.resultNote, items: data.items });
+    history.unshift({ city: data.city, district: data.district, track: data.track, keyword: data.keyword, sizes: data.sizes || [], financing: data.financing || [], industries: data.industries || [], companyTypes: data.companyTypes || [], lastCheckedAt: data.lastCheckedAt, resultNote: data.resultNote, items: data.items });
     companyWrite(COMPANY_HISTORY_KEY, history.slice(0, 10)); companyRenderHistory();
   }
   function companyRenderHistory() {
@@ -4374,12 +4438,19 @@
     var history = companyRead(COMPANY_HISTORY_KEY, []);
     if (!history.length) { companyHistoryEl.hidden = true; return; }
     companyHistoryEl.hidden = false;
-    companyHistoryEl.innerHTML = '<div class="company-history-title">本机最近查询（刷新后仍保留）</div>' + history.slice(0, 6).map(function (item, index) { return '<button type="button" class="company-history-item" data-company-history-index="' + index + '">' + escapeHtml(item.city || '深圳') + ' · ' + escapeHtml(item.keyword || '不限') + ' · ' + escapeHtml(new Date(item.lastCheckedAt || Date.now()).toLocaleDateString('zh-CN')) + '</button>'; }).join('');
+    companyHistoryEl.innerHTML = '<div class="company-history-title">本机最近查询（刷新后仍保留）</div>' + history.slice(0, 6).map(function (item, index) { return '<button type="button" class="company-history-item" data-company-history-index="' + index + '">' + escapeHtml(item.city || '深圳') + ' · ' + escapeHtml(item.district || '不限区域') + ' · ' + escapeHtml(item.keyword || '不限') + ' · ' + escapeHtml(new Date(item.lastCheckedAt || Date.now()).toLocaleDateString('zh-CN')) + '</button>'; }).join('');
+  }
+  function companyRestoreFilters(data) {
+    if (!data) return;
+    companyCityEl.value = data.city || '深圳'; companySetDistrictOptions(); companyDistrictEl.value = data.district || '不限区域'; companyKeywordEl.value = data.keyword === '不限' ? '' : (data.keyword || '');
+    document.querySelectorAll('[data-company-filter]').forEach(function (btn) { var group = btn.getAttribute('data-company-filter'), values = data[group] || []; btn.classList.toggle('active', values.indexOf(btn.getAttribute('data-value')) >= 0); });
+    companyUpdateFilterSummary();
   }
   function companySearch() {
     if (companyBusy) return;
     companyBusy = true; companySearchBtnEl.disabled = true; companySearchBtnEl.textContent = '筛选中…'; companyResultEl.innerHTML = '<div class="dict-empty">正在整理公开招聘信息，请稍候…</div>';
-    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'company-search', city: companyCityEl.value, track: '校招', keyword: companyKeywordEl.value }) })
+    var filters = companySelectedFilters(); companyView = 'candidates'; companyResultTabsEl.querySelectorAll('[data-company-view]').forEach(function (btn) { btn.classList.toggle('active', btn.getAttribute('data-company-view') === companyView); });
+    apiFetch('/api/job-guide', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ mode: 'company-search', city: companyCityEl.value, district: companyDistrictEl.value, track: '校招', keyword: companyKeywordEl.value, sizes: filters.sizes, financing: filters.financing, industries: filters.industries, companyTypes: filters.companyTypes }) })
       .then(function (resp) { return resp.json().catch(function () { return {}; }).then(function (body) { if (!resp.ok) throw new Error((body && body.error) || ('服务返回 ' + resp.status)); return body; }); })
       .then(function (json) { if (!json || !json.data) throw new Error('未返回有效结果'); companyRender(json.data); companySaveHistory(json.data); })
       .catch(function (err) { companyResultEl.innerHTML = '<div class="paper-idea-error">筛选失败：' + escapeHtml(err.message || '请稍后重试') + '</div>'; })
@@ -4391,9 +4462,13 @@
     if (companies) companyRenderHistory();
   }
   if (companySearchBtnEl) companySearchBtnEl.addEventListener('click', companySearch);
+  if (companyCityEl) { companySetDistrictOptions(); companyCityEl.addEventListener('change', companySetDistrictOptions); }
+  document.querySelectorAll('[data-company-filter]').forEach(function (btn) { btn.addEventListener('click', function () { btn.classList.toggle('active'); companyUpdateFilterSummary(); }); });
+  if (companyFilterResetEl) companyFilterResetEl.addEventListener('click', function () { document.querySelectorAll('[data-company-filter].active').forEach(function (btn) { btn.classList.remove('active'); }); companyUpdateFilterSummary(); });
+  if (companyResultTabsEl) companyResultTabsEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-company-view]'); if (!btn) return; companyView = btn.getAttribute('data-company-view'); companyResultTabsEl.querySelectorAll('[data-company-view]').forEach(function (item) { item.classList.toggle('active', item === btn); }); companyRender(companyCurrentData); });
   if (companyFilterTabsEl) companyFilterTabsEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-campus-panel]'); if (btn) companySwitchPanel(btn.getAttribute('data-campus-panel')); });
-  if (companyResultEl) companyResultEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-company-action]'); if (!btn) return; var card = btn.closest('[data-company-key]'); if (!card) return; var key = card.getAttribute('data-company-key'), statuses = companyStatuses(), status = statuses[key] || {}, action = btn.getAttribute('data-company-action'); status[action] = !status[action]; statuses[key] = status; companyWrite(COMPANY_STATUS_KEY, statuses); btn.classList.toggle('active', status[action]); if (action === 'favorite') btn.textContent = status[action] ? '已收藏' : '收藏'; });
-  if (companyHistoryEl) companyHistoryEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-company-history-index]'); if (!btn) return; var history = companyRead(COMPANY_HISTORY_KEY, []), item = history[Number(btn.getAttribute('data-company-history-index'))]; if (item) companyRender(item); });
+  if (companyResultEl) companyResultEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-company-action]'); if (!btn) return; var card = btn.closest('[data-company-key]'); if (!card) return; var key = card.getAttribute('data-company-key'), statuses = companyStatuses(), status = statuses[key] || {}, action = btn.getAttribute('data-company-action'); status[action] = !status[action]; statuses[key] = status; if (action === 'applied') { var applied = companyApplied(); if (status.applied) applied[key] = { item: (companyCurrentData && companyCurrentData.items || []).find(function (item) { return companyStatusKey(item) === key; }) || (companyView === 'applied' ? applied[key] && applied[key].item : null), appliedAt: new Date().toISOString() }; else delete applied[key]; companyWrite(COMPANY_APPLIED_KEY, applied); } companyWrite(COMPANY_STATUS_KEY, statuses); if (action === 'favorite') { btn.classList.toggle('active', status[action]); btn.textContent = status[action] ? '已收藏' : '收藏'; } else companyRender(companyCurrentData); });
+  if (companyHistoryEl) companyHistoryEl.addEventListener('click', function (e) { var btn = e.target.closest('[data-company-history-index]'); if (!btn) return; var history = companyRead(COMPANY_HISTORY_KEY, []), item = history[Number(btn.getAttribute('data-company-history-index'))]; if (item) { companyRestoreFilters(item); companyView = 'candidates'; companyRender(item); } });
 
   // ==================== 简历助手 v2.7：岗位科普 ====================
   var jobGuideTitleEl = document.getElementById('jobGuideTitle');
