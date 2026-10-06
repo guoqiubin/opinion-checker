@@ -127,20 +127,32 @@ function filterStrictCampusItems(items, filters) {
 }
 
 async function publicSearchEvidence(query) {
-  var url = 'https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query);
-  try {
-    var resp = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; OpinionChecker/1.0)' }, signal: AbortSignal.timeout(8000) });
-    if (!resp.ok) return [];
-    var html = await resp.text();
+  var headers = { 'User-Agent': 'Mozilla/5.0 (compatible; OpinionChecker/1.0)' };
+  function strip(value) { return String(value || '').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim(); }
+  function parseDuck(html) {
     var out = [], re = /<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]+class="result__snippet"[^>]*>([\s\S]*?)<\/a>/gi, m;
+    while ((m = re.exec(html)) && out.length < 12) if (/^https?:\/\//i.test(m[1])) out.push({ title: strip(m[2]).slice(0, 180), snippet: strip(m[3]).slice(0, 500), url: m[1].slice(0, 500) });
+    return out;
+  }
+  function parseBing(html) {
+    var out = [], re = /<li class="b_algo"[\s\S]*?<h2[^>]*><a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a><\/h2>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p>[\s\S]*?<\/li>/gi, m;
     while ((m = re.exec(html)) && out.length < 12) {
-      var title = m[2].replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
-      var snippet = m[3].replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
-      var link = m[1];
-      if (/^https?:\/\//i.test(link)) out.push({ title: title.slice(0, 180), snippet: snippet.slice(0, 500), url: link.slice(0, 500) });
+      var link = m[1].replace(/&amp;/g, '&');
+      var encoded = link.match(/[?&]u=a1([^&]+)/i);
+      if (encoded) { try { link = Buffer.from(encoded[1], 'base64').toString('utf8'); } catch (e) {} }
+      if (/^https?:\/\//i.test(link)) out.push({ title: strip(m[2]).slice(0, 180), snippet: strip(m[3]).slice(0, 500), url: link.slice(0, 500) });
     }
     return out;
-  } catch (e) { return []; }
+  }
+  try {
+    var duckResp = await fetch('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query), { headers: headers, signal: AbortSignal.timeout(2500) });
+    if (duckResp.ok) { var duckItems = parseDuck(await duckResp.text()); if (duckItems.length) return duckItems; }
+  } catch (e) {}
+  try {
+    var bingResp = await fetch('https://www.bing.com/search?q=' + encodeURIComponent(query), { headers: headers, signal: AbortSignal.timeout(5500) });
+    if (!bingResp.ok) return [];
+    return parseBing(await bingResp.text());
+  } catch (e2) { return []; }
 }
 
 function callLLM(systemPrompt, userContent, maxTokens) {
