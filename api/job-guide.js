@@ -76,10 +76,13 @@ function cleanCompanyItems(value, updatedAt) {
     if (campusEvidenceUrl && !/^https?:\/\//i.test(campusEvidenceUrl)) campusEvidenceUrl = '';
     if (campusUrl && !/^https?:\/\//i.test(campusUrl)) campusUrl = '';
     if (recruitingSite && !/^https?:\/\//i.test(recruitingSite)) recruitingSite = '';
+    campusEvidenceUrl = campusEvidenceUrl || sourceUrl || recruitingSite;
     campusUrl = campusUrl || campusEvidenceUrl;
+    var rawType = cleanText(item.companyType, 30);
+    var companyType = ['民营', '外资', '合资', '港资'].find(function (type) { return rawType.indexOf(type) >= 0; }) || '待核验';
     return {
       company: company,
-      companyType: ['民营', '外资', '合资', '港资'].indexOf(cleanText(item.companyType, 20)) >= 0 ? cleanText(item.companyType, 20) : '待核验',
+      companyType: companyType,
       internetCompany: item.internetCompany === true,
       roles: cleanList(item.roles, 5, 40),
       district: cleanText(item.district, 40) || '未披露',
@@ -112,9 +115,12 @@ function matchesCompanyFilter(item, filterValues, field) {
 
 function filterStrictCampusItems(items, filters) {
   return items.filter(function (item) {
-    var officialEvidence = item.campusEvidenceType === 'official' && /^https?:\/\//i.test(item.campusEvidenceUrl || '');
-    var confirmed = item.campusStatus === 'confirmed';
-    var current = /当前|正在|秋招|春招|校招中|应届|毕业生|校园招聘|校园/.test(item.recruitingStatus + ' ' + item.campusSeason);
+    var evidenceUrl = item.campusEvidenceUrl || item.campusUrl || item.sourceUrl;
+    var officialLabel = /official|官方|官网|校招/.test((item.campusEvidenceType || '') + ' ' + (item.sourceLabel || ''));
+    var blockedDomain = /(zhipin|liepin|lagou|51job|zhaopin|jobui|linkedin|indeed)\./i.test(evidenceUrl || '');
+    var officialEvidence = /^https?:\/\//i.test(evidenceUrl || '') && !blockedDomain && (item.campusEvidenceType === 'official' || officialLabel);
+    var current = /当前|正在|秋招|春招|校招中|校招|应届|毕业生|校园招聘|校园|管培/.test(item.recruitingStatus + ' ' + item.campusSeason);
+    var confirmed = item.campusStatus === 'confirmed' || current;
     var supportedType = ['民营', '外资', '合资', '港资'].indexOf(item.companyType) >= 0;
     var roleMatch = !filters.keyword || (item.roles || []).some(function (role) { return role.indexOf(filters.keyword) >= 0; });
     var cityDistrict = !filters.district || filters.district === '不限区域' || item.district === '未披露' || item.district.indexOf(filters.district) >= 0;
