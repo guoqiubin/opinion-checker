@@ -4413,7 +4413,7 @@
     var statuses = companyStatuses();
     items.forEach(function (item) {
       var key = companyStatusKey(item), status = statuses[key] || {}, stale = companyIsStale(item.lastCheckedAt);
-      var site = companySafeUrl(item.recruitingSite || item.campusUrl), source = companySafeUrl(item.campusEvidenceUrl || item.sourceUrl);
+      var site = companySafeUrl(item.campusUrl || item.recruitingSite || item.campusEvidenceUrl), source = companySafeUrl(item.campusEvidenceUrl || item.sourceUrl);
       html += '<article class="company-card" data-company-key="' + escapeHtml(key) + '"><div class="company-card-head"><span class="company-name">' + escapeHtml(item.company || '未命名企业') + '</span>';
       if (item.companyType) html += '<span class="company-tag">' + escapeHtml(item.companyType) + '</span>';
       if (item.internetCompany) html += '<span class="company-tag internet">互联网公司</span>';
@@ -4422,8 +4422,8 @@
       html += '</div><div class="company-card-meta">岗位方向：' + escapeHtml((item.roles || []).join('、') || '待核验') + ' · 招聘状态：' + escapeHtml(item.recruitingStatus || '待核验') + '<br>信息来源：' + escapeHtml(item.sourceLabel || '官方校招页面') + '</div><div class="company-card-details">区域：' + escapeHtml(item.district || '未披露') + ' · 规模：' + escapeHtml(item.companySize || '未披露') + ' · 融资：' + escapeHtml(item.financing || '未披露') + '<br>行业：' + escapeHtml(item.industry || '未披露') + ' · 校招批次：' + escapeHtml(item.campusSeason || '当前批次') + '</div><div class="company-card-actions">';
       html += '<button type="button" class="company-action company-favorite' + (status.favorite ? ' active' : '') + '" data-company-action="favorite">' + (status.favorite ? '已收藏' : '收藏') + '</button>';
       html += '<button type="button" class="company-action company-applied' + (status.applied ? ' active' : '') + '" data-company-action="applied">' + (companyView === 'applied' ? '取消已投递' : '已投递') + '</button>';
-      if (site) html += '<a class="company-action site" href="' + escapeHtml(site) + '" target="_blank" rel="noopener noreferrer">招聘官网</a>';
-      else if (source) html += '<a class="company-action site" href="' + escapeHtml(source) + '" target="_blank" rel="noopener noreferrer">查看来源</a>';
+      if (site) html += '<a class="company-action site" href="' + escapeHtml(site) + '" target="_blank" rel="noopener noreferrer">官方校招页</a>';
+      else if (source) html += '<a class="company-action site" href="' + escapeHtml(source) + '" target="_blank" rel="noopener noreferrer">查看官方证据</a>';
       html += '</div></article>';
     });
     companyResultEl.innerHTML = html;

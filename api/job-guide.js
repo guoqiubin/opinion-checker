@@ -76,6 +76,7 @@ function cleanCompanyItems(value, updatedAt) {
     if (campusEvidenceUrl && !/^https?:\/\//i.test(campusEvidenceUrl)) campusEvidenceUrl = '';
     if (campusUrl && !/^https?:\/\//i.test(campusUrl)) campusUrl = '';
     if (recruitingSite && !/^https?:\/\//i.test(recruitingSite)) recruitingSite = '';
+    campusUrl = campusUrl || campusEvidenceUrl;
     return {
       company: company,
       companyType: ['民营', '外资', '合资', '港资'].indexOf(cleanText(item.companyType, 20)) >= 0 ? cleanText(item.companyType, 20) : '待核验',
